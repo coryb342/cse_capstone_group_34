@@ -1,0 +1,52 @@
+name: Discord Pull Request Notifications
+
+on:
+  pull_request:
+    types:
+      - opened
+      - closed
+      - reopened
+      - edited
+      - ready_for_review
+      - review_requested
+      - review_request_removed
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - synchronize
+      - converted_to_draft
+
+  pull_request_review:
+    types:
+      - submitted
+      - edited
+      - dismissed
+
+  pull_request_review_comment:
+    types:
+      - created
+      - edited
+      - deleted
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send PR update to Discord
+        uses: Ilshidur/action-discord@v2
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          message: |
+            📌 **PR Event:** ${{ github.event_name }}  
+            🧑 **User:** ${{ github.actor }}  
+            🧱 **Repository:** ${{ github.repository }}  
+            🔗 **PR:** [#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}](${{ github.event.pull_request.html_url }})  
+            📝 **Action:** ${{ github.event.action }}  
+            {% if github.event.pull_request.merged %}
+            ✅ **Merged by:** ${{ github.event.pull_request.merged_by.login }}  
+            {% endif %}
+            {% if github.event.comment.body %}
+            💬 **Comment:** ${{ github.event.comment.body }}  
+            {% endif %}
