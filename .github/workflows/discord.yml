@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Send PR update to Discord
-        uses: Ilshidur/action-discord@v2
+        uses: Ilshidur/action-discord@0.4.0
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           message: |
