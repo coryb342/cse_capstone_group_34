@@ -39,14 +39,9 @@ jobs:
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
           content: |
-            📌 **PR Event:** ${{ github.event_name }}  
-            🧑 **User:** ${{ github.actor }}  
-            🧱 **Repository:** ${{ github.repository }}  
             🔗 **PR:** [#${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}](${{ github.event.pull_request.html_url }})  
-            📝 **Action:** ${{ github.event.action }}  
-            {% if github.event.pull_request.merged %}
-            ✅ **Merged by:** ${{ github.event.pull_request.merged_by.login }}  
-            {% endif %}
-            {% if github.event.comment.body %}
-            💬 **Comment:** ${{ github.event.comment.body }}  
-            {% endif %}
+            😎 **User:** ${{ github.actor }}  
+            📦 **Repo:** ${{ github.repository }}  
+            🚀 **Action:** ${{ github.event.action }}  
+            ${{ github.event.pull_request.merged && format('✅ **Merged by:** {0}', github.event.pull_request.merged_by.login) || '' }}
+            ${{ github.event.comment.body && format('💬 **Comment:** {0}', github.event.comment.body) || '' }}
