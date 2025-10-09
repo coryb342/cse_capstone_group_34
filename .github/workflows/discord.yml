@@ -35,10 +35,10 @@ jobs:
 
     steps:
       - name: Send PR update to Discord
-        uses: Ilshidur/action-discord@0.4.0
+        uses: Ilshidur/discord-action@v2
         with:
-          entryPoint: ${{ secrets.DISCORD_WEBHOOK }}
-          message: |
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          content: |
             📌 **PR Event:** ${{ github.event_name }}  
             🧑 **User:** ${{ github.actor }}  
             🧱 **Repository:** ${{ github.repository }}  
