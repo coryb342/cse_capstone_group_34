@@ -29,12 +29,6 @@ on:
       - edited
       - deleted
 
-  issue_comment:
-    types:
-      - created
-      - edited
-      - deleted
-
 jobs:
   notify:
     runs-on: ubuntu-latest
