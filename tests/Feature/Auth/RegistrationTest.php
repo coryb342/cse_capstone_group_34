@@ -10,6 +10,7 @@ test('new users can register', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
+        'org_id' => \App\Models\Organization::factory(1)->create()->first()->id,
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
