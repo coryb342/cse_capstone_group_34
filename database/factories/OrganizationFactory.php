@@ -17,7 +17,7 @@ class OrganizationFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'org_name' => $this->faker->name(),
             'seats' => $this->faker->randomDigit(),
         ];
     }
