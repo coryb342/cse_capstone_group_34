@@ -11,7 +11,12 @@ class PredictiveModel extends Model
         'org_id',
         'path',
         'name',
-        'required_parameters'
+        'required_parameters',
+        'run_access_code'
+    ];
+
+    protected $hidden = [
+        'run_access_code'
     ];
 
     public function organization(): BelongsTo
@@ -27,5 +32,10 @@ class PredictiveModel extends Model
     public function getRequiredParameters(): string
     {
         return $this->required_parameters;
+    }
+
+    public function getRunAccessCode(): string
+    {
+        return $this->run_access_code;
     }
 }

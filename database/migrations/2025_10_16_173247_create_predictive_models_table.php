@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('path');
             $table->string('name');
             $table->json('required_parameters')->nullable();
+            $table->string('run_access_code');
             $table->timestamps();
         });
     }
