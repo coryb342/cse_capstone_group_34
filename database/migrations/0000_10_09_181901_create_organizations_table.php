@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('org_name');
-            $table->integer('seats');
+            $table->integer('num_seats');
         });
     }
 
