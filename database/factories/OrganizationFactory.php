@@ -18,7 +18,7 @@ class OrganizationFactory extends Factory
     {
         return [
             'org_name' => $this->faker->name(),
-            'seats' => $this->faker->randomDigit(),
+            'num_seats' => $this->faker->randomDigit(),
         ];
     }
 }
