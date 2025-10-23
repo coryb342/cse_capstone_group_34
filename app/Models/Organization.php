@@ -35,5 +35,10 @@ class Organization extends Model
     {
         return $this->num_seats;
     }
+
+    public function getAccessCodes(): HasMany
+    {
+        return $this->hasMany(OrgAccessCode::class);
+    }
 }
 
