@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('org_id')->constrained();
             $table->string('access_code');
-            $table->foreignId('created_by')->constrained('users');
+            $table->integer('created_by');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
