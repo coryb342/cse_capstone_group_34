@@ -13,7 +13,7 @@ class Organization extends Model
 
     protected $fillable = [
         'org_name',
-        'seats'
+        'num_seats'
     ];
 
     public function users(): HasMany
@@ -28,12 +28,12 @@ class Organization extends Model
 
     public function getRemainingSeats(): int
     {
-        return ($this->seats) - User::query()->where('org_id', '=', $this->id)->count();
+        return ($this->num_seats) - User::query()->where('org_id', '=', $this->id)->count();
     }
 
     public function getAllowedSeats(): int
     {
-        return $this->seats;
+        return $this->num_seats;
     }
 }
 

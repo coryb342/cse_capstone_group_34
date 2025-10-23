@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
@@ -9,22 +8,60 @@ import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import RegisterOrganizationController from '@/actions/App/Http/Controllers/Auth/RegisterOrganizationController';
 </script>
 
 <template>
     <AuthBase
-        title="Create an account"
-        description="Enter your details below to create your account"
+        title="Register your Organization"
+        description="Enter Organization and Admin Details"
     >
         <Head title="Register" />
 
         <Form
-            v-bind="RegisteredUserController.store.form()"
+            v-bind="RegisterOrganizationController.store.form()"
             :reset-on-success="['password', 'password_confirmation']"
             v-slot="{ errors, processing }"
             class="flex flex-col gap-6"
         >
             <div class="grid gap-6">
+
+                <h2>Organization Details</h2>
+
+                <div class="grid gap-2">
+                    <Label for="org_name">Organization Name</Label>
+                    <Input
+                        id="org_name"
+                        type="text"
+                        required
+                        autofocus
+                        :tabindex="1"
+                        autocomplete="org_name"
+                        name="org_name"
+                        placeholder="Name of Organization"
+                    />
+                    <InputError :message="errors.org_name" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="num_seats">Number of Seats</Label>
+                    <Input
+                        id="num_seats"
+                        type="number"
+                        required
+                        autofocus
+                        :tabindex="1"
+                        autocomplete="num_seats"
+                        name="num_seats"
+                        placeholder="1-10"
+                    />
+                    <InputError :message="errors.num_seats" />
+                </div>
+            </div>
+            <div class="grid gap-6">
+
+                <h2>Admin Details</h2>
+
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>
                     <Input
