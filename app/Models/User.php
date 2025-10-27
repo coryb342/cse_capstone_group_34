@@ -11,6 +11,10 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
 {
+    private const ACTIVE = 0;
+    private const INACTIVE = 1;
+    private const BANNED = 2;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
@@ -24,7 +28,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
-        'org_id'
+        'org_id',
+        'status'
     ];
 
     /**
@@ -68,5 +73,14 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->is_admin;
+    }
+
+    public function getStatus(): string
+    {
+        return match ($this->status) {
+            self::INACTIVE => 'inactive',
+            self::BANNED => 'banned',
+            default => 'active',
+        };
     }
 }
