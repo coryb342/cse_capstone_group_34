@@ -61,9 +61,9 @@ class User extends Authenticatable
         return $this->belongsTo(Organization::class);
     }
 
-    public function RunAccessTokens(): HasMany
+    public function accessTokens(): HasMany
     {
-        return $this->hasMany(PredictiveModelRunAccessToken::class);
+        return $this->hasMany(PredictiveModelAccessToken::class);
     }
 
     public function getUserName(): string

@@ -24,9 +24,9 @@ class PredictiveModel extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function runAccessTokens(): HasMany
+    public function accessTokens(): HasMany
     {
-        return $this->hasMany(PredictiveModelRunAccessToken::class);
+        return $this->hasMany(PredictiveModelAccessToken::class);
     }
 
     public function getPath(): string
