@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisterOrganizationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\JoinOrganizationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -15,6 +16,12 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register', [RegisterOrganizationController::class, 'store'])
         ->name('register.store');
+
+    Route::get('join-organization', [JoinOrganizationController::class, 'index'])
+        ->name('join-organization.index');
+
+    Route::post('join-organization', [JoinOrganizationController::class, 'store'])
+        ->name('join-organization.store');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
