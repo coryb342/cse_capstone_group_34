@@ -12,8 +12,6 @@ import JoinOrganizationController from '@/actions/App/Http/Controllers/JoinOrgan
 import {usePage} from '@inertiajs/vue3';
 
 const page = usePage()
-const errors = page.props.errors
-const flash = page.props.flash
 </script>
 
 <template>
