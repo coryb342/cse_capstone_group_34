@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PredictiveModel extends Model
 {
@@ -11,8 +12,7 @@ class PredictiveModel extends Model
         'org_id',
         'path',
         'name',
-        'required_parameters',
-        'run_access_code'
+        'required_parameters'
     ];
 
     protected $hidden = [
@@ -22,6 +22,11 @@ class PredictiveModel extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function accessTokens(): HasMany
+    {
+        return $this->hasMany(PredictiveModelAccessToken::class);
     }
 
     public function getPath(): string
@@ -34,8 +39,4 @@ class PredictiveModel extends Model
         return $this->required_parameters;
     }
 
-    public function getRunAccessCode(): string
-    {
-        return $this->run_access_code;
-    }
 }

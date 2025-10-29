@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('org_access_codes', function (Blueprint $table) {
+        Schema::create('predictive_model_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('org_id')->constrained('organizations');
-            $table->string('access_code');
-            $table->integer('created_by');
-            $table->boolean('is_active')->default(true);
+            $table->foreignId('model_id')->constrained('predictive_models');
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('access_token');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('org_access_codes');
+        Schema::dropIfExists('predictive_model_run_access_tokens');
     }
 };

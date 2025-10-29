@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('predictive_models', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('org_id')->constrained();
+            $table->foreignId('org_id')->constrained('organizations');
             $table->string('path');
             $table->string('name');
             $table->json('required_parameters')->nullable();
-            $table->string('run_access_code');
             $table->timestamps();
         });
     }
