@@ -9,9 +9,6 @@ import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 import JoinOrganizationController from '@/actions/App/Http/Controllers/JoinOrganizationController';
-import {usePage} from '@inertiajs/vue3';
-
-const page = usePage()
 </script>
 
 <template>
