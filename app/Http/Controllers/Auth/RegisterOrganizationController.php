@@ -49,7 +49,7 @@ class RegisterOrganizationController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'is_admin' => true,
-            'org_id' => $org->id,
+            'organization_id' => $org->id,
         ]);
 
         event(new Registered($user));
