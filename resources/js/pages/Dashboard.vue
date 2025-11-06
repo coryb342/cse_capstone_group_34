@@ -23,7 +23,7 @@ const page = usePage();
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div v-if="page.props.errors">
-            <div v-for="(error) in page.props.errors">
+            <div v-for="(index, error) in page.props.errors" :key="index">
                 <span class="text-red-600">{{ error }}</span>
             </div>
         </div>

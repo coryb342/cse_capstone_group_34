@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { route } from 'ziggy-js';
 import {useForm} from '@inertiajs/vue3';
 import { Label } from 'reka-ui';
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 
 import {
     Table,
@@ -24,7 +24,6 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
-import { Alert } from '@/components/ui/alert';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -38,8 +37,6 @@ const page = usePage();
 const props = defineProps({
     users: Array,
 });
-
-const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
 
 const show = ref(false);
 
@@ -112,19 +109,17 @@ watch(
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div v-if="page.props.errors">
-            <div v-for="(error) in page.props.errors">
+            <div v-for="(index, error) in page.props.errors" :key="index">
                 <span class="text-red-600">{{ error }}</span>
             </div>
         </div>
-        <div v-if="show && $page.props.flash.success">
-            <transition name="fade">
-                <div
-                    class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded shadow-lg"
-                >
-                    {{ page.props.flash.success }}
-                </div>
-            </transition>
-        </div>
+        <transition name="fade">
+            <div v-if="show && $page.props.flash.success"
+                class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded shadow-lg"
+            >
+                {{ page.props.flash.success }}
+            </div>
+        </transition>
         <Label>Users</Label>
         <div
             class="relative overflow-y-auto max-h-[35vh] rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border overflow-x-auto"

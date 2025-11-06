@@ -14,7 +14,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, LucideBrain } from 'lucide-vue-next';
+import { LayoutGrid, LucideBrain } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 const page = usePage();
 const user = page.props.auth.user;
