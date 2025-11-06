@@ -36,13 +36,15 @@ class UserManagementController extends Controller
 
         if (! $user_to_modify->isAdmin()) {
             $user_to_modify->is_admin = true;
+            $success = $user_to_modify->name . 'is now an Admin.';
         } else {
             $user_to_modify->is_admin = false;
+            $success = $user_to_modify->name . 'is no longer an Admin.';
         }
 
         $user_to_modify->save();
 
-        return redirect()->back()->with(['success' => 'User privileges have been successfully modified.']);
+        return redirect()->back()->with(['success' => $success]);
     }
 
     public function toggleStatus(Request $request) {
@@ -57,13 +59,16 @@ class UserManagementController extends Controller
 
         if (! $user_to_modify->isActive()) {
             $user_to_modify->status = 0;
+            $success = $user_to_modify->name . ' is now active';
         } else {
             $user_to_modify->status = 1;
+            $success = $user_to_modify->name . ' is now inactive';
+
         }
 
         $user_to_modify->save();
 
-        return redirect()->back()->with(['success' => 'User status has been successfully updated.']);
+        return redirect()->back()->with(['success' => $success]);
     }
 
     public function deleteUser(Request $request) {
