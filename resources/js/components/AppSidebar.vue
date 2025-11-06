@@ -13,9 +13,12 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { BookOpen, Folder, LayoutGrid, LucideBrain } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+const page = usePage();
+const user = page.props.auth.user;
+
 
 const mainNavItems: NavItem[] = [
     {
@@ -23,19 +26,19 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    ...(user?.is_admin ?
+    [
+        {
+            title: 'Manage Users',
+            icon: LucideBrain,
+            href: '/manage-users'
+        }
+    ]
+    : []),
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
+
 ];
 </script>
 
