@@ -28,7 +28,7 @@ class Organization extends Model
 
     public function getRemainingSeats(): int
     {
-        return ($this->num_seats) - User::query()->where('org_id', '=', $this->id)->count();
+        return ($this->num_seats) - User::query()->where('organization_id', '=', $this->id)->count();
     }
 
     public function getAllowedSeats(): int

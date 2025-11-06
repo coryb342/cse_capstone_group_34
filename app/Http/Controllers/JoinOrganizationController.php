@@ -37,7 +37,7 @@ class JoinOrganizationController extends Controller
                 'name' => $request->get('name'),
                 'email' => $request->get('email'),
                 'password' => Hash::make($request->get('password')),
-                'org_id' => $active_access_code->org_id
+                'organization_id' => $active_access_code->organization_id
             ]);
 
             event(new Registered($user));

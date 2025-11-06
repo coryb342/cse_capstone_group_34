@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('org_access_codes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('org_id')->constrained('organizations');
+            $table->foreignId('organization_id')->constrained('organizations');
             $table->string('access_code');
             $table->integer('created_by');
             $table->boolean('is_active')->default(true);
