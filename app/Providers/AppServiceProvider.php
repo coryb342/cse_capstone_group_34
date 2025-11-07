@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
             'flash' => function () {
                 return [
                     'success' => session('success'),
+                    'code' => session('code'),
                 ];
             },
         ]);

@@ -16,6 +16,7 @@ Route::get('/manage-users', [UserManagementController::class, 'index'])->middlew
 Route::post('/manage-users/toggle-admin', [UserManagementController::class, 'toggleAdmin'])->middleware(['auth', 'verified'])->name('toggle-admin');
 Route::post('/manage-users/toggle-status', [UserManagementController::class, 'toggleStatus'])->middleware(['auth', 'verified'])->name('toggle-status');
 Route::post('/manage-users/delete-user', [UserManagementController::class, 'deleteUser'])->middleware(['auth', 'verified'])->name('delete-user');
+Route::post('/manage-users/generate-access-code', [UserManagementController::class, 'generateAccessCode'])->middleware(['auth', 'verified'])->name('generate-access-code');
 
 
 

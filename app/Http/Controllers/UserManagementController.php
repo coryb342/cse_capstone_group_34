@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrgAccessCode;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,9 +20,11 @@ class UserManagementController extends Controller
 
         $organization = Organization::find($user->organization_id);
 
+        $org_allowed_seats = $organization->getAllowedSeats();
+
         $all_org_users = $organization->users;
 
-        return Inertia::render('UserManagement', ["users" => $all_org_users]);
+        return Inertia::render('UserManagement', ["users" => $all_org_users, "org_allowed_seats" => $org_allowed_seats]);
     }
 
     public function toggleAdmin(Request $request) {
@@ -84,5 +87,30 @@ class UserManagementController extends Controller
         $user_to_delete->delete();
 
         return redirect()->back()->with(['success' =>  $user_to_delete_name . ' has been successfully deleted.']);
+    }
+
+    public function generateAccessCode(Request $request) {
+        $request->validate([
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+        ]);
+
+        $user = User::query()->find($request->get('user_id'));
+
+        if (! $user->isAdmin()) {
+            return Redirect::back()->withErrors(['unauthorized' => 'Access Denied']);
+        }
+
+        $organization = Organization::query()->find($user->organization_id);
+
+        $access_code = OrgAccessCode::create([
+            'organization_id' => $organization->id,
+            'access_code' => mt_rand(100000, 999999),
+            'created_by' => $user->id,
+            'is_active' => true,
+        ]);
+
+        $code = $access_code->access_code;
+
+        return redirect()->back()->with(['success' => 'Access Code Generated Successfully' , 'code' => $code]);
     }
 }

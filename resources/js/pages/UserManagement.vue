@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { usePage } from '@inertiajs/vue3';
@@ -8,7 +7,6 @@ import { route } from 'ziggy-js';
 import {useForm} from '@inertiajs/vue3';
 import { Label } from 'reka-ui';
 import { ref, watch } from 'vue'
-
 import {
     Table,
     TableBody,
@@ -17,13 +15,21 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-
 import {
     DropdownMenu,
     DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -36,6 +42,7 @@ const page = usePage();
 
 const props = defineProps({
     users: Array,
+    org_allowed_seats: Number,
 });
 
 const show = ref(false);
@@ -46,13 +53,9 @@ function toggleAdmin(user_id) {
     form.post(route('toggle-admin'), {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-            console.log('User modified successfully.')
-        },
         onError: () => {
             console.error(errors)
         },
-
     })
 }
 
@@ -62,13 +65,9 @@ function toggleStatus(user_id) {
     form.post(route('toggle-status'), {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-            console.log('User modified successfully.')
-        },
         onError: () => {
             console.error(errors)
         },
-
     })
 }
 
@@ -81,13 +80,20 @@ function deleteUser(user_id, user_name) {
     form.post(route('delete-user'), {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-            console.log('User modified successfully.')
-        },
         onError: () => {
             console.error(errors)
         },
+    })
+}
+function generateAccessCode(user_id) {
+    const form = useForm({ user_id })
 
+    form.post(route('generate-access-code'), {
+        preserveScroll: true,
+        preserveState: true,
+        onError: () => {
+            console.error(errors)
+        },
     })
 }
 
@@ -103,7 +109,6 @@ watch(
     },
     { immediate: true }
 )
-
 </script>
 
 <template>
@@ -120,7 +125,7 @@ watch(
                 {{ page.props.flash.success }}
             </div>
         </transition>
-        <Label>Users</Label>
+        <Label class="mt-5">Users</Label>
         <div
             class="relative overflow-y-auto max-h-[35vh] rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border overflow-x-auto"
         >
@@ -167,6 +172,42 @@ watch(
                     </TableRow>
                 </TableBody>
             </Table>
+        </div>
+        <div class="lg:flex relative overflow-y-auto max-h-[40vh] md:min-h-min overflow-x-auto mt-5">
+            <div class="max-w-[25vh] min-w-[25vh] mr-5">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Usage</CardTitle>
+                        <CardDescription>Seats Used/Total</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <span v-if="users.length / org_allowed_seats >= .50 && users.length / org_allowed_seats < .75" class="text-yellow"> {{ users.length }} / {{ org_allowed_seats }} </span>
+                        <span v-else-if="users.length / org_allowed_seats >= .75" class="text-red-600"> {{ users.length }} / {{ org_allowed_seats }} </span>
+                        <span v-else class="text-green-500"> {{ users.length }} / {{ org_allowed_seats }} </span>
+                    </CardContent>
+                    <CardFooter>
+                        <Button>
+                            Add More Seats
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </div>
+            <div class="relative max-h-[35vh] w-full rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-5">
+                <Label class="font-bold">
+                    Generate Organization Access Code
+                </Label>
+                <div class="lg:flex p-10">
+                    <Button class="mr-5" @click="generateAccessCode(page.props.auth.user.id)">
+                        Generate
+                    </Button>
+                    <div>
+                        <Input disabled :value="page.props.flash.code ? page.props.flash.code : ''"/>
+                        <Label>
+                            <span v-if="page.props.flash.code" class="dark:text-white text-black">Provide new user with this code. It is valid for 24 hours.</span>
+                        </Label>
+                    </div>
+                </div>
+            </div>
         </div>
     </AppLayout>
 </template>
