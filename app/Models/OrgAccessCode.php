@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrgAccessCode extends Model
 {
     protected $fillable = [
-        'org_id',
+        'organization_id',
         'access_code',
         'created_by',
         'is_active'

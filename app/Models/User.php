@@ -29,7 +29,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
-        'org_id',
+        'organization_id',
         'status'
     ];
 
@@ -88,5 +88,9 @@ class User extends Authenticatable
             self::BANNED => 'banned',
             default => 'active',
         };
+    }
+
+    public function isActive(): bool {
+        return $this->status === 0;
     }
 }

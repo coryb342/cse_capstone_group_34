@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class PredictiveModel extends Model
 {
     protected $fillable = [
-        'org_id',
+        'organization_id',
         'path',
         'name',
         'required_parameters'
