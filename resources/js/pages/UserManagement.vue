@@ -154,12 +154,13 @@ watch(
                         <TableCell>
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
-                                    <EllipsisVerticalIcon
+                                    <button
                                         class="p-1 cursor-pointer dark:text-white text-black rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Open menu"
                                         :disabled="page.props.auth.user.id === user.id"
                                     >
-                                    </EllipsisVerticalIcon>
+                                        <EllipsisVerticalIcon/>
+                                    </button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     <DropdownMenuItem>
