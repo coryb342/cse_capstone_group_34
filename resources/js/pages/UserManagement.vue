@@ -30,6 +30,7 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input';
+import { EllipsisVerticalIcon } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -125,9 +126,14 @@ watch(
                 {{ page.props.flash.success }}
             </div>
         </transition>
-        <Label class="mt-5">Users</Label>
+        <div class="mx-auto lg:min-w-7xl flex items-center justify-between mb-4 mt-8">
+            <div>
+                <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-2">Users</h1>
+                <p class="text-slate-600 dark:text-slate-400">Manage Users and Generate Access Codes</p>
+            </div>
+        </div>
         <div
-            class="relative overflow-y-auto max-h-[35vh] rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border overflow-x-auto"
+            class="mx-auto relative overflow-y-auto rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border overflow-x-auto lg:min-w-7xl max-w-7xl flex items-center justify-center"
         >
             <Table class="w-full text-left border-collapse">
                 <TableHeader>
@@ -144,17 +150,16 @@ watch(
                         <TableCell>{{ user.name}}</TableCell>
                         <TableCell>{{ user.email }}</TableCell>
                         <TableCell>{{ user.is_admin ? "Yes" : "No" }}</TableCell>
-                        <TableCell>{{ user.status === 0 ? "Active" : user.status === 1 ? "Inactive" : "Banned" }}</TableCell>
+                        <TableCell :class="user.status === 0 ? 'text-green-500' : 'text-red-500'">{{ user.status === 0 ? "Active" : user.status === 1 ? "Inactive" : "Banned" }}</TableCell>
                         <TableCell>
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
-                                    <button
-                                        class="p-2 text-lg font-black cursor-pointer dark:text-white text-black rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    <EllipsisVerticalIcon
+                                        class="p-1 cursor-pointer dark:text-white text-black rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                                         aria-label="Open menu"
                                         :disabled="page.props.auth.user.id === user.id"
                                     >
-                                        ⋮
-                                    </button>
+                                    </EllipsisVerticalIcon>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     <DropdownMenuItem>
@@ -173,7 +178,7 @@ watch(
                 </TableBody>
             </Table>
         </div>
-        <div class="lg:flex relative overflow-y-auto max-h-[40vh] md:min-h-min overflow-x-auto mt-5">
+        <div class="mx-auto lg:flex items-center lg:min-w-7xl relative overflow-y-auto max-h-[40vh] md:min-h-min overflow-x-auto mt-5">
             <div class="max-w-[25vh] min-w-[25vh] mr-5">
                 <Card>
                     <CardHeader>
