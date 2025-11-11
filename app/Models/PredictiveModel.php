@@ -12,7 +12,12 @@ class PredictiveModel extends Model
         'organization_id',
         'path',
         'name',
-        'required_parameters'
+        'required_parameters',
+        'description',
+        'type',
+        'status',
+        'last_trained_on',
+        'accuracy',
     ];
 
     protected $hidden = [
@@ -37,6 +42,31 @@ class PredictiveModel extends Model
     public function getRequiredParameters(): string
     {
         return $this->required_parameters;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function getLastTrainedOn(): string
+    {
+        return $this->last_trained_on;
+    }
+
+    public function getAccuracy(): float
+    {
+        return $this->accuracy;
     }
 
 }

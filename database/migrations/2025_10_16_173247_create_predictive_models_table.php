@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('path');
             $table->string('name');
             $table->json('required_parameters')->nullable();
+            $table->string('description');
+            $table->string('type');
+            $table->string('status')->default('active');
+            $table->date('last_trained_on')->default(now());
+            $table->float('accuracy')->nullable();
             $table->timestamps();
         });
     }
