@@ -113,7 +113,7 @@ const props = defineProps({
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Card
                         class="hover:shadow-lg transition-shadow cursor-pointer group"
-                        v-for="model in models" :key="model.id"
+                        v-for="model in props.models" :key="model.id"
                     >
                     <CardHeader>
                         <div class="flex items-start justify-between mb-2">
