@@ -14,7 +14,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, LucideBrain } from 'lucide-vue-next';
+import { LayoutGrid, LucideBrain, Bot} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 const page = usePage();
 const user = page.props.auth.user;
@@ -35,6 +35,11 @@ const mainNavItems: NavItem[] = [
         }
     ]
     : []),
+    {
+        title: 'Models',
+        icon: Bot,
+        href: '/predictive-models'
+    }
 ];
 
 const footerNavItems: NavItem[] = [
