@@ -4,7 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, ChevronRight, Plus, Bot, MonitorCheck, Target, Sparkle } from 'lucide-vue-next';
-import { usePage } from '@inertiajs/vue3';
+import {  usePage, useForm } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { route } from 'ziggy-js';
 
 const getStatusColor = (status) => {
     switch(status) {
@@ -32,6 +45,43 @@ const props = defineProps({
     total_predictions: Number,
 });
 
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+const isDialogOpen = ref(false);
+const show = ref(false);
+
+const form = useForm({
+    model_name: '',
+    model_description: '',
+    required_parameters: '',
+    model_type: '',
+    model_accuracy: '',
+    last_trained_on: '',
+    model_file: null,
+})
+
+function submit() {
+    form.post(route('predictive-models-upload'), {
+        onSuccess: () => {
+            isDialogOpen.value = false  // Close dialog only if submission succeeds
+            form.reset() // optionally reset form
+        },
+    })
+}
+
+watch(
+    () => page.props.flash.success,
+    (newVal) => {
+        if (newVal) {
+            show.value = true
+            setTimeout(() => {
+                show.value = false
+            }, 3000)
+        }
+    },
+    { immediate: true }
+)
+
 </script>
 
 <template>
@@ -56,10 +106,75 @@ const props = defineProps({
                             <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-2">Predictive Models</h1>
                             <p class="text-slate-600 dark:text-slate-400">Manage and monitor your machine learning models</p>
                         </div>
-                        <Button>
-                            <Plus class="w-4 h-4 mr-2" />
-                            Upload Model
-                        </Button>
+                        <Dialog v-model:open="isDialogOpen" v-if="page.props.auth.user.is_admin">
+                            <DialogTrigger as-child>
+                                <Button @click="isDialogOpen = true">
+                                    <Plus class="w-4 h-4 mr-2" />
+                                    Upload Model
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Upload a Model</DialogTitle>
+                                    <DialogDescription>Use this form to add a new Predictive Model</DialogDescription>
+                                    <Form @submit.prevent="submit" enctype="multipart/form-data">
+                                        <input type="hidden" name="csrf_token" :value="csrfToken" />
+                                        <div>
+                                            <div class="grid p-2">
+                                                <Label for="model_name" class="text-left mb-1">
+                                                    Model Name
+                                                </Label>
+                                                <Input v-model="form.model_name" required id="model_name" name="model_name" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1"/>
+                                            </div>
+                                            <div class="grid p-2">
+                                                <Label for="model_description" class="text-left mb-1">
+                                                    Model Description
+                                                </Label>
+                                                <textarea v-model="form.model_description" required type="text" id="model_description" name="model_description" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1" />
+                                            </div>
+                                            <div class="grid p-2">
+                                                <Label for="required_parameters" class="text-left mb-1 grid">
+                                                    Required Parameters
+                                                    <Label required class="text-sm dark:text-slate-500 text-slate-900">Enter the inputs for the model in the order the model expects separating by commas.</Label>
+                                                </Label>
+                                                <Input v-model="form.required_parameters" id="required_parameters" name="required_parameters" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1" placeholder="ex. Flow, River Levels, Rainfall"/>
+                                            </div>
+                                            <div class="grid p-2">
+                                                <Label for="model_type" class="text-left mb-1">
+                                                    Model Type
+                                                </Label>
+                                                <Input v-model="form.model_type" required id="model_type" name="model_type" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1" />
+                                            </div>
+                                            <div class="grid p-2">
+                                                <Label for="model_accuracy" class="text-left mb-1 grid">
+                                                    Accuracy
+                                                    <Label class="text-sm dark:text-slate-500 text-slate-900">Enter the Accuracy of the model if it is known.</Label>
+                                                </Label>
+                                                <Input v-model="form.model_accuracy" type="number" id="model_accuracy" name="model_accuracy" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1" />
+                                            </div>
+                                            <div class="grid p-2">
+                                                <Label for="last_trained_on" class="text-left mb-1 grid">
+                                                    Date Last Trained
+                                                    <Label class="text-sm dark:text-slate-500 text-slate-900">Default will be today if no date is selected.</Label>
+                                                </Label>
+                                                <Input v-model="form.last_trained_on" type="date" id="last_trained_on" name="last_trained_on" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1 dark:bg-slate-700" />
+                                            </div>
+                                            <div class="grid p-2">
+                                                <Label for="model_file" class="text-left mb-1">
+                                                    Model File
+                                                </Label>
+                                                <Input required type="file" @change="e => form.model_file = e.target.files[0]" id="model_file" name="model_file" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1 dark:bg-slate-700" accept=".joblib,.pkl,.pickle"/>
+                                            </div>
+                                            <div class="flex justify-end mt-5 mb-5 mr-2">
+                                                <Button type="submit">
+                                                    Upload Model
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Form>
+                                </DialogHeader>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <Card>
