@@ -14,9 +14,14 @@ return new class extends Migration
         Schema::create('predictive_models', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organization_id')->constrained('organizations');
-            $table->string('path');
+            $table->string('path')->nullable();
             $table->string('name');
             $table->json('required_parameters')->nullable();
+            $table->string('description');
+            $table->string('type');
+            $table->string('status')->default('active');
+            $table->date('last_trained_on')->default(now());
+            $table->float('accuracy')->nullable();
             $table->timestamps();
         });
     }
