@@ -22,6 +22,7 @@ Route::post('/manage-users/generate-access-code', [UserManagementController::cla
 
 //Predictive Model Routes
 Route::get('/predictive-models', [PredictiveModelController::class, 'index'])->middleware(['auth', 'verified'])->name('predictive-models');
+Route::post('/predictive-models/upload', [PredictiveModelController::class, 'upload'])->middleware(['auth', 'verified'])->name('predictive-models-upload');
 
 
 require __DIR__.'/settings.php';
