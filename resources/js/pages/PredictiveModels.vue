@@ -18,6 +18,14 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { route } from 'ziggy-js';
+import type { BreadcrumbItem } from '@/types';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Models',
+        href: '/predictive-models',
+    },
+];
 
 const getStatusColor = (status) => {
     switch(status) {
@@ -85,7 +93,7 @@ watch(
 </script>
 
 <template>
-    <AppLayout>
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div v-if="page.props.errors">
             <div v-for="(index, error) in page.props.errors" :key="index">
                 <span class="text-red-600">{{ error }}</span>
