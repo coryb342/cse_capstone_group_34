@@ -61,6 +61,6 @@ class PredictiveModelController extends Controller
 
         $predictive_model->update(['path' => $directory_path . '/' . $model_file->getClientOriginalName()]);
 
-        return redirect()->back()->with(['success' => 'Predictive model uploaded successfully.']);
+        return redirect()->back()->with(['success' => $predictive_model->name . ' uploaded successfully.']);
     }
 }
