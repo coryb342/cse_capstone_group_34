@@ -56,7 +56,6 @@ class PredictiveModelController extends Controller
             Storage::disk('private')->makeDirectory($directory_path);
         }
 
-
         $model_file->storeAs($directory_path, $model_file->getClientOriginalName(), 'private');
 
         $predictive_model->update(['path' => $directory_path . '/' . $model_file->getClientOriginalName()]);

@@ -133,9 +133,9 @@ watch(
             </div>
         </div>
         <div
-            class="mx-auto relative overflow-y-auto rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border overflow-x-auto max-w-7xl flex items-center justify-center ml-8 mr-8"
+            class="rounded-xl border border-sidebar-border/70 dark:border-sidebar-border ml-8 mr-8 flex items-center justify-center"
         >
-            <Table class="w-full p-8 text-left border-collapse">
+            <Table class="w-full border-collapse">
                 <TableHeader>
                     <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
