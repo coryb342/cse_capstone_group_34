@@ -126,16 +126,16 @@ watch(
                 {{ page.props.flash.success }}
             </div>
         </transition>
-        <div class="mx-auto lg:min-w-7xl flex items-center justify-between mb-4 mt-8">
+        <div class="mx-auto ml-8 flex items-center justify-between mb-4 mt-8">
             <div>
                 <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-2">Users</h1>
                 <p class="text-slate-600 dark:text-slate-400">Manage Users and Generate Access Codes</p>
             </div>
         </div>
         <div
-            class="mx-auto relative overflow-y-auto rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border overflow-x-auto lg:min-w-7xl max-w-7xl flex items-center justify-center"
+            class="mx-auto relative overflow-y-auto rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border overflow-x-auto max-w-7xl flex items-center justify-center ml-8 mr-8"
         >
-            <Table class="w-full text-left border-collapse">
+            <Table class="w-full p-8 text-left border-collapse">
                 <TableHeader>
                     <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
@@ -179,7 +179,7 @@ watch(
                 </TableBody>
             </Table>
         </div>
-        <div class="mx-auto lg:flex items-center lg:min-w-7xl relative overflow-y-auto max-h-[40vh] md:min-h-min overflow-x-auto mt-5">
+        <div class="mx-auto lg:flex items-center ml-8 mr-8 relative overflow-y-auto max-h-[40vh] md:min-h-min overflow-x-auto mt-5">
             <div class="max-w-[25vh] min-w-[25vh] mr-5">
                 <Card>
                     <CardHeader>
