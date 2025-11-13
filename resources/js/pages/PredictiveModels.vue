@@ -252,7 +252,7 @@ watch(
                             <div class="grid grid-cols-2 gap-4 pt-2">
                                 <div>
                                     <p class="text-xs text-slate-500 mb-1">Accuracy</p>
-                                    <p class="text-lg font-semibold text-slate-900 dark:text-slate-400">{{model.accuracy}}</p>
+                                    <p class="text-lg font-semibold text-slate-900 dark:text-slate-400">{{model.accuracy ? model.accuracy : '--'}}</p>
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-500 mb-1">Predictions</p>
