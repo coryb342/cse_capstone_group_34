@@ -45,7 +45,7 @@ class PredictiveModelController extends Controller
             'type' => $request->input('model_type'),
             'required_parameters' => json_encode($required_parameters),
             'accuracy' => $request->input('model_accuracy') ? $request->input('model_accuracy') : null,
-            'last_trained_on' => $request->input('last_trained_on') ? $request->input('last_trained_on') : null,
+            'last_trained_on' => $request->input('last_trained_on') ? $request->input('last_trained_on') : now(),
         ]);
 
         $predictive_model->save();

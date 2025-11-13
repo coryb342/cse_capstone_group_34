@@ -9,6 +9,9 @@ import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 import JoinOrganizationController from '@/actions/App/Http/Controllers/JoinOrganizationController';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 </script>
 
 <template>
@@ -25,7 +28,11 @@ import JoinOrganizationController from '@/actions/App/Http/Controllers/JoinOrgan
             class="flex flex-col gap-6"
         >
             <div class="grid gap-6">
-
+                <div v-if="page.props.errors">
+                    <div v-for="(index, error) in page.props.errors" :key="index">
+                        <span class="text-red-600">{{ error }}</span>
+                    </div>
+                </div>
                 <h2>Organization Details</h2>
 
                 <div class="grid gap-2">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrgAccessCode;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -28,6 +29,12 @@ class JoinOrganizationController extends Controller
         ]);
 
         $active_access_code = OrgAccessCode::query()->where('access_code', '=', $request->get('org_access_code'))->where('is_active', '=', true)->first();
+
+        $organization = Organization::query()->where('id', '=', $active_access_code->organization_id)->first();
+
+        if ($organization->getRemainingSeats() < 1) {
+            return redirect()->back()->withErrors(['No Remaining Seats. Please contact the Administrator' => 'No Remaining Seats. Please contact the administrator.']);
+        }
 
         if ($active_access_code && !$active_access_code->isExpired()) {
 
