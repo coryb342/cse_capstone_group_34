@@ -24,6 +24,17 @@ Route::post('/manage-users/generate-access-code', [UserManagementController::cla
 Route::get('/predictive-models', [PredictiveModelController::class, 'index'])->middleware(['auth', 'verified'])->name('predictive-models');
 Route::post('/predictive-models/upload', [PredictiveModelController::class, 'upload'])->middleware(['auth', 'verified'])->name('predictive-models-upload');
 
+// Access Token Route
+Route::get('/access-tokens', function () {
+   return Inertia::render('AccessTokenManagement', [
+        'isAdmin' => true,
+        'myTokens' => [],
+        'tokens' => [],
+        'users' => [],
+        'models' => [],
+    ]);
+})->middleware(['auth', 'verified'])->name('access-tokens');
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
