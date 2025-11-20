@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PredictiveModelAccessTokenController;
 use App\Http\Controllers\PredictiveModelController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
@@ -25,15 +26,8 @@ Route::get('/predictive-models', [PredictiveModelController::class, 'index'])->m
 Route::post('/predictive-models/upload', [PredictiveModelController::class, 'upload'])->middleware(['auth', 'verified'])->name('predictive-models-upload');
 
 // Access Token Route
-Route::get('/access-tokens', function () {
-   return Inertia::render('AccessTokenManagement', [
-        'isAdmin' => true,
-        'myTokens' => [],
-        'tokens' => [],
-        'users' => [],
-        'models' => [],
-    ]);
-})->middleware(['auth', 'verified'])->name('access-tokens');
+Route::get('/access-tokens', [PredictiveModelAccessTokenController::class, 'index'])->middleware(['auth', 'verified'])->name('access-tokens-index');
+Route::post('/access-tokens/grant-access', [PredictiveModelAccessTokenController::class, 'grantAccess'])->middleware(['auth', 'verified'])->name('access-token-grant-access');
 
 
 require __DIR__.'/settings.php';
