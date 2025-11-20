@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('model_id')->constrained('predictive_models');
             $table->foreignId('user_id')->constrained('users');
-            $table->string('access_token');
+            $table->string('access_token')->nullable();
+            $table->string('status')->default('inactive');
             $table->timestamps();
         });
     }
