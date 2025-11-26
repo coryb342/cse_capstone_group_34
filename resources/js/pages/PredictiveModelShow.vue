@@ -3,8 +3,32 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, RotateCw, Play, HardDriveDownload, CalendarDays, ChartLine, TrendingUp, ChartScatter, Target } from 'lucide-vue-next';
-
+import {
+    Settings,
+    RotateCw,
+    Play,
+    HardDriveDownload,
+    CalendarDays,
+    ChartLine,
+    TrendingUp,
+    ChartScatter,
+    Target,
+    Plus
+} from 'lucide-vue-next';
+import {  usePage, useForm } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { route } from 'ziggy-js';
 
 import type { BreadcrumbItem } from '@/types';
 
@@ -31,6 +55,8 @@ const getStatusColor = (status) => {
         default: return 'bg-gray-400';
     }
 };
+
+const isDialogOpen = ref(false);
 
 const getMetricStatus = (metric, value) => {
     switch (metric) {
@@ -63,6 +89,20 @@ const getMetricStatus = (metric, value) => {
             return { label: '', color: 'text-gray-600' };
     }
 };
+
+const form = useForm({
+    parameters: [],
+    actual: null
+});
+
+function submit() {
+    form.post(route('predictive-models-upload'), {
+        onSuccess: () => {
+            isDialogOpen.value = false  // Close dialog only if submission succeeds
+            form.reset() // optionally reset form
+        },
+    })
+}
 </script>
 
 <template>
@@ -90,10 +130,43 @@ const getMetricStatus = (metric, value) => {
                                 <Settings class="w-4 h-4 mr-2" />
                                 Settings
                             </Button>
-                            <Button>
-                                <Play class="w-4 h-4 mr-2" />
-                                Run Prediction
-                            </Button>
+                            <Dialog v-model:open="isDialogOpen" v-if="page.props.auth.user.is_admin">
+                                <DialogTrigger as-child>
+                                    <Button @click="isDialogOpen = true">
+                                        <Play class="w-4 h-4 mr-2" />
+                                        Run Prediction
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Run Prediction</DialogTitle>
+                                        <DialogDescription>Use this form to run a prediction</DialogDescription>
+                                        <Form>
+                                            <div v-for="parameter in JSON.parse(model.required_parameters)" :key="parameter">
+                                                <div class="grid p-2">
+                                                    <Label for="parameter" class="text-left mb-1">
+                                                        {{ parameter.toString().toUpperCase() }}
+                                                    </Label>
+                                                    <Input required id="model_name" name="parameters[]" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1"/>
+                                                </div>
+                                            </div>
+                                            <div class="grid p-2 ">
+                                                <Label for="actual" class="mb-1 flex flex-col items-start text-left">
+                                                    <span class="text-left">Actual</span>
+                                                    <span class="text-xs text-left">Entering an Actual value will update the Model Accuracy</span>
+                                                </Label>
+                                                <Input id="actual" name="actual" class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1"/>
+                                            </div>
+                                            <div class="flex justify-end mt-5 mb-5 mr-2">
+                                                <Button type="submit">
+                                                    Run
+                                                </Button>
+                                            </div>
+                                        </Form>
+                                    </DialogHeader>
+                                </DialogContent>
+                            </Dialog>
+
                         </div>
                     </div>
                     <div>
@@ -173,17 +246,17 @@ const getMetricStatus = (metric, value) => {
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MSE </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.MSE}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
-                                        {{ getMetricStatus('MAE', aggregateMetrics.MSE).label }}
+                                    {{ props.aggregateMetrics?.MSE ?? '--' }}
+                                    <div v-if="props.aggregateMetrics?.MSE" :class="['text-sm font-semibold', getMetricStatus('MSE', aggregateMetrics.MSE).color]">
+                                        {{ getMetricStatus('MSE', aggregateMetrics.MSE).label }}
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MAE </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.MAE}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
+                                    {{props.aggregateMetrics?.MAE ?? '--'}}
+                                    <div v-if="props.aggregateMetrics?.MAE" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
                                         {{ getMetricStatus('MAE', aggregateMetrics.MAE).label }}
                                     </div>
                                 </CardContent>
@@ -191,8 +264,8 @@ const getMetricStatus = (metric, value) => {
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> RMSE </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.RMSE}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.RMSE).color]">
+                                    {{props.aggregateMetrics?.RMSE ?? '--'}}
+                                    <div v-if="props.aggregateMetrics?.RMSE" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.RMSE).color]">
                                         {{ getMetricStatus('MAE', aggregateMetrics.RMSE).label }}
                                     </div>
                                 </CardContent>
@@ -200,8 +273,8 @@ const getMetricStatus = (metric, value) => {
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> R² </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.R2}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.R2).color]">
+                                    {{props.aggregateMetrics?.R2 ?? '--'}}
+                                    <div v-if="props.aggregateMetrics?.R2" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.R2).color]">
                                         {{ getMetricStatus('MAE', aggregateMetrics.R2).label }}
                                     </div>
                                 </CardContent>

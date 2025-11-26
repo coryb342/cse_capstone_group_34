@@ -99,8 +99,8 @@ const form = useForm({
 function submit() {
     form.post(route('predictive-models-upload'), {
         onSuccess: () => {
-            isDialogOpen.value = false; // Close dialog only if submission succeeds
-            form.reset(); // optionally reset form
+            isDialogOpen.value = false
+            form.reset()
         },
     });
 }
@@ -395,10 +395,9 @@ watch(
                     class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
                 >
                     <Card
-                        class="group cursor-pointer transition-shadow hover:shadow-lg"
-                        v-for="model in props.models"
-                        :key="model.id"
-                        @click="router.visit(`/predictive-models/${model.id}`)"
+                        class="hover:shadow-lg transition-shadow cursor-pointer group"
+                        v-for="model in props.models" :key="model.id"
+                        @click="router.visit(route('predictive-models.show', model.id))"
                     >
                         <CardHeader>
                             <div class="mb-2 flex items-start justify-between">
