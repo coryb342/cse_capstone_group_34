@@ -34,30 +34,35 @@ const breadcrumbs: BreadcrumbItem[] = [
 const page = usePage();
 
 const props = defineProps({
-    isAdmin: Boolean,
-    myTokens: Array,
-    tokens: Array,
     users: Array,
-    models: Array,
+    models: Array
 });
 
+const show = ref(false);
 
-const showFlash = ref(false);
+watch(
+    () => page.props.flash.success,
+    (newVal) => {
+        if (newVal) {
+            show.value = true
+            setTimeout(() => {
+                show.value = false
+            }, 3000)
+        }
+    },
+    { immediate: true }
+)
+function grantAccess(user_id, model_id) {
+    const form = useForm({ user_id, model_id })
 
-// Show tokens
-const visibleTokens = ref<Record<number, boolean>>({});
-
-// Fuction to create forms
-const createForm = useForm({
-    user_id: '',
-    predictive_model_id: '',
-});
-
-function toggleTokenVisibility(id: number) {
-    visibleTokens.value[id] = !visibleTokens.value[id];
+    form.post(route('access-token-grant-access'), {
+        preserveScroll: true,
+        preserveState: true,
+        onError: () => {
+            console.error(errors)
+        },
+    })
 }
-
-
 
 </script>
 
@@ -70,7 +75,7 @@ function toggleTokenVisibility(id: number) {
         </div>
         <transition name="fade">
             <div
-                v-if="showFlash && $page.props.flash.success"
+                v-if="show && $page.props.flash.success"
                 class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded shadow-lg z-50"
             >
                 {{ page.props.flash.success }}
@@ -89,7 +94,7 @@ function toggleTokenVisibility(id: number) {
             </div>
         </div>
         <!-- Admin Section -->
-        <div v-if="props.isAdmin" class="ml-8 mr-8 space-y-6 mb-10">
+        <div v-if="page.props.auth.user.is_admin" class="ml-8 mr-8 space-y-6 mb-10">
             <Card>
                 <CardHeader>
                     <CardTitle>Create Access Token</CardTitle>
@@ -104,7 +109,7 @@ function toggleTokenVisibility(id: number) {
                             <Label for="user_id" class="mb-1 block">User</Label>
                             <select
                                 id="user_id"
-                                v-model="createForm.user_id"
+                                v-model="user_id"
                                 class="w-full rounded-md border border-sidebar-border/70 dark:border-sidebar-border bg-background px-3 py-2 text-sm"
                             >
                                 <option value="">Select user</option>
@@ -117,9 +122,9 @@ function toggleTokenVisibility(id: number) {
                         <!-- Model select -->
                         <div>
                             <Label for="model_id" class="mb-1 block">Model</Label>
-                            <select>
+                            <select
                                 id="model_id"
-                                v-model="createForm.predictive_model_id"
+                                v-model="model_id"
                                 class="w-full rounded-md border border-sidebar-border/70 dark:border-sidebar-border bg-background px-3 py-2 text-sm"
                             >
                                 <option value="">Select model</option>
@@ -131,8 +136,8 @@ function toggleTokenVisibility(id: number) {
 
                         <!-- Create button -->
                         <div class="flex items-end">
-                            <Button class="w-full" :disabled="createForm.processing" @click="createToken">
-                                Create Token
+                            <Button class="w-full"  @click="grantAccess(user_id, model_id)">
+                                Grant Access
                             </Button>
                         </div>
                     </div>
@@ -154,42 +159,21 @@ function toggleTokenVisibility(id: number) {
                             <TableHead>Action</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="token in props.tokens" :key="token.id">
-                            <TableCell class="font-medium">{{ token.user_name }}</TableCell>
-                            <TableCell>{{ token.user_email }}</TableCell>
-                            <TableCell>{{ token.model_name }}</TableCell>
-                            <TableCell>
-                                <div class="flex items-center gap-2">
-                                    <!-- Hidden until Show is clicked, Will need actual token to function. -->
-                                    <Input
-                                        :type="visibleTokens[token.id] ? 'text' : 'password'"
-                                        :value="token.token"
-                                        readonly
-                                        class="font-mono"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        @click="toggleTokenVisibility(token.id)"
-                                    >
-                                        {{ visibleTokens[token.id] ? 'Hide' : 'Show' }}
-                                    </Button>
-                                </div>
-                            </TableCell>
-                            <TableCell>{{ token.created_at }}</TableCell>
-                            <TableCell>
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    @click="deleteToken(token.id, token.model_name, token.user_name)"
-                                >
-                                    Delete
-                                </Button>
-                            </TableCell>
+                    <TableBody v-for="user in props.users" :key="user.id">
+                        <TableRow  v-for="token in user.access_tokens" :key="token.id">
+                            <TableCell class="font-medium">{{ user.name }}</TableCell>
+                            <TableCell>{{ user.email }}</TableCell>
+                            <TableCell >{{ token.model_id }}</TableCell>
+                            <TableCell >{{ token.access_token }}</TableCell>
+                            <TableCell >{{ token.created_at }}</TableCell>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                @click="deleteToken(token.id, token.model_name, token.user_name)"
+                            >
+                                Delete
+                            </Button>
                         </TableRow>
-
                         <TableRow v-if="!props.tokens || props.tokens.length === 0">
                             <TableCell colspan="6" class="text-center py-4 text-slate-500">
                                 No access tokens found.
@@ -222,29 +206,12 @@ function toggleTokenVisibility(id: number) {
                                     <TableHead v-if="props.isAdmin">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
-                            <TableBody>
-                                <TableRow v-for="token in props.myTokens" :key="token.id">
-                                    <TableCell class="font-medium">{{ token.model_name }}</TableCell>
-                                    <TableCell>
-                                        <div class="flex items-center gap-2">
-                                            <Input
-                                                :type="visibleTokens[token.id] ? 'text' : 'password'"
-                                                :value="token.token"
-                                                readonly
-                                                class="font-mono"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                @click="toggleTokenVisibility(token.id)"
-                                            >
-                                                {{ visibleTokens[token.id] ? 'Hide' : 'Show' }}
-                                            </Button>
-                                        </div>
-                                    </TableCell>
+                            <TableBody v-for="user in props.users" :key="user.id">
+                                <TableRow v-if="page.props.auth.user.id === user.id" v-for="token in user.access_tokens" :key="token.id">
+                                    <TableCell class="font-medium">{{ token.model_id }}</TableCell>
+                                    <TableCell>{{ token.access_token }}}</TableCell>
                                     <TableCell>{{ token.created_at }}</TableCell>
-                                    <TableCell v-if="props.isAdmin">
+                                    <TableCell>
                                         <Button
                                             variant="destructive"
                                             size="sm"
