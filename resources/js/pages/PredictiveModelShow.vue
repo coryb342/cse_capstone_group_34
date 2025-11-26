@@ -1,0 +1,233 @@
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Settings, RotateCw, Play, HardDriveDownload, CalendarDays, ChartLine, TrendingUp, ChartScatter, Target } from 'lucide-vue-next';
+import {  usePage, useForm } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { route } from 'ziggy-js';
+
+import type { BreadcrumbItem } from '@/types';
+import { TableCell, TableHead, TableRow } from '@/components/ui/table';
+import { useDateFormat } from '@vueuse/shared';
+const page = usePage();
+const user = page.props.auth.user;
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: `Model Results`,
+        href: '/predictive-model/${props.model.id}',
+    },
+];
+
+const props = defineProps({
+    model: Object,
+    run_results: Array,
+    totalPredictions: Number,
+    aggregateMetrics: Object,
+});
+
+const getStatusColor = (status) => {
+    switch(status) {
+        case 'active': return 'bg-green-500';
+        case 'inactive': return 'bg-gray-400';
+        default: return 'bg-gray-400';
+    }
+};
+
+const getMetricStatus = (metric, value) => {
+    switch (metric) {
+        case 'MAE':
+            if (value < 2) return { label: 'Great', color: 'text-green-600' };
+            if (value < 3) return { label: 'Good', color: 'text-blue-600' };
+            if (value < 5) return { label: 'Needs Work', color: 'text-yellow-600' };
+            return { label: 'Poor', color: 'text-red-600' };
+
+        case 'MSE':
+            if (value < 10) return { label: 'Great', color: 'text-green-600'};
+            if (value < 25) return { label: 'Good', color: 'text-blue-600'};
+            if (value < 50) return { label: 'Needs Work', color: 'text-green-600'};
+            return { label: 'Poor', color: 'text-red-600' };
+
+        case 'RMSE':
+            if (value < 2) return { label: 'Great', color: 'text-green-600' };
+            if (value < 3) return { label: 'Good', color: 'text-blue-600' };
+            if (value < 5) return { label: 'Needs Work', color: 'text-yellow-600' };
+            return { label: 'Poor', color: 'text-red-600' };
+
+        case 'R2':
+            if (value > 0.85) return { label: 'Excellent', color: 'text-green-600' };
+            if (value > 0.7) return { label: 'Very Good', color: 'text-blue-600' };
+            if (value > 0.5) return { label: 'Good', color: 'text-yellow-600' };
+            if (value > 0.3) return { label: 'Moderate', color: 'text-orange-600' };
+            return { label: 'Weak', color: 'text-red-600' };
+
+        default:
+            return { label: '', color: 'text-gray-600' };
+    }
+};
+</script>
+
+<template>
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div>
+            <Card>
+                <CardHeader>
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <CardTitle class="text-5xl font-bold text-slate-900 dark:text-slate-400">
+                                {{ model.name }}
+                            </CardTitle>
+                            <div class="flex items-center gap-2 ml-4">
+                                <div :class="getStatusColor(model.status)" class="w-2 h-2 rounded-full"/>
+                                <Badge variant="secondary">{{ model.status }}</Badge>
+                                <span class="text-sm text-slate-500">{{ model.version }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <Button variant="outline">
+                                <RotateCw class="w-4 h-4 mr-2" />
+                                Retrain
+                            </Button>
+                            <Button variant="outline">
+                                <HardDriveDownload class="w-4 h-4 mr-2" />
+                                Export
+                            </Button>
+                            <Button variant="outline">
+                                <Settings class="w-4 h-4 mr-2" />
+                                Settings
+                            </Button>
+                            <Button>
+                                <Play class="w-4 h-4 mr-2" />
+                                Run Prediction
+                            </Button>
+                        </div>
+                    </div>
+                    <div>
+
+                        <p class="text-sm text-slate-600 dark:text-white mb-1 size-5/12">{{model.description}} </p>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400 mb-6">
+                        <div class="flex items-center gap-2">
+                            <CalendarDays class="w-4 h-4" />
+                            <span>Created: {{ model.created_at}}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <CalendarDays class="w-4 h-4" />
+                            <span>Last trained: {{ model.last_trained_on }}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <ChartLine class="w-4 h-4" />
+                            <span>Type: {{ model.type }}</span>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent class="pt-6">
+                    <div class="flex flex-col gap-6 mb-6">
+                        <Card>
+                            <CardContent class="p-6">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="text-lg font-medium text-slate-600 dark:text-slate-400">Accuracy</span>
+                                    <TrendingUp class="w-10 h-10 text-green-500" />
+                                </div>
+                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                                    {{model.accuracy}}%
+                                </div>
+<!--                                EDIT TO DETERMINE IF UP OR DOWN FROM PREVIOUS MONTH AND SHOW PROPER RESULT-->
+    <!--                            <div class="flex items-center text-sm text-green-600">-->
+    <!--                                <ArrowUp class="w-4 h-4 mr-1" />-->
+    <!--                                <span>2.1% from last month</span>-->
+    <!--                            </div>-->
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent class="p-6">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="text-lg font-medium text-slate-600 dark:text-slate-400">Total Predictions</span>
+                                    <ChartScatter class="w-10 h-10 text-blue-500" />
+                                </div>
+                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                                    {{props.totalPredictions}}
+                                </div>
+                                <div class="text-sm text-slate-500">
+                                    Last 30 days
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent class="p-6">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="text-lg font-medium text-slate-600 dark:text-slate-400 ">Precision</span>
+                                    <Target class="w-10 h-10 text-purple-500" />
+                                </div>
+                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                                    ##
+                                </div>
+                                <div class="text-sm text-slate-500">
+                                    Current performance
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <Card>
+                                <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MSE </CardHeader>
+                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                    {{props.aggregateMetrics.MSE}}
+                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
+                                        {{ getMetricStatus('MAE', aggregateMetrics.MSE).label }}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MAE </CardHeader>
+                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                    {{props.aggregateMetrics.MAE}}
+                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
+                                        {{ getMetricStatus('MAE', aggregateMetrics.MAE).label }}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> RMSE </CardHeader>
+                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                    {{props.aggregateMetrics.RMSE}}
+                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.RMSE).color]">
+                                        {{ getMetricStatus('MAE', aggregateMetrics.RMSE).label }}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> R² </CardHeader>
+                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                    {{props.aggregateMetrics.R2}}
+                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.R2).color]">
+                                        {{ getMetricStatus('MAE', aggregateMetrics.R2).label }}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    </AppLayout>
+</template>
+
+<style scoped>
+
+</style>

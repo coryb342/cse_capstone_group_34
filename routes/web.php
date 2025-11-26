@@ -35,6 +35,8 @@ Route::get('/access-tokens', function () {
     ]);
 })->middleware(['auth', 'verified'])->name('access-tokens');
 
+// Predictive Model Show
+Route::get('predictive-models/{id}', [PredictiveModelController::class, 'show'])->middleware(['auth', 'verified'])->name('predictive-models.show');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import { route } from 'ziggy-js';
 import type { BreadcrumbItem } from '@/types';
+import { router } from '@inertiajs/vue3'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -233,10 +234,12 @@ watch(
                         </Card>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Card
                         class="hover:shadow-lg transition-shadow cursor-pointer group"
                         v-for="model in props.models" :key="model.id"
+                        @click="router.visit(`/predictive-models/${model.id}`)"
                     >
                     <CardHeader>
                         <div class="flex items-start justify-between mb-2">
@@ -252,7 +255,7 @@ watch(
                             <div class="flex items-center justify-between">
                                 <Badge variant="secondary">{{model.type}}</Badge>
                                 <div class="flex items-center gap-2">
-                                    <div :class="getStatusColor(model.status)" class="w-2 h-2"/>
+                                    <div :class="getStatusColor(model.status)" class="w-2 h-2 rounded-full"/>
                                     <span class="text-sm text-slate-600 capitalize">{{model.status}}</span>
                                 </div>
                             </div>

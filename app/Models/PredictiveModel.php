@@ -69,4 +69,8 @@ class PredictiveModel extends Model
         return $this->accuracy;
     }
 
+    public function runResults(): HasMany
+    {
+        return $this->hasMany(PredictiveModelRunResult::class, 'model_id');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PredictiveModel;
+use App\Models\PredictiveModelRunResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -62,4 +63,78 @@ class PredictiveModelController extends Controller
 
         return redirect()->back()->with(['success' => $predictive_model->name . ' uploaded successfully.']);
     }
+    public function show($id)
+    {
+        $model = PredictiveModel::with('runResults')->findOrFail($id);
+        $runResults = $model->runResults;
+        $totalPredictions = $model->runResults->count();
+
+        $resultsWithActuals = $runResults->filter(function($result){
+            return !is_null($result->actual);
+        });
+        $resultsWithoutActuals = $runResults->filter(function($result){
+            return is_null($result->actual);
+        });
+
+        $aggregateMetrics = null;
+        if($resultsWithActuals->count() > 0){
+            $predictions = $resultsWithActuals->map(function($result){
+                return $result->result['predicted'];
+            })->toArray();
+            $actuals = $resultsWithActuals->map(function($result){
+                return $result->actual['value'];
+            })->toArray();
+
+            $aggregateMetrics = $this->calculateMetrics($predictions, $actuals);
+            $aggregateMetrics['based on'] = count($predictions);
+        }
+
+        return Inertia::render('PredictiveModelShow', ['model' => $model, 'run_results' => $model->runResults, 'totalPredictions' => $totalPredictions, 'aggregateMetrics' => $aggregateMetrics]);
+    }
+    private function calculateMetrics(array $predictions, array $actuals): array
+    {
+        $n = count($predictions);
+        $predictions = array_values($predictions);
+        $actuals = array_values($actuals);
+
+        // Mean Absolute Error - avg( |actual - pred| )
+        $mae = 0;
+        for ($i = 0; $i < $n; $i++){
+            $mae += abs($actuals[$i]-$predictions[$i]);
+        }
+        $mae = $mae / $n;
+
+        //Mean Squared Error
+        $mse = 0;
+        for ($i = 0; $i < $n; $i++){
+            $error = $actuals[$i] - $predictions[$i];
+            $mse += $error*$error;
+        }
+        $mse = $mse / $n;
+
+        // Root Mean Squared Error
+        $rmse = sqrt($mse);
+
+        //R^2 coefficient of determination (1 - (SSR / SST))
+        $sumActual = 0;
+        for($i = 0; $i < $n; $i++){
+            $sumActual += $actuals[$i];
+        }
+        $meanActual = $sumActual/$n;
+        $ssR = 0; // sum of squared residuals
+        $ssT = 0; // total sum of squares
+
+        for($i = 0; $i  < $n; $i++){
+            $ssR += pow($actuals[$i] - $predictions[$i], 2);
+            $ssT += pow($actuals[$i] - $meanActual, 2);
+        }
+        $r2 = $ssT > 0 ? 1 - ($ssR / $ssT) : 0;
+
+        return ['MAE' => round($mae, 4),
+            'MSE' => round($mse, 4),
+            'RMSE' => round($rmse, 4),
+            'R2' => round($r2, 4)
+        ];
+    }
+
 }
