@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,12 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('predictive_model_access_tokens', function (Blueprint $table) {
+        Schema::create('predictive_model_run_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('model_id')->constrained('predictive_models');
-            $table->foreignId('user_id')->constrained('users');
-            $table->string('access_token')->nullable();
-            $table->string('status')->default('inactive');
+            $table->foreignId('model_id')->constrained('predictive_models')->onDelete('cascade');
+            $table->json('inputs');
+            $table->json('result');
+            $table->json('actual');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('predictive_model_run_access_tokens');
+        Schema::dropIfExists('predictive_model_run_results');
     }
 };

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PredictiveModelAccessTokenController;
 use App\Http\Controllers\PredictiveModelController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,12 @@ Route::post('/manage-users/generate-access-code', [UserManagementController::cla
 Route::get('/predictive-models', [PredictiveModelController::class, 'index'])->middleware(['auth', 'verified'])->name('predictive-models');
 Route::post('/predictive-models/upload', [PredictiveModelController::class, 'upload'])->middleware(['auth', 'verified'])->name('predictive-models-upload');
 
+// Access Token Route
+Route::get('/access-tokens', [PredictiveModelAccessTokenController::class, 'index'])->middleware(['auth', 'verified'])->name('access-tokens-index');
+Route::post('/access-tokens/grant-access', [PredictiveModelAccessTokenController::class, 'grantAccess'])->middleware(['auth', 'verified'])->name('access-token-grant-access');
+
+// Predictive Model Show
+Route::get('predictive-models/{id}', [PredictiveModelController::class, 'show'])->middleware(['auth', 'verified'])->name('predictive-models.show');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
