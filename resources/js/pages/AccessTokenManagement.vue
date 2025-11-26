@@ -7,7 +7,6 @@ import { ref, watch } from 'vue';
 
 import { Button } from "@/components/ui/button";
 import { Label } from 'reka-ui';
-import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -207,20 +206,22 @@ function grantAccess(user_id, model_id) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody v-for="user in props.users" :key="user.id">
-                                <TableRow v-if="page.props.auth.user.id === user.id" v-for="token in user.access_tokens" :key="token.id">
-                                    <TableCell class="font-medium">{{ token.model_id }}</TableCell>
-                                    <TableCell>{{ token.access_token }}}</TableCell>
-                                    <TableCell>{{ token.created_at }}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            @click="deleteToken(token.id, token.model_name)"
-                                        >
-                                            Delete
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
+                                <div v-if="page.props.auth.user.id === user.id">
+                                    <TableRow v-for="token in user.access_tokens" :key="token.id">
+                                        <TableCell class="font-medium">{{ token.model_id }}</TableCell>
+                                        <TableCell>{{ token.access_token }}}</TableCell>
+                                        <TableCell>{{ token.created_at }}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                @click="deleteToken(token.id, token.model_name)"
+                                            >
+                                                Delete
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>`
+                                </div>
 
                                 <TableRow v-if="!props.myTokens || props.myTokens.length === 0">
                                     <TableCell colspan="4" class="text-center py-4 text-slate-500">

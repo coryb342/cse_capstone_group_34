@@ -1,29 +1,12 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Settings, RotateCw, Play, HardDriveDownload, CalendarDays, ChartLine, TrendingUp, ChartScatter, Target } from 'lucide-vue-next';
-import {  usePage, useForm } from '@inertiajs/vue3';
-import { Form } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
-import { route } from 'ziggy-js';
+
 
 import type { BreadcrumbItem } from '@/types';
-import { TableCell, TableHead, TableRow } from '@/components/ui/table';
-import { useDateFormat } from '@vueuse/shared';
-const page = usePage();
-const user = page.props.auth.user;
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -34,9 +17,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps({
     model: Object,
-    run_results: Array,
+    runResults: Array,
     totalPredictions: Number,
     aggregateMetrics: Object,
+    modelCreatedDate: String,
+    modelLastTrainedDate: String,
 });
 
 const getStatusColor = (status) => {
@@ -87,14 +72,9 @@ const getMetricStatus = (metric, value) => {
                 <CardHeader>
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex items-center gap-3">
-                            <CardTitle class="text-5xl font-bold text-slate-900 dark:text-slate-400">
+                            <CardTitle class="text-5xl font-bold text-slate-900 dark:text-white">
                                 {{ model.name }}
                             </CardTitle>
-                            <div class="flex items-center gap-2 ml-4">
-                                <div :class="getStatusColor(model.status)" class="w-2 h-2 rounded-full"/>
-                                <Badge variant="secondary">{{ model.status }}</Badge>
-                                <span class="text-sm text-slate-500">{{ model.version }}</span>
-                            </div>
                         </div>
 
                         <div class="flex items-center gap-2">
@@ -118,35 +98,41 @@ const getMetricStatus = (metric, value) => {
                     </div>
                     <div>
 
-                        <p class="text-sm text-slate-600 dark:text-white mb-1 size-5/12">{{model.description}} </p>
+                        <p class="text-sm text-slate-900 dark:text-white mb-6 size-5/12">{{model.description}} </p>
                     </div>
-                    <div class="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400 mb-6">
+                    <div class="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400 ">
                         <div class="flex items-center gap-2">
                             <CalendarDays class="w-4 h-4" />
-                            <span>Created: {{ model.created_at}}</span>
+                            <span>Created: {{ props.modelCreatedDate}}</span>
                         </div>
 
                         <div class="flex items-center gap-2">
                             <CalendarDays class="w-4 h-4" />
-                            <span>Last trained: {{ model.last_trained_on }}</span>
+                            <span>Last trained: {{ props.modelLastTrainedDate }}</span>
                         </div>
 
                         <div class="flex items-center gap-2">
                             <ChartLine class="w-4 h-4" />
                             <span>Type: {{ model.type }}</span>
                         </div>
+
+                        <div class="flex items-center gap-2">
+                            <div :class="getStatusColor(model.status)" class="w-2 h-2 rounded-full animate-pulse"/>
+                            <Badge variant="secondary">{{ model.status }}</Badge>
+                            <span class="text-sm text-slate-500">{{ model.version }}</span>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent class="pt-6">
-                    <div class="flex flex-col gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                         <Card>
                             <CardContent class="p-6">
                                 <div class="flex items-start justify-between mb-2">
-                                    <span class="text-lg font-medium text-slate-600 dark:text-slate-400">Accuracy</span>
+                                    <span class="text-2xl font-medium text-slate-600 dark:text-white">Accuracy</span>
                                     <TrendingUp class="w-10 h-10 text-green-500" />
                                 </div>
-                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
-                                    {{model.accuracy}}%
+                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-400 mb-1">
+                                    {{props.aggregateMetrics.Accuracy ? props.aggregateMetrics.Accuracy + '%' : '--'}}
                                 </div>
 <!--                                EDIT TO DETERMINE IF UP OR DOWN FROM PREVIOUS MONTH AND SHOW PROPER RESULT-->
     <!--                            <div class="flex items-center text-sm text-green-600">-->
@@ -158,10 +144,10 @@ const getMetricStatus = (metric, value) => {
                         <Card>
                             <CardContent class="p-6">
                                 <div class="flex items-start justify-between mb-2">
-                                    <span class="text-lg font-medium text-slate-600 dark:text-slate-400">Total Predictions</span>
+                                    <span class="text-2xl font-medium text-slate-600 dark:text-white">Total Predictions</span>
                                     <ChartScatter class="w-10 h-10 text-blue-500" />
                                 </div>
-                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-400 mb-1">
                                     {{props.totalPredictions}}
                                 </div>
                                 <div class="text-sm text-slate-500">
@@ -172,10 +158,10 @@ const getMetricStatus = (metric, value) => {
                         <Card>
                             <CardContent class="p-6">
                                 <div class="flex items-start justify-between mb-2">
-                                    <span class="text-lg font-medium text-slate-600 dark:text-slate-400 ">Precision</span>
+                                    <span class="text-2xl font-medium text-slate-600 dark:text-white">Precision</span>
                                     <Target class="w-10 h-10 text-purple-500" />
                                 </div>
-                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-400 mb-1">
                                     ##
                                 </div>
                                 <div class="text-sm text-slate-500">
@@ -223,11 +209,29 @@ const getMetricStatus = (metric, value) => {
                         </div>
                     </div>
                 </CardContent>
+                <div class=" shadow p-6 flex flex-col items-center justify-center h-48 border">
+
+                    <div class="text-gray-400 mb-2">
+                        📊
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-gray-700">
+                        Graphs Coming Soon
+                    </h3>
+
+                    <p class="text-sm text-gray-500 mt-1 text-center">
+                        This model will display flow trends, predictions, and accuracy charts.
+                    </p>
+
+                </div>
+                <Card>
+                    <CardHeader class="flex items-start justify-between text-2xl font-bold text-slate-900 dark:text-white">
+                        Input Data
+                    </CardHeader>
+                </Card>
             </Card>
         </div>
     </AppLayout>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
