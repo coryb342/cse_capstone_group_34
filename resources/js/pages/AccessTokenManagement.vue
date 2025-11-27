@@ -63,6 +63,15 @@ function grantAccess(user_id, model_id) {
     })
 }
 
+function getCurrentUserAccessTokens(users) {
+    for (const user of users) {
+        if (user.id === page.props.auth.user.id) {
+            return user.access_tokens;
+        }
+    }
+    return;
+}
+
 </script>
 
 <template>
@@ -205,9 +214,8 @@ function grantAccess(user_id, model_id) {
                                            <TableHead v-if="props.isAdmin">Action</TableHead>
                                        </TableRow>
                                    </TableHeader>
-                                   <TableBody v-for="user in props.users" :key="user.id">
-                                       <div v-if="page.props.auth.user.id === user.id">
-                                           <TableRow v-for="token in user.access_tokens" :key="token.id">
+                                   <TableBody>
+                                           <TableRow v-for="token in (getCurrentUserAccessTokens(props.users))" :key="token.id">
                                                <TableCell class="font-medium">{{ token.model_id }}</TableCell>
                                                <TableCell>{{ token.access_token }}}</TableCell>
                                                <TableCell>{{ token.created_at }}</TableCell>
@@ -221,8 +229,6 @@ function grantAccess(user_id, model_id) {
                                                    </Button>
                                                </TableCell>
                                            </TableRow>`
-                                       </div>
-
                                        <TableRow v-if="!props.myTokens || props.myTokens.length === 0">
                                            <TableCell colspan="4" class="text-center py-4 text-slate-500">
                                                You don't have any access tokens yet.
