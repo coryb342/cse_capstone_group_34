@@ -31,6 +31,7 @@ Route::post('/access-tokens/grant-access', [PredictiveModelAccessTokenController
 
 // Predictive Model Show
 Route::get('predictive-models/{id}', [PredictiveModelController::class, 'show'])->middleware(['auth', 'verified'])->name('predictive-models.show');
+Route::post('predictive-models/run', [PredictiveModelController::class, 'run'])->middleware(['auth', 'verified'])->name('predictive-models.run');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
