@@ -7,6 +7,7 @@ use App\Models\PredictiveModelRunResult;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -30,10 +31,10 @@ class PredictiveModelController extends Controller
             if ($runs->count() > 0) {
                 // arrays for calculateMetrics()
                 $preds = $runs->map(function($result){
-                    return $result->result['predicted'];
+                    return json_decode($result->result);
                 })->toArray();
                 $acts = $runs->map(function($result){
-                    return $result->actual['value'];
+                    return json_decode($result->actual);
                 })->toArray();
                 $metrics = $this->calculateMetrics($preds, $acts);
                 // return accuracy
@@ -66,6 +67,7 @@ class PredictiveModelController extends Controller
             'model_description' => 'required',
             'model_type' => 'required',
             'required_parameters' => 'required',
+            'target' => 'required',
             'model_file' => 'required|file|max:256000',
             'model_accuracy' => 'nullable|max:100|min:0',
             'last_trained_on' => 'nullable|date',
@@ -80,6 +82,7 @@ class PredictiveModelController extends Controller
             'description' => $request->input('model_description'),
             'type' => $request->input('model_type'),
             'required_parameters' => json_encode($required_parameters),
+            'target' => $request->input('target'),
             'accuracy' => $request->input('model_accuracy') ? $request->input('model_accuracy') : null,
             'last_trained_on' => $request->input('last_trained_on') ? $request->input('last_trained_on') : now(),
         ]);
@@ -109,6 +112,7 @@ class PredictiveModelController extends Controller
         $resultsWithActuals = $runResults->filter(function($result){
             return !is_null($result->actual);
         });
+
         $resultsWithoutActuals = $runResults->filter(function($result){
             return is_null($result->actual);
         });
@@ -116,10 +120,10 @@ class PredictiveModelController extends Controller
         $aggregateMetrics = null;
         if($resultsWithActuals->count() > 0){
             $predictions = $resultsWithActuals->map(function($result){
-                return $result->result['predicted'];
+                return json_decode($result->result);
             })->toArray();
             $actuals = $resultsWithActuals->map(function($result){
-                return $result->actual['value'];
+                return json_decode($result->actual);
             })->toArray();
 
             $aggregateMetrics = $this->calculateMetrics($predictions, $actuals);
@@ -182,5 +186,64 @@ class PredictiveModelController extends Controller
             'RMSE' => round($rmse, 4),
             'R2' => round($r2, 4)
         ];
+    }
+
+    public function run(Request $request) {
+        $request->validate([
+            'model_id' => 'required',
+            'parameters' => 'required',
+        ]);
+
+        $user = Auth::user();
+        $model = PredictiveModel::query()->where('id', '=', $request->get('model_id'))->first();
+        $parameters = $request->get('parameters');
+        $required_parameters = json_decode($model->required_parameters);
+        $required_parameter_count = count($required_parameters);
+
+        if (count($parameters) != $required_parameter_count) {
+            return redirect()->back()->withErrors(['parameters' => 'Incorrect number of parameters']);
+        }
+
+        $mapped_parameters = array_combine($required_parameters, $parameters);
+
+        $temp_dir = sys_get_temp_dir() . '/model_tmp';
+        if (!File::exists($temp_dir)) {
+            File::makeDirectory($temp_dir, 0755, true);
+        }
+
+        $model_path = Storage::disk('private')->path($model->getPath());
+        $model_filename = basename($model_path);
+        $temp_model_path = $temp_dir . '/' . $model_filename;
+
+        File::copy($model_path, $temp_model_path);
+
+        $cmd = "docker run --rm "
+            . "-v {$temp_dir}:/models "
+            . "-e MODEL_PATH=/models/{$model_filename} "
+            . "run_prediction_image python run_prediction.py "
+            . implode(' ', $parameters);
+        $prediction = shell_exec($cmd);
+
+        if (!$prediction) {
+            return redirect()->back()->withErrors(['prediction_failed' => 'Prediction failed']);
+        }
+
+        $result = trim($prediction);
+
+        $run_result = PredictiveModelRunResult::create([
+            'model_id' => $request->get('model_id'),
+            'result' => json_encode($result),
+            'inputs' => json_encode($mapped_parameters),
+            'actual' => $request->get('actual') ?? null,
+        ]);
+
+        $run_result->save();
+
+        return redirect()->back()->with(['model_run_result' => $result, 'mapped_parameters' => $mapped_parameters]);
+
+
+
+
+
     }
 }
