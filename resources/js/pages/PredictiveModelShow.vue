@@ -3,8 +3,31 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, RotateCw, Play, HardDriveDownload, CalendarDays, ChartLine, TrendingUp, ChartScatter, Target } from 'lucide-vue-next';
-
+import {
+    Settings,
+    RotateCw,
+    Play,
+    HardDriveDownload,
+    CalendarDays,
+    ChartLine,
+    TrendingUp,
+    ChartScatter,
+    Target,
+} from 'lucide-vue-next';
+import {  usePage, useForm } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { route } from 'ziggy-js';
 
 import type { BreadcrumbItem } from '@/types';
 
@@ -31,6 +54,10 @@ const getStatusColor = (status) => {
         default: return 'bg-gray-400';
     }
 };
+
+const isDialogOpen = ref(false);
+const isLoadingResult = ref(false);
+const hasViewedResult = ref(false);
 
 const getMetricStatus = (metric, value) => {
     switch (metric) {
@@ -63,17 +90,44 @@ const getMetricStatus = (metric, value) => {
             return { label: '', color: 'text-gray-600' };
     }
 };
+
+const form = useForm({
+    parameters: [],
+    actual: "",
+    model_id: null,
+});
+
+function submit() {
+    isLoadingResult.value = true;
+    hasViewedResult.value = false;
+    form.post(route('predictive-models.run'), {
+        onSuccess: () => {
+            isDialogOpen.value = true
+            isLoadingResult.value = false
+            form.reset()
+        },
+    })
+}
+
+function resetDialogue() {
+    hasViewedResult.value = true;
+    isDialogOpen.value = true;
+}
+
+const page = usePage();
 </script>
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div>
+        <div class="p-8">
             <Card>
                 <CardHeader>
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex items-center gap-3">
-                            <CardTitle class="text-5xl font-bold text-slate-900 dark:text-white">
-                                {{ model.name }}
+                            <CardTitle>
+                                <h1 class="mb-2 text-4xl font-bold text-slate-900 dark:text-white">
+                                    {{ model.name }}
+                                </h1>
                             </CardTitle>
                         </div>
 
@@ -90,10 +144,102 @@ const getMetricStatus = (metric, value) => {
                                 <Settings class="w-4 h-4 mr-2" />
                                 Settings
                             </Button>
-                            <Button>
-                                <Play class="w-4 h-4 mr-2" />
-                                Run Prediction
-                            </Button>
+                            <Dialog v-model:open="isDialogOpen">
+                                <DialogTrigger as-child>
+                                    <Button @click="resetDialogue">
+                                        <Play class="w-4 h-4 mr-2" />
+                                        Run Prediction
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent v-if="(!page.props.flash.model_run_result || hasViewedResult) && !isLoadingResult">
+                                    <DialogHeader>
+                                        <DialogTitle>Run Prediction</DialogTitle>
+                                        <DialogDescription>Use this form to run a prediction</DialogDescription>
+                                    </DialogHeader>
+                                        <Form
+                                            @submit.prevent="submit"
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="model_id"
+                                                :value="form.model_id = model.id"
+                                            />
+                                            <div v-for="(parameter, index) in JSON.parse(model.required_parameters)" :key="index">
+                                                <div class="grid p-2">
+                                                    <Label :for="'parameter_' + index" class="text-left mb-1">
+                                                        {{ parameter.toString().toUpperCase() }}
+                                                    </Label>
+                                                    <Input required
+                                                           :id="'parameter_' + index"
+                                                           :name="'parameters[' + index + ']'"
+                                                           v-model="form.parameters[index]"
+                                                           class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1"/>
+                                                </div>
+                                            </div>
+                                            <div class="grid p-2 ">
+                                                <Label for="actual" class="mb-1 flex flex-col items-start text-left">
+                                                    <span class="text-left">Actual</span>
+                                                    <span class="text-xs text-left">Entering an Actual value will update the Model Accuracy</span>
+                                                </Label>
+                                                <Input
+                                                    id="actual"
+                                                    name="actual"
+                                                    v-model="form.actual"
+                                                    class="col-span-3 border rounded dark:border-slate-400 border-slate-900 px-2 py-1"/>
+                                            </div>
+                                            <div class="flex justify-end mt-5 mb-5 mr-2">
+                                                <Button type="submit">
+                                                    Run
+                                                </Button>
+                                            </div>
+                                        </Form>
+                                </DialogContent>
+                                <DialogContent v-else-if="isLoadingResult">
+                                    <DialogHeader>
+                                        <DialogTitle>Running Prediction...</DialogTitle>
+                                        <DialogDescription>Doing some magic</DialogDescription>
+                                    </DialogHeader>
+                                    <div class="flex justify-center items-center h-24">
+                                        <svg
+                                            class="animate-spin h-8 w-8 text-blue-600"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                class="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                stroke-width="4"
+                                            ></circle>
+                                            <path
+                                                class="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                            ></path>
+                                        </svg>
+                                    </div>
+                                </DialogContent>
+                                <DialogContent v-else>
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Success!
+                                        </DialogTitle>
+                                        <DialogDescription>Result Details Below</DialogDescription>
+                                    </DialogHeader>
+                                    <span class="text-lg font-bold">Inputs Given: </span>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-sm" v-for="(parameter, index) in page.props.flash.mapped_parameters" :key="index">
+                                            {{index}}: {{parameter}}
+                                        </span>
+                                    </div>
+                                    <span class="text-lg font-bold">Result:</span>
+                                    <span>Predicted {{model.target}}: {{Number(page.props.flash.model_run_result).toFixed(2)}}</span>
+                                </DialogContent>
+                            </Dialog>
+
                         </div>
                     </div>
                     <div>
@@ -132,7 +278,7 @@ const getMetricStatus = (metric, value) => {
                                     <TrendingUp class="w-10 h-10 text-green-500" />
                                 </div>
                                 <div class="text-4xl font-bold text-slate-900 dark:text-slate-400 mb-1">
-                                    {{props.aggregateMetrics.Accuracy ? props.aggregateMetrics.Accuracy + '%' : '--'}}
+                                    {{props.aggregateMetrics?.Accuracy ? props.aggregateMetrics.Accuracy + '%' : '--'}}
                                 </div>
 <!--                                EDIT TO DETERMINE IF UP OR DOWN FROM PREVIOUS MONTH AND SHOW PROPER RESULT-->
     <!--                            <div class="flex items-center text-sm text-green-600">-->
@@ -173,17 +319,17 @@ const getMetricStatus = (metric, value) => {
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MSE </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.MSE}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
-                                        {{ getMetricStatus('MAE', aggregateMetrics.MSE).label }}
+                                    {{ props.aggregateMetrics?.MSE ?? '--' }}
+                                    <div v-if="props.aggregateMetrics?.MSE" :class="['text-sm font-semibold', getMetricStatus('MSE', aggregateMetrics.MSE).color]">
+                                        {{ getMetricStatus('MSE', aggregateMetrics.MSE).label }}
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MAE </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.MAE}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
+                                    {{props.aggregateMetrics?.MAE ?? '--'}}
+                                    <div v-if="props.aggregateMetrics?.MAE" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
                                         {{ getMetricStatus('MAE', aggregateMetrics.MAE).label }}
                                     </div>
                                 </CardContent>
@@ -191,8 +337,8 @@ const getMetricStatus = (metric, value) => {
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> RMSE </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.RMSE}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.RMSE).color]">
+                                    {{props.aggregateMetrics?.RMSE ?? '--'}}
+                                    <div v-if="props.aggregateMetrics?.RMSE" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.RMSE).color]">
                                         {{ getMetricStatus('MAE', aggregateMetrics.RMSE).label }}
                                     </div>
                                 </CardContent>
@@ -200,8 +346,8 @@ const getMetricStatus = (metric, value) => {
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> R² </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics.R2}}
-                                    <div :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.R2).color]">
+                                    {{props.aggregateMetrics?.R2 ?? '--'}}
+                                    <div v-if="props.aggregateMetrics?.R2" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.R2).color]">
                                         {{ getMetricStatus('MAE', aggregateMetrics.R2).label }}
                                     </div>
                                 </CardContent>

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('path')->nullable();
             $table->string('name');
             $table->json('required_parameters')->nullable();
+            $table->string('target');
             $table->string('description');
             $table->string('type');
             $table->string('status')->default('active');

@@ -41,6 +41,10 @@ class AuthenticatedSessionController extends Controller
             return to_route('two-factor.login');
         }
 
+        if ($user->status != 0) {
+            return redirect()->back()->withErrors(['Your account has been deactivated. Contact Administrator.' => 'unauthorized']);
+        }
+
         Auth::login($user, $request->boolean('remember'));
 
         $request->session()->regenerate();

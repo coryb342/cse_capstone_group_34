@@ -4,16 +4,16 @@ import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 
-# Configuration
 CSV_PATH = "OrganizedHighFlowData.csv"
 TARGET_COL = "Plant_Influent"
-FEATURE_COL = "Vista_Level_ft"
+MODEL_OUTPUT_PATH = "plant_influent_model.joblib"
+DATE_COL = "Date"
+
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
-MODEL_OUTPUT_PATH = "plant_influent_model.joblib"
 
-# Column name mapping
 RENAME_MAP = {
     "Unnamed: 0": "Date",
     "Plant Influent\n[Plant Influent Total Flow]": "Plant_Influent",
@@ -31,7 +31,6 @@ RENAME_MAP = {
 
 
 def main():
-    # Load data
     try:
         df = pd.read_csv(CSV_PATH)
     except FileNotFoundError:
@@ -40,30 +39,27 @@ def main():
 
     df = df.rename(columns=RENAME_MAP)
 
-    # Prepare data
-    data = df[[FEATURE_COL, TARGET_COL]].dropna()
-    X = data[[FEATURE_COL]]
-    y = data[TARGET_COL]
+    df = df.dropna()
 
-    # Split data
+    if DATE_COL in df.columns:
+        df = df.drop(columns=[DATE_COL])
+
+    y = df[TARGET_COL]
+    X = df.drop(columns=[TARGET_COL])
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
     )
 
-    # Train model
-    model = LinearRegression()
+    model = RandomForestRegressor(random_state=RANDOM_STATE)
     model.fit(X_train, y_train)
 
-    # Package model
     model_package = {
-        'model': model,
-        'feature_name': FEATURE_COL,
-        'target_name': TARGET_COL,
-        'intercept': model.intercept_,
-        'coefficient': model.coef_[0]
+        "model": model,
+        "features": list(X.columns),  # list of feature names
+        "target": TARGET_COL
     }
 
-    # Save model
     joblib.dump(model_package, MODEL_OUTPUT_PATH)
     print(f"Model saved to: {MODEL_OUTPUT_PATH}")
 

@@ -25,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
                 return [
                     'success' => session('success'),
                     'code' => session('code'),
+                    'model_run_result' => session('model_run_result'),
+                    'mapped_parameters' => session('mapped_parameters'),
                 ];
             },
         ]);

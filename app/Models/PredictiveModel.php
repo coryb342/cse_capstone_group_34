@@ -13,6 +13,7 @@ class PredictiveModel extends Model
         'path',
         'name',
         'required_parameters',
+        'target',
         'description',
         'type',
         'status',
