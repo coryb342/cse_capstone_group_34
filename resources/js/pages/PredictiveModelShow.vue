@@ -151,7 +151,10 @@ const page = usePage();
                                         Run Prediction
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent v-if="(!page.props.flash.model_run_result || hasViewedResult) && !isLoadingResult">
+                                <DialogContent
+                                    v-if="(!page.props.flash.model_run_result || hasViewedResult) && !isLoadingResult"
+                                    class="max-h-[90vh] overflow-y-auto"
+                                >
                                     <DialogHeader>
                                         <DialogTitle>Run Prediction</DialogTitle>
                                         <DialogDescription>Use this form to run a prediction</DialogDescription>
@@ -194,7 +197,10 @@ const page = usePage();
                                             </div>
                                         </Form>
                                 </DialogContent>
-                                <DialogContent v-else-if="isLoadingResult">
+                                <DialogContent
+                                    v-else-if="isLoadingResult"
+                                    class="max-h-[90vh] overflow-y-auto"
+                                >
                                     <DialogHeader>
                                         <DialogTitle>Running Prediction...</DialogTitle>
                                         <DialogDescription>Doing some magic</DialogDescription>
@@ -222,7 +228,10 @@ const page = usePage();
                                         </svg>
                                     </div>
                                 </DialogContent>
-                                <DialogContent v-else>
+                                <DialogContent
+                                    v-else
+                                    class="max-h-[90vh] overflow-y-auto"
+                                >
                                     <DialogHeader>
                                         <DialogTitle>
                                             Success!
