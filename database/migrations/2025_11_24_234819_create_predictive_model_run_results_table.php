@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('model_id')->constrained('predictive_models')->onDelete('cascade');
             $table->json('inputs');
             $table->json('result');
-            $table->json('actual');
+            $table->json('actual')->nullable();
             $table->timestamps();
         });
     }
