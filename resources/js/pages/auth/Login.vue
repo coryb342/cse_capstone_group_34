@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, usePage } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+
+const page = usePage();
 
 defineProps<{
     status?: string;
@@ -31,7 +33,11 @@ defineProps<{
         >
             {{ status }}
         </div>
-
+        <div v-if="page.props.errors">
+            <div v-for="(index, error) in page.props.errors" :key="index">
+                <span class="text-red-600">{{ error }}</span>
+            </div>
+        </div>
         <Form
             v-bind="AuthenticatedSessionController.store.form()"
             :reset-on-success="['password']"
