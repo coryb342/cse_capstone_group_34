@@ -11,8 +11,8 @@ def main():
 
     input_features = sys.argv[1:]
     if len(input_features) != len(features):
-        print(f"Error: Expected {len(features)} features, got {len(input_features)}", file=sys.stderr)
-        sys.exit(1)
+        print(f"Error: Expected {len(features)} features, got {len(input_features)}")
+        return
 
     input_floats = list(map(float, input_features))
 
