@@ -63,10 +63,14 @@ function getAverageAccuracy(models) {
     // }
     // return sum_of_accuracies/models.length;
     let sumAccuracy = 0;
+    let models_considered = 0;
     for (const model of models){
-        sumAccuracy += getAccuracyForModel(model.id);
+        if (getAccuracyForModel(model.id) != null && getAccuracyForModel(model.id) != 0){
+            sumAccuracy += getAccuracyForModel(model.id);
+            models_considered += 1;
+        }
     }
-    return sumAccuracy/models.length;
+    return sumAccuracy/models_considered;
 }
 
 function getAccuracyForModel(modelId){
@@ -460,10 +464,13 @@ watch(
                                         </div>
                                         <div>
                                             <p class="mb-1 text-xs text-slate-500">
-                                                Prediction
+                                                Latest Prediction
                                             </p>
-                                            <p class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                                Need to Implement Results first
+                                            <p class="text-lg font-semibold text-slate-900 dark:text-slate-400" v-if="model.run_results.length > 0">
+                                                    {{ parseFloat(JSON.parse(model.run_results.at(-1).result)).toFixed(2) }}
+                                            </p>
+                                            <p class="text-lg font-semibold text-slate-900 dark:text-slate-400" v-else>
+                                                --
                                             </p>
                                         </div>
                                     </div>
