@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class PredictiveModelController extends Controller
@@ -226,6 +227,10 @@ class PredictiveModelController extends Controller
 
         if (!$prediction) {
             return redirect()->back()->withErrors(['prediction_failed' => 'Prediction failed']);
+        }
+
+        if(Str::contains($prediction, 'Error:')) {
+            return redirect()->back()->with(['prediction_failed' =>$prediction, 'mapped_parameters' => $mapped_parameters]);
         }
 
         $result = trim($prediction);

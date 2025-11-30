@@ -152,7 +152,7 @@ const page = usePage();
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent
-                                    v-if="(!page.props.flash.model_run_result || hasViewedResult) && !isLoadingResult"
+                                    v-if="((!page.props.flash.model_run_result && !page.props.flash.prediction_failed) || hasViewedResult) && !isLoadingResult"
                                     class="max-h-[90vh] overflow-y-auto"
                                 >
                                     <DialogHeader>
@@ -229,11 +229,30 @@ const page = usePage();
                                     </div>
                                 </DialogContent>
                                 <DialogContent
+                                    v-else-if="page.props.flash.prediction_failed"
+                                    class="max-h-[90vh] overflow-y-auto"
+                                >
+                                    <DialogHeader>
+                                        <DialogTitle class="text-red-600">
+                                            Prediction Failed!
+                                        </DialogTitle>
+                                        <DialogDescription>Error Details Below</DialogDescription>
+                                    </DialogHeader>
+                                    <span class="text-lg font-bold">Inputs Given: </span>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-sm" v-for="(parameter, index) in page.props.flash.mapped_parameters" :key="index">
+                                            {{index}}: {{parameter}}
+                                        </span>
+                                    </div>
+                                    <span class="text-lg font-bold">Error:</span>
+                                    <span>{{page.props.flash.prediction_failed}}</span>
+                                </DialogContent>
+                                <DialogContent
                                     v-else
                                     class="max-h-[90vh] overflow-y-auto"
                                 >
                                     <DialogHeader>
-                                        <DialogTitle>
+                                        <DialogTitle class="text-green-500">
                                             Success!
                                         </DialogTitle>
                                         <DialogDescription>Result Details Below</DialogDescription>
