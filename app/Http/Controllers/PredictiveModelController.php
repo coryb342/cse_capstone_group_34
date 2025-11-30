@@ -17,7 +17,7 @@ class PredictiveModelController extends Controller
     {
         $user = Auth::user();
         $organization_id = $user->organization_id;
-        $predictive_models = PredictiveModel::query()->where('organization_id', '=', $organization_id)->get();
+        $predictive_models = PredictiveModel::query()->where('organization_id', '=', $organization_id)->with('runResults')->get();
 
         $modelsData = [];
 
