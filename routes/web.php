@@ -28,6 +28,8 @@ Route::post('/predictive-models/upload', [PredictiveModelController::class, 'upl
 // Access Token Route
 Route::get('/access-tokens', [PredictiveModelAccessTokenController::class, 'index'])->middleware(['auth', 'verified'])->name('access-tokens-index');
 Route::post('/access-tokens/grant-access', [PredictiveModelAccessTokenController::class, 'grantAccess'])->middleware(['auth', 'verified'])->name('access-token-grant-access');
+Route::delete('/access-tokens/{accessToken}', [PredictiveModelAccessTokenController::class, 'destroy'])->middleware(['auth', 'verified'])->name('access-tokens.destroy');
+Route::post('/access-tokens/{accessToken}/activate', [PredictiveModelAccessTokenController::class, 'activate'])->middleware(['auth', 'verified'])->name('access-tokens.activate');
 
 // Predictive Model Show
 Route::get('predictive-models/{id}', [PredictiveModelController::class, 'show'])->middleware(['auth', 'verified'])->name('predictive-models.show');
