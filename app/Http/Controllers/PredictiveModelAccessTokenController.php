@@ -8,6 +8,7 @@ use App\Models\PredictiveModelAccessToken;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Hash;
 
 class PredictiveModelAccessTokenController extends Controller
 {
@@ -49,4 +50,62 @@ class PredictiveModelAccessTokenController extends Controller
 
 
     }
+
+    public function destroy(Request $request, PredictiveModelAccessToken $accessToken)
+    {
+        $user = $request->user();
+
+        // Only admins can delete tokens (adjust if you want users to delete their own)
+        if (!$user->is_admin && !$user->id === $accessToken->user_id) {
+            return redirect()->back()->withErrors(['unauthorized' => 'You are not authorized to delete this token.']);
+        }
+
+        // Optional: make sure the token belongs to same org
+        if ($accessToken->user->organization_id !== $user->organization_id) {
+            return redirect()->back()->withErrors(['unauthorized' => 'You are not authorized to delete this token.']);
+        }
+
+        $accessToken->delete();
+
+        return redirect()->back()->with('success', 'Access token deleted.');
+    }
+
+    public function activate(Request $request, PredictiveModelAccessToken $accessToken)
+    {
+        $user = $request->user();
+
+
+        if ($user->id !== $accessToken->user_id ) {
+            return redirect()->back()->withErrors(['unauthorized' => 'You are not authorized to activate this token.']);
+        }
+
+        if ($accessToken->user->organization_id !== $user->organization_id) {
+            return redirect()->back()->withErrors(['unauthorized' => 'You are not authorized to activate this token.']);
+        }
+
+
+        $request->validate([
+            'token_name' => 'required|string|max:255',
+        ]);
+
+        $plainToken = bin2hex(random_bytes(32)); // 64-char random hex string
+
+        $hashedToken = Hash::make($plainToken);
+
+        $accessToken->access_token = $hashedToken;
+        $accessToken->token_name = $request->input('token_name');
+        $accessToken->status = 'active';
+        $accessToken->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Token activated.')
+            ->with('token', $plainToken);
+
+
+    }
+
+
+
+
 }

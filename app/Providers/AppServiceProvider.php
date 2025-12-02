@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
                     'model_run_result' => session('model_run_result'),
                     'mapped_parameters' => session('mapped_parameters'),
                     'prediction_failed' => session('prediction_failed'),
+                    'token' => session('token'),
                 ];
             },
         ]);
