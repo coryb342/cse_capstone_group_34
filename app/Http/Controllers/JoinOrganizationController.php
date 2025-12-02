@@ -30,6 +30,10 @@ class JoinOrganizationController extends Controller
 
         $active_access_code = OrgAccessCode::query()->where('access_code', '=', $request->get('org_access_code'))->where('is_active', '=', true)->first();
 
+        if (!$active_access_code) {
+            return Redirect::back()->withErrors(['org_access_code' => 'Access Code Not Found!']);
+        }
+
         $organization = Organization::query()->where('id', '=', $active_access_code->organization_id)->first();
 
         if ($organization->getRemainingSeats() < 1) {
