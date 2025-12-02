@@ -172,7 +172,7 @@ function deleteToken(tokenId: number) {
             </div>
         </div>
 
-        <!-- success toast -->
+
         <transition name="fade">
             <div
                 v-if="show && $page.props.flash.success"
@@ -270,7 +270,7 @@ function deleteToken(tokenId: number) {
                                     >
                                         <TableCell class="font-medium">{{ user.name }}</TableCell>
                                         <TableCell>{{ user.email }}</TableCell>
-                                        <TableCell>{{ token.model_name }}</TableCell>
+                                        <TableCell>{{models.find(m => m.id === token.model_id).name}}</TableCell>
                                         <TableCell>{{ token.token_name ?? `Token #${token.id}` }}</TableCell>
                                         <TableCell>{{ token.status === 'inactive' ? 'Inactive' : 'Active' }}</TableCell>
                                         <TableCell>
@@ -317,7 +317,7 @@ function deleteToken(tokenId: number) {
                                             :key="token.id"
                                         >
                                             <TableCell class="font-medium">
-                                                {{ token.model_name }}
+                                                {{models.find(m => m.id === token.model_id).name}}
                                             </TableCell>
                                             <TableCell>
                                                 {{ token.token_name ?? `Token #${token.id}` }}
@@ -377,9 +377,12 @@ function deleteToken(tokenId: number) {
                             class="w-full rounded-md border border-sidebar-border/70 dark:border-sidebar-border px-3 py-2 text-sm"
                             placeholder="e.g. My Sensor Model Token"
                         />
+                        <Button @click="generateToken">
+                            Generate
+                        </Button>
                     </div>
 
-                    <div class="mb-4" v-if="generatedToken">
+                    <div class="mb-4" v-if="page.props.flash.token">
                         <Label>Generated Token</Label>
                         <input
                             readonly
@@ -397,11 +400,9 @@ function deleteToken(tokenId: number) {
                         variant="outline"
                         @click="showActivateDialog = false"
                     >
-                        Cancel
+                        Close
                     </Button>
-                    <Button @click="generateToken">
-                        Generate
-                    </Button>
+
                 </div>
             </Card>
         </div>

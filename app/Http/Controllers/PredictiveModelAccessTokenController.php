@@ -56,7 +56,7 @@ class PredictiveModelAccessTokenController extends Controller
         $user = $request->user();
 
         // Only admins can delete tokens (adjust if you want users to delete their own)
-        if (!$user->is_admin) {
+        if (!$user->is_admin && !$user->id === $accessToken->user_id) {
             return redirect()->back()->withErrors(['unauthorized' => 'You are not authorized to delete this token.']);
         }
 
@@ -75,7 +75,7 @@ class PredictiveModelAccessTokenController extends Controller
         $user = $request->user();
 
 
-        if ($user->id !== $accessToken->user_id && !$user->is_admin) {
+        if ($user->id !== $accessToken->user_id ) {
             return redirect()->back()->withErrors(['unauthorized' => 'You are not authorized to activate this token.']);
         }
 
@@ -94,6 +94,7 @@ class PredictiveModelAccessTokenController extends Controller
 
         $accessToken->access_token = $hashedToken;
         $accessToken->token_name = $request->input('token_name');
+        $accessToken->status = 'active';
         $accessToken->save();
 
         return redirect()
