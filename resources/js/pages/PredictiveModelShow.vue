@@ -366,8 +366,8 @@ const page = usePage();
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> RMSE </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
                                     {{props.aggregateMetrics?.RMSE ?? '--'}}
-                                    <div v-if="props.aggregateMetrics?.RMSE" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.RMSE).color]">
-                                        {{ getMetricStatus('MAE', aggregateMetrics.RMSE).label }}
+                                    <div v-if="props.aggregateMetrics?.RMSE" :class="['text-sm font-semibold', getMetricStatus('RMSE', aggregateMetrics.RMSE).color]">
+                                        {{ getMetricStatus('RMSE', aggregateMetrics.RMSE).label }}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -375,8 +375,8 @@ const page = usePage();
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> R² </CardHeader>
                                 <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
                                     {{props.aggregateMetrics?.R2 ?? '--'}}
-                                    <div v-if="props.aggregateMetrics?.R2" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.R2).color]">
-                                        {{ getMetricStatus('MAE', aggregateMetrics.R2).label }}
+                                    <div v-if="props.aggregateMetrics?.R2" :class="['text-sm font-semibold', getMetricStatus('R2', aggregateMetrics.R2).color]">
+                                        {{ getMetricStatus('R2', aggregateMetrics.R2).label }}
                                     </div>
                                 </CardContent>
                             </Card>

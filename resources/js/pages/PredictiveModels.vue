@@ -394,7 +394,7 @@ watch(
                                                 Avg Accuracy
                                             </p>
                                             <p class="text-2xl font-bold text-slate-900 dark:text-slate-400">
-                                                {{ models.length > 0 ? getAverageAccuracy(models).toFixed(2) + '%' : '--' }}
+                                                {{ total_predictions > 0 ? getAverageAccuracy(models).toFixed(2) + '%' : '--' }}
                                             </p>
                                         </div>
                                         <Target class="h-8 w-8 text-purple-500" />
