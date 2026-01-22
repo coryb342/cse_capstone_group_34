@@ -14,7 +14,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, LucideBrain, Bot, Key} from 'lucide-vue-next';
+import { LayoutGrid, LucideBrain, Bot, Key, Bolt} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 const page = usePage();
 const user = page.props.auth.user;
@@ -45,6 +45,12 @@ const mainNavItems: NavItem[] = [
         title: 'Access Tokens',
         icon: Key,
         href: '/access-tokens'
+    },
+
+    {
+        title: "Soft Sensors",
+        icon: Bolt,
+        href: '/soft-sensors'
     }
 ];
 
