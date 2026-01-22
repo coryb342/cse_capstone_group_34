@@ -35,5 +35,10 @@ Route::post('/access-tokens/{accessToken}/activate', [PredictiveModelAccessToken
 Route::get('predictive-models/{id}', [PredictiveModelController::class, 'show'])->middleware(['auth', 'verified'])->name('predictive-models.show');
 Route::post('predictive-models/run', [PredictiveModelController::class, 'run'])->middleware(['auth', 'verified'])->name('predictive-models.run');
 
+// Soft Sensor
+Route::get('/soft-sensor', function () {
+    return Inertia::render('SoftSensor');
+})->middleware(['auth', 'verified'])->name('soft-sensor');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
