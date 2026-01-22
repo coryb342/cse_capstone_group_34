@@ -6,7 +6,7 @@ import { Head, usePage } from '@inertiajs/vue3';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Soft Sensor',
+        title: 'Soft Sensors',
         href: dashboard().url,
     },
 ];
@@ -15,7 +15,7 @@ const page = usePage();
 </script>
 
 <template>
-    <Head title="Soft Sensor" />
+    <Head title="Soft Sensors" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div v-if="page.props.errors">

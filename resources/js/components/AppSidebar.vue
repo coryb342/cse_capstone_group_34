@@ -50,7 +50,7 @@ const mainNavItems: NavItem[] = [
     {
         title: "Soft Sensors",
         icon: Bolt,
-        href: '/soft-sensor'
+        href: '/soft-sensors'
     }
 ];
 
