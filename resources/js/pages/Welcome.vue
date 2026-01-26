@@ -1,55 +1,49 @@
 <script setup lang="ts">
-import { dashboard, login, register } from '@/routes'
-import { Head, Link } from '@inertiajs/vue3'
+import { dashboard, login, register } from '@/routes';
+import { Head, Link } from '@inertiajs/vue3';
 </script>
 
 <template>
     <Head title="Welcome" />
 
-    <main class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div class="w-full max-w-md mx-auto p-8 bg-white dark:bg-slate-800 rounded-2xl shadow text-center">
-            <img
-                src="/img/FSF_Logo.png"
-                alt="FSF logo"
-                class="mx-auto mb-10 h-28 md:h-36 w-auto"
-            />
-            <h1 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                Flow & Sensor Forecast
-            </h1>
-            <p class="mt-1 text-slate-600 dark:text-slate-300">
-                Forecasts & soft-sensor estimates for wastewater plants
-            </p>
+    <main class="flex min-h-screen flex-col items-center justify-center">
+        <div
+            class="flex w-full max-w-sm flex-col items-center gap-1 text-center"
+        >
+            <!-- Logo -->
+            <img src="/img/FSF_Logo.png" alt="FSF logo" />
 
-            <nav class="mt-6 flex items-center justify-center gap-3">
+            <!-- Links -->
+            <div class="flex flex-col gap-1 text-sm text-muted-foreground">
+                <Link
+                    :href="login()"
+                    class="rounded-lg border border-slate-300 px-4 py-2 text-slate-900 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                    Log in
+                </Link>
+
+                <Link
+                    :href="register()"
+                    class="rounded-lg border border-slate-300 px-4 py-2 text-slate-900 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                    Register Organization
+                </Link>
+
+                <Link
+                    href="/join-organization"
+                    class="rounded-lg border border-slate-300 px-4 py-2 text-slate-900 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                    Join Organization
+                </Link>
+
                 <Link
                     v-if="$page.props.auth?.user"
                     :href="dashboard()"
-                    class="inline-flex rounded-lg px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
+                    class="underline underline-offset-4 hover:text-slate-900 dark:hover:text-slate-100"
                 >
-                    Dashboard
+                    Go to Dashboard
                 </Link>
-                <template v-else>
-                    <Link
-                        :href="login()"
-                        class="inline-flex rounded-lg px-4 py-2 border border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700"
-                    >
-                        Log in
-                    </Link>
-                    <Link
-                        :href="register()"
-                        class="inline-flex rounded-lg px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                        Register Organization
-                    </Link>
-                    <a
-                        href="/join-organization"
-                        class="inline-flex rounded-lg px-4 py-2 border border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700"
-                    >
-                        Join Organization
-                    </a>
-                </template>
-            </nav>
+            </div>
         </div>
     </main>
 </template>
-
