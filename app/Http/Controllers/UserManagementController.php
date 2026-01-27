@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OrgAccessCode;
 use App\Models\Organization;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -18,16 +19,20 @@ class UserManagementController extends Controller
             return Redirect::back()->withErrors(['unauthorized' => 'Access Denied']);
         }
 
+        $isSuper = $user->isSuper();
+
         $organization = Organization::find($user->organization_id);
 
         $org_allowed_seats = $organization->getAllowedSeats();
 
-        $all_org_users = $organization->users;
+        $all_org_users = User::query()->where('organization_id', $organization->id)->with('roles')->get();
 
-        return Inertia::render('UserManagement', ["users" => $all_org_users, "org_allowed_seats" => $org_allowed_seats]);
+        return Inertia::render('UserManagement', ["users" => $all_org_users, "org_allowed_seats" => $org_allowed_seats, "current_user_is_super" => $isSuper]);
     }
 
     public function toggleAdmin(Request $request) {
+
+        $admin_role_id = Role::query()->where('name', 'Admin')->first()->id;
 
         $request->validate([
             'user_id' => ['required', 'integer', 'exists:users,id'],
@@ -38,11 +43,15 @@ class UserManagementController extends Controller
         $user_to_modify = User::query()->find($user_to_modify_id);
 
         if (! $user_to_modify->isAdmin()) {
-            $user_to_modify->is_admin = true;
+            $user_to_modify->roles()->attach($admin_role_id);
             $success = $user_to_modify->name . 'is now an Admin.';
         } else {
-            $user_to_modify->is_admin = false;
-            $success = $user_to_modify->name . 'is no longer an Admin.';
+            if (auth()->user()->isSuper()) {
+                $user_to_modify->roles()->detach($admin_role_id);
+                $success = $user_to_modify->name . 'is no longer an Admin.';
+            } else {
+                return Redirect::back()->withErrors(['unauthorized' => 'Access Denied']);
+            }
         }
 
         $user_to_modify->save();
