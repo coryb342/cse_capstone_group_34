@@ -44,6 +44,7 @@ const page = usePage();
 const props = defineProps({
     users: Array,
     org_allowed_seats: Number,
+    current_user_is_super: Boolean,
 });
 
 const show = ref(false);
@@ -98,6 +99,13 @@ function generateAccessCode(user_id) {
     })
 }
 
+function isAdmin(user) {
+    return user.roles.includes(role => role.name === 'Admin');
+}
+function isSuper(user) {
+    return user.roles.includes(role => role.name === 'Super');
+}
+
 watch(
     () => page.props.flash.success,
     (newVal) => {
@@ -142,7 +150,7 @@ watch(
                             <TableHead>ID</TableHead>
                             <TableHead>Name</TableHead>
                             <TableHead>Email</TableHead>
-                            <TableHead>Is Admin?</TableHead>
+                            <TableHead>Admin</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Action</TableHead>
                         </TableHeader>
@@ -151,7 +159,7 @@ watch(
                                 <TableCell class="font-medium"> {{ user.id }} </TableCell>
                                 <TableCell>{{ user.name}}</TableCell>
                                 <TableCell>{{ user.email }}</TableCell>
-                                <TableCell>{{ user.is_admin ? "Yes" : "No" }}</TableCell>
+                                <TableCell>{{ isAdmin(user) || isSuper(user) ? "Yes" : "No" }}</TableCell>
                                 <TableCell :class="user.status === 0 ? 'text-green-500' : 'text-red-500'">{{ user.status === 0 ? "Active" : user.status === 1 ? "Inactive" : "Banned" }}</TableCell>
                                 <TableCell>
                                     <DropdownMenu>
@@ -159,7 +167,7 @@ watch(
                                             <button
                                                 class="p-1 cursor-pointer dark:text-white text-black rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 aria-label="Open menu"
-                                                :disabled="page.props.auth.user.id === user.id"
+                                                :disabled="page.props.auth.user.id === user.id || (isAdmin(user) && !current_user_is_super) || isSuper(user)"
                                             >
                                                 <EllipsisVerticalIcon/>
                                             </button>
