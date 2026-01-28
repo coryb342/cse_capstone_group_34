@@ -10,13 +10,16 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $zip = $request->input('zip', '89502');
+        $zip = $request->input('zip') ?: '89502';
         $gauge = $request->input('gauge');
-        $city = $location['places'][0]['place name'] ?? null;
+
 
 
         //Convert ZIP → lat/lon
         $location = Http::get("https://api.zippopotam.us/us/{$zip}")->json();
+        $state = $location['places'][0]['state abbreviation'] ?? null;
+        $city = $location['places'][0]['place name'] ?? null;
+
 
         $lat = isset($location['places'][0]['latitude'])
             ? (float) $location['places'][0]['latitude']
@@ -74,6 +77,8 @@ class DashboardController extends Controller
             'discharge' => $discharge,
             'riverName' => $siteName,
             'city' => $city,
+            'state' => $state,
+
         ]);
     }
 }

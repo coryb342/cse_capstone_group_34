@@ -75,6 +75,13 @@ const page = usePage();
                                     Go
                                 </button>
                             </form>
+                            <p class ="mt-2 text-sm">
+                                <span class="flex items-center gap-1">
+                                    <Icon icon="map:map-pin" />
+                                    <strong>City:</strong>
+                                    {{page.props.city}}, {{page.props.state}}
+                                    </span>
+                            </p>
 
                             <p class="mt-2 text-sm">
                                 <span class="flex items-center gap-1">
