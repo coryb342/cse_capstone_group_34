@@ -15,10 +15,9 @@ const gauge = ref('');
 function updateDashboard() {
     router.get('/dashboard', {
         zip: zip.value,
-        gauge: gauge.value
-    })
+        gauge: gauge.value,
+    });
 }
-
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -55,13 +54,15 @@ const page = usePage();
                             <form
                                 @submit.prevent="updateDashboard"
                                 class="mt-2 flex items-center gap-2"
-                            > <!-- Zip Box -->
+                            >
+                                <!-- Zip Box -->
                                 <input
                                     v-model="zip"
                                     type="text"
                                     placeholder="ZIP"
                                     class="w-20 rounded border px-2 py-1 text-xs"
-                                /> <!-- Gauge Box -->
+                                />
+                                <!-- Gauge Box -->
                                 <input
                                     v-model="gauge"
                                     type="text"
@@ -75,57 +76,63 @@ const page = usePage();
                                     Go
                                 </button>
                             </form>
-                            <p class ="mt-2 text-sm">
-                                <span class="flex items-center gap-1">
+                            <!-- City info -->
+                            <p class="mt-2 text-sm">
+                                <span v-if="page.props.city" class="flex items-center gap-1">
                                     <Icon icon="map:map-pin" />
                                     <strong>City:</strong>
-                                    {{page.props.city}}, {{page.props.state}}
-                                    </span>
+                                    {{ page.props.city }},{{ page.props.state }}
+                                </span>
+                                <span v-else class="flex items-center gap-1">
+                                    <Icon icon="map:map-pin" />
+                                    <strong>City:</strong>
+                                    Invalid ZIP
+                                </span>
                             </p>
 
+                            <!-- Temp Stuff -->
                             <p class="mt-2 text-sm">
-                                <span class="flex items-center gap-1">
+                                <span v-if="page.props.weather" class="flex items-center gap-1">
                                     <Icon icon="mdi:thermometer" />
                                     <strong>Temperature:</strong>
                                     {{ page.props.weather.temperature_2m }}°C
                                 </span>
+
+                                <span v-else class="text-red-600">
+                                    No Weather Data
+                                </span>
                             </p>
+
                             <p class="mt-2 text-sm">
-                                <span class="flex items-center gap-1">
+                                <span v-if="page.props.weather" class="flex items-center gap-1">
                                     <Icon icon="wi:rain" />
                                     <strong>Precipitation:</strong>
                                     {{ page.props.weather.precipitation }} mm
                                 </span>
+
+                                <span v-else class="text-red-600">
+                                    No Precipitation Data
+                                </span>
                             </p>
+
+                            <!-- River Stuff -->
                             <p class="mt-2 text-sm">
-                                <span
-                                    class="inline-flex items-center gap-2 text-sm"
-                                >
-                                    <Icon icon="mdi:map-marker" class="align-middle" />
+                                <span class="inline-flex items-center gap-2 text-sm">
+                                    <Icon icon="mdi:map-marker" class="align-middle"/>
                                     <strong>River:</strong>
                                     {{ page.props.riverName }}
                                 </span>
                             </p>
                             <p class="mt-2 text-sm">
-                                <span
-                                    class="inline-flex items-center gap-2 text-sm"
-                                >
-                                    <Icon
-                                        icon="mdi:waves"
-                                        class="align-middle"
-                                    />
+                                <span class="inline-flex items-center gap-2 text-sm">
+                                    <Icon icon="mdi:waves" class="align-middle"/>
                                     <strong>Gauge Height:</strong>
                                     {{ page.props.gageHeight }} ft
                                 </span>
                             </p>
                             <p class="mt-2 text-sm">
-                                <span
-                                    class="inline-flex items-center gap-2 text-sm"
-                                >
-                                    <Icon
-                                        icon="mdi:water"
-                                        class="align-middle"
-                                    />
+                                <span class="inline-flex items-center gap-2 text-sm">
+                                    <Icon icon="mdi:water" class="align-middle"/>
                                     <strong>Discharge:</strong>
                                     {{ page.props.discharge }} cfs
                                 </span>
@@ -133,7 +140,13 @@ const page = usePage();
                         </div>
                     </div>
                     <p class="mt-4 text-xs text-gray-600 dark:text-gray-300">
-                        Updated: {{ page.props.weather.time }}
+                        <template v-if="page.props.weather">
+                            Updated: {{ page.props.weather.time }}
+                        </template>
+
+                        <template v-else>
+                            Updated: No data
+                        </template>
                     </p>
 
                     <PlaceholderPattern class="pointer-events-none" />
