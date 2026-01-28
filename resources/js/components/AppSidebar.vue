@@ -18,6 +18,7 @@ import { LayoutGrid, LucideBrain, Bot, Key, Bolt} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 const page = usePage();
 const user = page.props.auth.user;
+const user_roles = page.props.auth.user_roles
 
 
 const mainNavItems: NavItem[] = [
@@ -26,7 +27,7 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
-    ...(user?.is_admin ?
+    ...(user_roles?.some(user_role => user_role.name === 'Admin') ?
     [
         {
             title: 'Manage Users',

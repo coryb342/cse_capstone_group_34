@@ -100,10 +100,10 @@ function generateAccessCode(user_id) {
 }
 
 function isAdmin(user) {
-    return user.roles.includes(role => role.name === 'Admin');
+    return user.roles.some(role => role.name === 'Admin');
 }
 function isSuper(user) {
-    return user.roles.includes(role => role.name === 'Super');
+    return user.roles.some(role => role.name === 'Super');
 }
 
 watch(
@@ -159,7 +159,7 @@ watch(
                                 <TableCell class="font-medium"> {{ user.id }} </TableCell>
                                 <TableCell>{{ user.name}}</TableCell>
                                 <TableCell>{{ user.email }}</TableCell>
-                                <TableCell>{{ isAdmin(user) || isSuper(user) ? "Yes" : "No" }}</TableCell>
+                                <TableCell>{{isSuper(user) ? "Super" : isAdmin(user) ? "Yes" : "No" }}</TableCell>
                                 <TableCell :class="user.status === 0 ? 'text-green-500' : 'text-red-500'">{{ user.status === 0 ? "Active" : user.status === 1 ? "Inactive" : "Banned" }}</TableCell>
                                 <TableCell>
                                     <DropdownMenu>
