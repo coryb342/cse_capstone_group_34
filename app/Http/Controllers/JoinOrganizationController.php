@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OrgAccessCode;
 use App\Models\Organization;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -50,6 +51,9 @@ class JoinOrganizationController extends Controller
                 'password' => Hash::make($request->get('password')),
                 'organization_id' => $active_access_code->organization_id
             ]);
+
+            $user_role_id = Role::query()->where('name', '=', 'User')->first()->id;
+            $user->roles()->attach($user_role_id);
 
             event(new Registered($user));
 

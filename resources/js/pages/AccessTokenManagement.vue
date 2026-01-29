@@ -196,7 +196,7 @@ function deleteToken(tokenId: number) {
                 </CardHeader>
 
                 <!-- ADMIN SECTION -->
-                <div v-if="page.props.auth.user.is_admin" class="ml-8 mr-8 space-y-6 mb-10">
+                <div v-if="page.props.auth.user_roles.some(role => role.name === 'Admin')" class="ml-8 mr-8 space-y-6 mb-10">
                     <!-- Create token card -->
                     <Card>
                         <CardHeader>

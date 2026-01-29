@@ -26,7 +26,7 @@ class PredictiveModelAccessTokenController extends Controller
     public function grantAccess(Request $request) {
         $user = auth()->user();
 
-        if (!$user->is_admin) {
+        if (!$user->isAdmin()) {
             return redirect()->back()->withErrors(['unauthorized' => 'You are not authorized to access this page.']);
         }
 

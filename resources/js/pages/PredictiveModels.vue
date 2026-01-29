@@ -154,7 +154,7 @@ watch(
                     </CardTitle>
                     <Dialog
                         v-model:open="isDialogOpen"
-                        v-if="page.props.auth.user.is_admin"
+                        v-if="page.props.auth.user_roles.some(role => role.name === 'Admin')"
                     >
                         <DialogTrigger as-child>
                             <Button @click="isDialogOpen = true">

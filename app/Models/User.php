@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -66,6 +67,11 @@ class User extends Authenticatable
         return $this->hasMany(PredictiveModelAccessToken::class);
     }
 
+    public function roles(): belongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_role');
+    }
+
     public function getUserName(): string
     {
         return $this->name;
@@ -78,7 +84,12 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->is_admin;
+        return $this->roles->contains('name', 'Admin');
+    }
+
+    public function isSuper(): bool
+    {
+        return $this->roles->contains('name', 'Super');
     }
 
     public function getStatus(): string

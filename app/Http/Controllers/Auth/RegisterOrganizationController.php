@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -48,9 +49,16 @@ class RegisterOrganizationController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'is_admin' => true,
             'organization_id' => $org->id,
         ]);
+
+        $super_role_id = Role::query()->where('name', '=', 'Super')->first()->id;
+        $admin_role_id = Role::query()->where('name', '=', 'Admin')->first()->id;
+        $user_role_id = Role::query()->where('name', '=', 'User')->first()->id;
+
+        $user->roles()->attach($super_role_id);
+        $user->roles()->attach($admin_role_id);
+        $user->roles()->attach($user_role_id);
 
         event(new Registered($user));
 
