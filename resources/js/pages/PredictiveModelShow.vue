@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import ResidualScatter from '@/components/charts/residualScatterPlot.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +43,7 @@ const props = defineProps({
     model: Object,
     runResults: Array,
     totalPredictions: Number,
-    aggregateMetrics: Object,
+    analytics: Object,
     modelCreatedDate: String,
     modelLastTrainedDate: String,
 });
@@ -70,7 +71,7 @@ const getMetricStatus = (metric, value) => {
         case 'MSE':
             if (value < 10) return { label: 'Great', color: 'text-green-600'};
             if (value < 25) return { label: 'Good', color: 'text-blue-600'};
-            if (value < 50) return { label: 'Needs Work', color: 'text-green-600'};
+            if (value < 50) return { label: 'Needs Work', color: 'text-yellow-600'};
             return { label: 'Poor', color: 'text-red-600' };
 
         case 'RMSE':
@@ -306,7 +307,7 @@ const page = usePage();
                                     <TrendingUp class="w-10 h-10 text-green-500" />
                                 </div>
                                 <div class="text-4xl font-bold text-slate-900 dark:text-slate-400 mb-1">
-                                    {{props.aggregateMetrics?.Accuracy ? props.aggregateMetrics.Accuracy + '%' : '--'}}
+                                    {{props.analytics?.accuracy ? props.analytics.accuracy + '%' : '--'}}
                                 </div>
 <!--                                EDIT TO DETERMINE IF UP OR DOWN FROM PREVIOUS MONTH AND SHOW PROPER RESULT-->
     <!--                            <div class="flex items-center text-sm text-green-600">-->
@@ -329,80 +330,95 @@ const page = usePage();
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardContent class="p-6">
-                                <div class="flex items-start justify-between mb-2">
-                                    <span class="text-2xl font-medium text-slate-600 dark:text-white">Precision</span>
-                                    <Target class="w-10 h-10 text-purple-500" />
-                                </div>
-                                <div class="text-4xl font-bold text-slate-900 dark:text-slate-400 mb-1">
-                                    ##
-                                </div>
-                                <div class="text-sm text-slate-500">
-                                    Current performance
-                                </div>
-                            </CardContent>
-                        </Card>
+                    </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MSE </CardHeader>
-                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{ props.aggregateMetrics?.MSE ?? '--' }}
-                                    <div v-if="props.aggregateMetrics?.MSE" :class="['text-sm font-semibold', getMetricStatus('MSE', aggregateMetrics.MSE).color]">
-                                        {{ getMetricStatus('MSE', aggregateMetrics.MSE).label }}
+                                <CardContent>
+                                    <div class="flex items-start gap-6">
+                                        <div>
+                                            <div class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                                {{props.analytics?.mse ?? '--'}}
+                                            </div>
+                                            <div v-if="props.analytics?.mse" :class="['text-sm font-semibold', getMetricStatus('MSE', analytics.mse).color]">
+                                                {{ getMetricStatus('MSE', analytics.mse).label }}
+                                            </div>
+                                        </div>
+
+                                        <div class="text-sm text-slate-900 dark:text-slate-100">
+                                            <strong>Low:</strong> No extreme failures<br>
+                                            <strong>High:</strong> Occasionally makes bad predictions<br>
+                                            <span class="text-slate-900 dark:text-slate-400">→ Highlights where model can fail badly</span>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> MAE </CardHeader>
-                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics?.MAE ?? '--'}}
-                                    <div v-if="props.aggregateMetrics?.MAE" :class="['text-sm font-semibold', getMetricStatus('MAE', aggregateMetrics.MAE).color]">
-                                        {{ getMetricStatus('MAE', aggregateMetrics.MAE).label }}
+                                <CardContent>
+                                    <div class="flex items-start gap-6">
+                                        <div>
+                                            <div class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                                {{props.analytics?.mae ?? '--'}}
+                                            </div>
+                                            <div v-if="props.analytics?.mae" :class="['text-sm font-semibold', getMetricStatus('MAE', analytics.mae).color]">
+                                                {{ getMetricStatus('MAE', analytics.mae).label }}
+                                            </div>
+                                        </div>
+
+                                        <div class="text-sm text-slate-900 dark:text-slate-100">
+                                            <strong>Low:</strong> Predictions are usually close<br>
+                                            <strong>High:</strong> Predictions frequently off by a larger margin<br>
+                                            <span class="text-slate-900 dark:text-slate-400">→ Tells us the average mistake size</span>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> RMSE </CardHeader>
-                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics?.RMSE ?? '--'}}
-                                    <div v-if="props.aggregateMetrics?.RMSE" :class="['text-sm font-semibold', getMetricStatus('RMSE', aggregateMetrics.RMSE).color]">
-                                        {{ getMetricStatus('RMSE', aggregateMetrics.RMSE).label }}
+                                <CardContent>
+                                    <div class="flex items-start gap-6">
+                                        <div>
+                                            <div class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                                {{props.analytics?.rmse ?? '--'}}
+                                            </div>
+                                            <div v-if="props.analytics?.rmse" :class="['text-sm font-semibold', getMetricStatus('RMSE', analytics.rmse).color]">
+                                                {{ getMetricStatus('RMSE', analytics.rmse).label }}
+                                            </div>
+                                        </div>
+
+                                        <div class="text-sm text-slate-900 dark:text-slate-100">
+                                            <strong>RMSE ≈ MAE:</strong> Errors are consistent <br>
+                                            <strong>RMSE > MAE:</strong> Large failures occasionally<br>
+                                            <span class="text-slate-900 dark:text-slate-400">→ Shows how bad predictions get when the model is wrong.</span>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardHeader class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-1"> R² </CardHeader>
-                                <CardContent class="text-lg font-semibold text-slate-900 dark:text-slate-400">
-                                    {{props.aggregateMetrics?.R2 ?? '--'}}
-                                    <div v-if="props.aggregateMetrics?.R2" :class="['text-sm font-semibold', getMetricStatus('R2', aggregateMetrics.R2).color]">
-                                        {{ getMetricStatus('R2', aggregateMetrics.R2).label }}
+                                <CardContent>
+                                    <div class="flex items-start gap-6">
+                                        <div>
+                                            <div class="text-lg font-semibold text-slate-900 dark:text-slate-400">
+                                                {{props.analytics?.r2 ?? '--'}}
+                                            </div>
+                                            <div v-if="props.analytics?.r2" :class="['text-sm font-semibold', getMetricStatus('R2', analytics.r2).color]">
+                                                {{ getMetricStatus('R2', analytics.r2).label }}
+                                            </div>
+                                        </div>
+
+                                        <div class="text-sm text-slate-900 dark:text-slate-100">
+                                            <strong>1.0: Perfect: </strong> <br>
+                                            <strong>0.0: Equal to guessing the mean: </strong> <br>
+                                            <strong>Less than 0 is worse than guessing:</strong> <br>
+                                            <span class="text-slate-900 dark:text-slate-400">→ Shows how bad predictions get when the model is wrong.</span>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
                         </div>
-                    </div>
                 </CardContent>
-                <div class=" shadow p-6 flex flex-col items-center justify-center h-48 border">
-
-                    <div class="text-gray-400 mb-2">
-                        📊
-                    </div>
-
-                    <h3 class="text-lg font-semibold text-gray-700">
-                        Graphs Coming Soon
-                    </h3>
-
-                    <p class="text-sm text-gray-500 mt-1 text-center">
-                        This model will display flow trends, predictions, and accuracy charts.
-                    </p>
-
-                </div>
-                <Card>
-                    <CardHeader class="flex items-start justify-between text-2xl font-bold text-slate-900 dark:text-white">
-                        Input Data
-                    </CardHeader>
-                </Card>
             </Card>
         </div>
     </AppLayout>

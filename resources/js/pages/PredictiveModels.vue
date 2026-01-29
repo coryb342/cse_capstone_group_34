@@ -74,7 +74,8 @@ function getAverageAccuracy(models) {
 }
 
 function getAccuracyForModel(modelId){
-    return props.modelData.find(m => m.model.id === modelId).accuracy;
+    const m = props.models?.find(x => x.id === modelId);
+    return m?.analytics?.accuracy ?? null;
 }
 
 const page = usePage();
@@ -458,16 +459,17 @@ watch(
                                                 Accuracy
                                             </p>
                                             <p class="text-2xl font-semibold text-slate-900 dark:text-slate-400">
-                                                {{ getAccuracyForModel(model.id) ? getAccuracyForModel(model.id).toFixed(2) + '%' : '--' }}
-    <!--                                            {{model.accuracy ? model.accuracy + '%' : '&#45;&#45;'}}-->
+                                                {{ model.analytics?.accuracy != null ? Number(model.analytics.accuracy).toFixed(2) + '%' : '--' }}
                                             </p>
                                         </div>
                                         <div>
                                             <p class="mb-1 text-xs text-slate-500">
                                                 Latest Prediction
                                             </p>
-                                            <p class="text-lg font-semibold text-slate-900 dark:text-slate-400" v-if="model.run_results.length > 0">
-                                                    {{ parseFloat(JSON.parse(model.run_results.at(-1).result)).toFixed(2) }}
+                                            <p class="text-lg font-semibold text-slate-900 dark:text-slate-400" v-if="model.latest_run_result">
+                                                {{ (parseFloat(JSON.parse(model.latest_run_result.result))).toFixed(2) }}
+<!--                                                    {{ parseFloat(JSON.parse(model.run_results.at(-1).result)).toFixed(2) }}-->
+
                                             </p>
                                             <p class="text-lg font-semibold text-slate-900 dark:text-slate-400" v-else>
                                                 --

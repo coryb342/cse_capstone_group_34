@@ -74,4 +74,13 @@ class PredictiveModel extends Model
     {
         return $this->hasMany(PredictiveModelRunResult::class, 'model_id');
     }
+
+    public function analytics()
+    {
+        return $this->hasOne(PredictiveModelAnalytics::class, 'model_id');
+    }
+    public function latestRunResult()
+    {
+        return $this->hasOne(\App\Models\PredictiveModelRunResult::class, 'model_id')->latestOfMany();
+    }
 }
