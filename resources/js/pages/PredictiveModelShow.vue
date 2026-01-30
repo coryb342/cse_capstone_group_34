@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import ResidualScatter from '@/components/charts/residualScatterPlot.vue'
+import ResidualScatterPlot from '@/components/charts/residualScatterPlot.vue'
+import ActualVsPredScatterPlot from '@/components/charts/ActualVsPredScatterPlot.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,6 @@ import {
     ChartLine,
     TrendingUp,
     ChartScatter,
-    Target,
 } from 'lucide-vue-next';
 import {  usePage, useForm } from '@inertiajs/vue3';
 import { Form } from '@inertiajs/vue3';
@@ -46,6 +46,7 @@ const props = defineProps({
     analytics: Object,
     modelCreatedDate: String,
     modelLastTrainedDate: String,
+    residualScatter: { points: Array<{ x: number; y: number; run_id?: number; created_at?: string }>() },
 });
 
 const getStatusColor = (status) => {
@@ -409,9 +410,9 @@ const page = usePage();
                                         </div>
 
                                         <div class="text-sm text-slate-900 dark:text-slate-100">
-                                            <strong>1.0: Perfect: </strong> <br>
-                                            <strong>0.0: Equal to guessing the mean: </strong> <br>
-                                            <strong>Less than 0 is worse than guessing:</strong> <br>
+                                            <strong>1.0: Perfect </strong> <br>
+                                            <strong>0.0: Equal to guessing the mean </strong> <br>
+                                            <strong>10 > Samples = R2 is unstable</strong> <br>
                                             <span class="text-slate-900 dark:text-slate-400">→ Shows how bad predictions get when the model is wrong.</span>
                                         </div>
                                     </div>
@@ -420,6 +421,17 @@ const page = usePage();
                         </div>
                 </CardContent>
             </Card>
+        </div>
+        <div class = 'flex justify-center p-4'>
+            <ResidualScatterPlot :points="props.residualScatter?.points ?? []" />
+        </div>
+        <div class = 'flex justify-center p-4'>
+            <ActualVsPredScatterPlot
+                :points="(props.residualScatter?.points ?? []).map(p => ({
+            predicted: p.x,
+            actual: p.x - p.y  // Convert residual back to actual
+        }))"
+            />
         </div>
     </AppLayout>
 </template>

@@ -101,25 +101,62 @@ class PredictiveModelController extends Controller
             ->orderBy('created_at')
             ->get(['id', 'created_at', 'result', 'actual']);
 
+//
+        $extractNumber = function ($jsonOrScalar) {
+            if ($jsonOrScalar === null) return null;
+
+            // If it's already a numeric scalar string like "12.3"
+            if (is_string($jsonOrScalar) && is_numeric($jsonOrScalar)) {
+                return (float) $jsonOrScalar;
+            }
+
+            // If it's JSON stored as string (your case)
+            if (is_string($jsonOrScalar)) {
+                $decoded = json_decode($jsonOrScalar, true);
+
+                // If decoding fails, nothing we can do
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return null;
+                }
+
+                // decoded might be: 12.3, "12.3", [12.3], {"value":12.3}, {"result":12.3}
+                $v = $decoded;
+
+                if (is_numeric($v)) return (float) $v;
+
+                if (is_string($v) && is_numeric($v)) return (float) $v;
+
+                if (is_array($v)) {
+                    // common object keys
+                    foreach (['value', 'result', 'prediction', 'y', 'pred'] as $key) {
+                        if (array_key_exists($key, $v) && is_numeric($v[$key])) {
+                            return (float) $v[$key];
+                        }
+                    }
+
+                    // array like [12.3]
+                    if (count($v) === 1) {
+                        $first = array_values($v)[0];
+                        if (is_numeric($first)) return (float) $first;
+                        if (is_string($first) && is_numeric($first)) return (float) $first;
+                    }
+                }
+            }
+
+            return null;
+        };
+
         $points = [];
 
         foreach ($runs as $r) {
-            $pred = method_exists($r, 'predictedValue') ? $r->predictedValue() : null;
-            $act = method_exists($r, 'actualValue') ? $r->actualValue() : null;
+            $pred = $extractNumber($r->result);
+            $act  = $extractNumber($r->actual);
 
-            if ($pred === null || $act === null)
-                continue;
-            if (!is_numeric($pred) || !is_numeric($act))
-                continue;
-
-            $pred = (float)$pred;
-            $act = (float)$act;
-
-            $residual = $act - $pred; // y-axis
+            if ($pred === null || $act === null) continue;
 
             $points[] = [
                 'x' => $pred,
-                'y' => $residual,
+                'y' => $act - $pred,
                 'run_id' => $r->id,
                 'created_at' => $r->created_at->toDateTimeString(),
             ];
