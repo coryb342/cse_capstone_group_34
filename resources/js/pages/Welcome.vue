@@ -53,6 +53,13 @@ import { Head, Link } from '@inertiajs/vue3'
                 >
                     Join Organization
                 </a>
+
+                <a
+                    href="/about"
+                    class="hover:underline text-sm"
+                >
+                    About
+                </a>
             </template>
 
         </div>
