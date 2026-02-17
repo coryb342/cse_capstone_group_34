@@ -39,6 +39,10 @@ Route::post('/access-tokens/{accessToken}/activate', [PredictiveModelAccessToken
 // Predictive Model Show
 Route::get('predictive-models/{id}', [PredictiveModelController::class, 'show'])->middleware(['auth', 'verified'])->name('predictive-models.show');
 Route::post('predictive-models/run', [PredictiveModelController::class, 'run'])->middleware(['auth', 'verified'])->name('predictive-models.run');
+Route::patch('/predictive-models/{model}/status', [PredictiveModelController::class, 'updateStatus'])
+    ->name('predictive-models.status');
+Route::delete('/predictive-models/{model}', [PredictiveModelController::class, 'destroy'])
+    ->name('predictive-models.destroy');
 
 // Soft Sensor
 Route::get('/soft-sensors', function () {

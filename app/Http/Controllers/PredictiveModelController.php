@@ -216,4 +216,23 @@ class PredictiveModelController extends Controller
 
         return redirect()->back()->with(['model_run_result' => $result, 'mapped_parameters' => $mapped_parameters]);
     }
+    public function updateStatus(Request $request, PredictiveModel $model)
+    {
+        $request->validate([
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $model->update([
+            'status' => $request->status,
+        ]);
+
+        return back();
+    }
+
+    public function destroy(PredictiveModel $model)
+    {
+        $model->delete();
+
+        return redirect()->route('predictive-models');
+    }
 }

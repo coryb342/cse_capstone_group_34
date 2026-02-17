@@ -29,6 +29,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { route } from 'ziggy-js';
+import { router } from '@inertiajs/vue3';
 
 import type { BreadcrumbItem } from '@/types';
 
@@ -177,6 +178,25 @@ function formatInputsPreview(inputs: any, maxPairs = 4) {
     return total > maxPairs ? `${preview} … (+${total - maxPairs})` : preview
 }
 
+const showSettingsModal = ref(false)
+const confirmingDelete  = ref(false)
+const settingsStatus    = ref(props.model.status)
+
+function toggleStatus() {
+    const newStatus = settingsStatus.value === 'active' ? 'inactive' : 'active'
+    settingsStatus.value = newStatus
+
+    router.patch(route('predictive-models.status', { model: props.model.id }), {
+        status: newStatus,
+    }, {
+        preserveScroll: true,
+        preserveState:  true,
+    })
+}
+
+function deleteModel() {
+    router.delete(route('predictive-models.destroy', { model: props.model.id }))
+}
 </script>
 
 <template>
@@ -200,7 +220,7 @@ function formatInputsPreview(inputs: any, maxPairs = 4) {
                                 <HardDriveDownload class="mr-2 h-4 w-4" />
                                 Export
                             </Button>
-                            <Button variant="outline">
+                            <Button  @click="showSettingsModal = true">
                                 <Settings class="mr-2 h-4 w-4" />
                                 Settings
                             </Button>
@@ -763,8 +783,14 @@ function formatInputsPreview(inputs: any, maxPairs = 4) {
                             Total runs: {{ totalPredictions }}
                         </p>
                     </div>
+                    <button
+                        @click="showRunDataModal = false"
+                        class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200
+               dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                        X
+                    </button>
                 </div>
-
                 <!-- Table -->
                 <div class="flex-1 overflow-auto">
                     <table class="min-w-full text-left text-sm">
@@ -838,7 +864,6 @@ function formatInputsPreview(inputs: any, maxPairs = 4) {
                         <span class="text-xs font-medium text-slate-400 dark:text-slate-500">Export:</span>
 
                         <button
-                            @click="triggerExport('csv')"
                             class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
                    font-medium text-slate-700 transition-colors hover:bg-slate-50
                    disabled:cursor-not-allowed disabled:opacity-40
@@ -853,8 +878,6 @@ function formatInputsPreview(inputs: any, maxPairs = 4) {
                         </button>
 
                         <button
-                            @click="triggerExport('excel')"
-                            :disabled="!runResults?.length"
                             class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
                    font-medium text-slate-700 transition-colors hover:bg-slate-50
                    disabled:cursor-not-allowed disabled:opacity-40
@@ -867,18 +890,132 @@ function formatInputsPreview(inputs: any, maxPairs = 4) {
                             Excel
                         </button>
                     </div>
-
-                    <button
-                        @click="showRunDataModal = false"
-                        class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200
-               dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                    >
-                        Close
-                    </button>
                 </div>
             </div>
         </div>
+        <div
+            v-if="showSettingsModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            @click.self="showSettingsModal = false; confirmingDelete = false"
+        >
+            <div
+                class="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border bg-white shadow-xl
+               dark:border-slate-700 dark:bg-slate-900"
+                role="dialog"
+                aria-modal="true"
+            >
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-700">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                            Model Settings
+                        </h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">{{ model.name }}</p>
+                    </div>
+                    <button
+                        @click="showSettingsModal = false; confirmingDelete = false"
+                        class="text-slate-400 hover:text-slate-600 transition-colors dark:hover:text-slate-200"
+                    >
+                        ✕
+                    </button>
+                </div>
 
+                <div class="flex flex-col gap-4 px-6 py-5">
+                    <!-- Status toggle -->
+                    <div class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3
+                        dark:border-slate-700">
+                        <div>
+                            <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Model Status</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Currently
+                                <span :class="settingsStatus === 'active'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-slate-400'">
+                            {{ settingsStatus }}
+                        </span>
+                            </p>
+                        </div>
+                        <button
+                            @click="toggleStatus"
+                            :class="[
+                        'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2',
+                        'border-transparent transition-colors duration-200 focus:outline-none',
+                        settingsStatus === 'active'
+                            ? 'bg-emerald-500'
+                            : 'bg-slate-300 dark:bg-slate-600'
+                    ]"
+                        >
+                    <span
+                        :class="[
+                            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow',
+                            'transform transition duration-200',
+                            settingsStatus === 'active' ? 'translate-x-5' : 'translate-x-0'
+                        ]"
+                    />
+                        </button>
+                    </div>
+
+                    <!-- Model info -->
+                    <div class="divide-y rounded-xl border border-slate-200 dark:border-slate-700 dark:divide-slate-700">
+                        <div class="flex items-start justify-between px-4 py-3">
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Type</span>
+                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right">{{ model.type ?? '—' }}</span>
+                        </div>
+                        <div class="flex items-start justify-between px-4 py-3">
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Target</span>
+                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right">{{ model.target ?? '—' }}</span>
+                        </div>
+                        <div class="flex items-start justify-between px-4 py-3">
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Required Parameters</span>
+                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right max-w-[60%]">
+                        {{ model.required_parameters ?? '—' }}</span>
+                        </div>
+                        <div class="flex items-start justify-between px-4 py-3">
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Model File</span>
+                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right max-w-[60%] break-all">
+                        {{ model.path ?? '—' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Delete button -->
+                    <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3
+                        dark:border-rose-900/50 dark:bg-rose-950/20">
+                        <p class="text-sm font-medium text-rose-700 dark:text-rose-400">Danger Zone</p>
+                        <p class="mt-0.5 text-xs text-rose-600/80 dark:text-rose-400/70">
+                            Permanently deletes this model and all its run results. This cannot be undone.
+                        </p>
+                        <button
+                            v-if="!confirmingDelete"
+                            @click="confirmingDelete = true"
+                            class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium
+                           text-rose-600 transition-colors hover:bg-rose-50
+                           dark:border-rose-800 dark:bg-transparent dark:text-rose-400 dark:hover:bg-rose-900/30"
+                        >
+                            Delete Model
+                        </button>
+                        <div v-else class="mt-3 flex items-center gap-2">
+                            <span class="text-xs text-rose-600 dark:text-rose-400">Are you sure?</span>
+                            <button
+                                @click="deleteModel"
+                                class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white
+                               hover:bg-rose-700 transition-colors"
+                            >
+                                Yes, delete
+                            </button>
+                            <button
+                                @click="confirmingDelete = false"
+                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium
+                               text-slate-600 hover:bg-slate-50 transition-colors
+                               dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </AppLayout>
 </template>
 
