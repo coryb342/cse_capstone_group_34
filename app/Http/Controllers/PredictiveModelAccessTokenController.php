@@ -90,7 +90,7 @@ class PredictiveModelAccessTokenController extends Controller
 
         $plainToken = bin2hex(random_bytes(32)); // 64-char random hex string
 
-        $hashedToken = Hash::make($plainToken);
+        $hashedToken = hash('sha256', $plainToken);
 
         $accessToken->access_token = $hashedToken;
         $accessToken->token_name = $request->input('token_name');
