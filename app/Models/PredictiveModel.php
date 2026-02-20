@@ -40,6 +40,11 @@ class PredictiveModel extends Model
         return $this->path;
     }
 
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
     public function getRequiredParameters(): string
     {
         return $this->required_parameters;
