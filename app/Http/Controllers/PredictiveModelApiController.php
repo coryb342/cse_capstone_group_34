@@ -44,6 +44,48 @@ class PredictiveModelApiController extends Controller
         return response()->json($response, 200);
     }
 
+    public function executePrediction(Request $request): JsonResponse
+    {
+        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($rate_limit_key, $perMinute = self::API_RATE_LIMIT_PER_MIN)) {
+            return response()->json(['error' => 'Too many attempts.'], 429);
+        }
+
+        $validated_token = $this->tokenResolver($request);
+
+        if (!$validated_token) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $predictive_model_id = $validated_token->model_id;
+        $predictive_model = PredictiveModel::find($predictive_model_id);
+
+        if (!$predictive_model->isActive()) {
+            return response()->json(['error' => 'Model marked as Inactive'], 404);
+        }
+
+        $model_required_parameters = json_decode($predictive_model->required_parameters);
+        $provided_parameters = [];
+
+        foreach ($model_required_parameters as $model_required_parameter) {
+            try {
+                $provided_parameters[] = $request->input(str_replace(' ', '_', $model_required_parameter));
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
+        }
+
+        $response = $this->api_service->execute($predictive_model, $provided_parameters, $model_required_parameters);
+        RateLimiter::hit($rate_limit_key, 60);
+
+        if (!$response) {
+            return response()->json(['error' => 'Error Processing Request'], 500);
+        }
+
+        return response()->json($response, 200);
+    }
+
     private function tokenResolver(Request $request): ?PredictiveModelAccessToken
     {
         $token_provided = $request->header('X-Access-Token');
