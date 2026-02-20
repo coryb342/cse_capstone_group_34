@@ -27,6 +27,7 @@ class PredictiveModelApiService
         $description = [
             'Model Name' => $predictive_model->name,
             'Model Type' => $predictive_model->type,
+            'Status' => $predictive_model->status,
             'Model Description' => $predictive_model->description ?? 'N/A',
             'Accuracy' => $predictive_model_analytics->accuracy ?? 'N/A',
             'Required Headers' => 'X-Access-Token',
