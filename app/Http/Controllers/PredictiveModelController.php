@@ -97,7 +97,8 @@ class PredictiveModelController extends Controller
         $model = PredictiveModel::with('runResults', 'analytics')->findOrFail($id);
         $modelCreatedDate = Carbon::parse($model->created_at)->format('m-d-Y');
         $modelLastTrainedDate = Carbon::parse($model->last_trained_on)->format('m-d-Y');
-        $runResults = $model->runResults;
+        $runResults = $model->runResults()->orderBy('created_at')
+            ->get(['id', 'created_at', 'inputs', 'result', 'actual']);
         $totalPredictions = $model->runResults->count();
         $analytics = $model->analytics;
 
@@ -108,25 +109,20 @@ class PredictiveModelController extends Controller
             ->orderBy('created_at')
             ->get(['id', 'created_at', 'result', 'actual']);
 
-//
         $extractNumber = function ($jsonOrScalar) {
             if ($jsonOrScalar === null) return null;
 
-            // If it's already a numeric scalar string like "12.3"
             if (is_string($jsonOrScalar) && is_numeric($jsonOrScalar)) {
                 return (float) $jsonOrScalar;
             }
 
-            // If it's JSON stored as string (your case)
             if (is_string($jsonOrScalar)) {
                 $decoded = json_decode($jsonOrScalar, true);
 
-                // If decoding fails, nothing we can do
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     return null;
                 }
 
-                // decoded might be: 12.3, "12.3", [12.3], {"value":12.3}, {"result":12.3}
                 $v = $decoded;
 
                 if (is_numeric($v)) return (float) $v;
@@ -134,14 +130,12 @@ class PredictiveModelController extends Controller
                 if (is_string($v) && is_numeric($v)) return (float) $v;
 
                 if (is_array($v)) {
-                    // common object keys
                     foreach (['value', 'result', 'prediction', 'y', 'pred'] as $key) {
                         if (array_key_exists($key, $v) && is_numeric($v[$key])) {
                             return (float) $v[$key];
                         }
                     }
 
-                    // array like [12.3]
                     if (count($v) === 1) {
                         $first = array_values($v)[0];
                         if (is_numeric($first)) return (float) $first;
@@ -168,7 +162,7 @@ class PredictiveModelController extends Controller
                 'created_at' => $r->created_at->toDateTimeString(),
             ];
         }
-        return Inertia::render('PredictiveModelShow', ['model' => $model, 'run_results' => $model->runResults, 'totalPredictions' => $totalPredictions, 'analytics' => $analytics, 'modelCreatedDate' => $modelCreatedDate, 'modelLastTrainedDate' => $modelLastTrainedDate, 'residualScatter' => [
+        return Inertia::render('PredictiveModelShow', ['model' => $model, 'runResults' => $runResults, 'totalPredictions' => $totalPredictions, 'analytics' => $analytics, 'modelCreatedDate' => $modelCreatedDate, 'modelLastTrainedDate' => $modelLastTrainedDate, 'residualScatter' => [
             'points' => $points]]);
     }
     public function run(Request $request) {
@@ -212,5 +206,24 @@ class PredictiveModelController extends Controller
         $run_result->save();
 
         return redirect()->back()->with(['model_run_result' => $result, 'mapped_parameters' => $mapped_parameters]);
+    }
+    public function updateStatus(Request $request, PredictiveModel $model)
+    {
+        $request->validate([
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $model->update([
+            'status' => $request->status,
+        ]);
+
+        return back();
+    }
+
+    public function destroy(PredictiveModel $model)
+    {
+        $model->delete();
+
+        return redirect()->route('predictive-models');
     }
 }
