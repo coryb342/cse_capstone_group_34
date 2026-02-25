@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PredictiveModel;
 use App\Models\PredictiveModelRunResult;
+use App\Services\DockerExecutionService;
 use App\Services\PredictiveModelAnalyticsService;
 
 use Carbon\Carbon;
@@ -17,6 +18,12 @@ use Inertia\Inertia;
 
 class PredictiveModelController extends Controller
 {
+
+    public function __construct(
+        protected DockerExecutionService $execution_service,
+    )
+    {
+    }
     public function index()
     {
         $user = Auth::user();
@@ -182,23 +189,7 @@ class PredictiveModelController extends Controller
 
         $mapped_parameters = array_combine($required_parameters, $parameters);
 
-        $temp_dir = sys_get_temp_dir() . '/model_tmp';
-        if (!File::exists($temp_dir)) {
-            File::makeDirectory($temp_dir, 0755, true);
-        }
-
-        $model_path = Storage::disk('private')->path($model->getPath());
-        $model_filename = basename($model_path);
-        $temp_model_path = $temp_dir . '/' . $model_filename;
-
-        File::copy($model_path, $temp_model_path);
-
-        $cmd = "docker run --rm "
-            . "-v {$temp_dir}:/models "
-            . "-e MODEL_PATH=/models/{$model_filename} "
-            . "run_prediction_image python run_prediction.py "
-            . implode(' ', $parameters);
-        $prediction = shell_exec($cmd);
+        $prediction = $this->execution_service->runPrediction($model, $parameters);
 
         if (!$prediction) {
             return redirect()->back()->withErrors(['prediction_failed' => 'Prediction failed']);
