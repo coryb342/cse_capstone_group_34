@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PredictiveModel;
 use App\Models\PredictiveModelAccessToken;
+use App\Models\PredictiveModelRunResult;
 use App\Services\PredictiveModelApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,47 +22,61 @@ class PredictiveModelApiController extends Controller
 
     public function describeModel(Request $request): JsonResponse
     {
-        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX . $request->ip();
+        $source_ip = $request->ip();
+        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX . $source_ip;
 
         if (RateLimiter::tooManyAttempts($rate_limit_key, $perMinute = self::API_RATE_LIMIT_PER_MIN)) {
+            $this->api_service->logApiHit($source_ip, 'describe', '429');
             return response()->json(['error' => 'Too many attempts.'], 429);
         }
 
         $validated_token = $this->tokenResolver($request);
 
         if (!$validated_token) {
+            $this->api_service->logApiHit($source_ip, 'describe', '401');
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        $user_id = $validated_token->user_id;
+        $access_token_id = $validated_token->id;
 
         $predictive_model_id = $validated_token->model_id;
         $response = $this->api_service->describe($predictive_model_id);
         RateLimiter::hit($rate_limit_key, 60);
 
         if (!$response) {
+            $this->api_service->logApiHit($source_ip, 'describe', '404', $user_id, $access_token_id);
             return response()->json(['error' => 'Not Found'], 404);
         }
 
+        $this->api_service->logApiHit($source_ip, 'describe', '200', $user_id, $access_token_id);
         return response()->json($response, 200);
     }
 
     public function executePrediction(Request $request): JsonResponse
     {
-        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX . $request->ip();
+        $source_ip = $request->ip();
+        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX . $source_ip;
 
         if (RateLimiter::tooManyAttempts($rate_limit_key, $perMinute = self::API_RATE_LIMIT_PER_MIN)) {
+            $this->api_service->logApiHit($source_ip, 'execute', '429');
             return response()->json(['error' => 'Too many attempts.'], 429);
         }
 
         $validated_token = $this->tokenResolver($request);
 
         if (!$validated_token) {
+            $this->api_service->logApiHit($source_ip, 'execute', '401');
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $predictive_model_id = $validated_token->model_id;
+        $user_id = $validated_token->user_id;
+        $access_token_id = $validated_token->id;
         $predictive_model = PredictiveModel::find($predictive_model_id);
 
         if (!$predictive_model->isActive()) {
+            $this->api_service->logApiHit($source_ip, 'execute', '404', $user_id, $access_token_id);
             return response()->json(['error' => 'Model marked as Inactive'], 404);
         }
 
@@ -72,6 +87,7 @@ class PredictiveModelApiController extends Controller
             try {
                 $provided_parameters[] = $request->input(str_replace(' ', '_', $model_required_parameter));
             } catch (\Exception $e) {
+                $this->api_service->logApiHit($source_ip, 'execute', '500', $user_id, $access_token_id);
                 return response()->json(['error' => $e->getMessage()], 500);
             }
         }
@@ -80,9 +96,22 @@ class PredictiveModelApiController extends Controller
         RateLimiter::hit($rate_limit_key, 60);
 
         if (!$response) {
+            $this->api_service->logApiHit($source_ip, 'execute', '500', $user_id, $access_token_id);
             return response()->json(['error' => 'Error Processing Request'], 500);
         }
 
+        try {
+            $run_result = PredictiveModelRunResult::create([
+                'model_id' => $predictive_model_id,
+                'result' => json_encode(trim($response['Prediction'])),
+                'inputs' => json_encode($response['Provided Parameters']),
+                'actual'=> null,
+            ]);
+        } catch (\Exception $exception) {
+            logger($exception);
+        }
+
+        $this->api_service->logApiHit($source_ip, 'execute', '200', $user_id, $access_token_id, $run_result->id ?? null);
         return response()->json($response, 200);
     }
 
