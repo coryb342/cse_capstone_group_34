@@ -1,9 +1,9 @@
 <?php
 namespace App\Services;
 
+use App\Models\ApiLog;
 use App\Models\PredictiveModel;
 use App\Models\PredictiveModelAnalytics;
-use App\Models\PredictiveModelRunResult;
 use Illuminate\Support\Str;
 
 class PredictiveModelApiService
@@ -56,17 +56,20 @@ class PredictiveModelApiService
             'Prediction' => trim($prediction),
         ];
 
-        try {
-            PredictiveModelRunResult::create([
-                'model_id' => $model->id,
-                'result' => json_encode(trim($prediction)),
-                'inputs' => json_encode($mapped_parameters),
-                'actual'=> null,
-            ]);
-        } catch (\Exception $exception) {
-            return null;
-        }
-
         return $result;
+    }
+
+    public function logApiHit(string $source_ip, string $method, int $response_code, int $user_id = null, int $predictive_model_access_token_id = null, int $predictive_model_run_result_id = null): void
+    {
+        ApiLog::create(
+            [
+                'source_ip' => $source_ip,
+                'user_id' => $user_id,
+                'predictive_model_access_token_id' => $predictive_model_access_token_id,
+                'method' => $method,
+                'predictive_model_run_result_id' => $predictive_model_run_result_id,
+                'response_code' => $response_code,
+            ]
+        );
     }
 }
