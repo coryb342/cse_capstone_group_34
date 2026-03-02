@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -18,13 +18,31 @@ const showForm = ref(false);
 
 const mqttBroker = ref('');
 const mqttTopic = ref('');
-const modelBroker = ref('');
-const modelTopic = ref('');
-const predictionInterval = ref(30);
-const sensorName = ref('');
-const sensorDescription = ref('');
-</script>
+const modelId = ref('');
+const timeInterval = ref(60);
 
+function saveSensor() {
+    router.post(
+        route('soft-sensors.store'),
+        {
+            mqtt_broker: mqttBroker.value,
+            mqtt_topic: mqttTopic.value,
+            model_id: modelId.value,
+            time_interval: timeInterval.value,
+        },
+        {
+            onSuccess: () => {
+                showForm.value = false;
+
+                mqttBroker.value = '';
+                mqttTopic.value = '';
+                modelId.value = '';
+                timeInterval.value = 60;
+            },
+        },
+    );
+}
+</script>
 <template>
     <Head title="Soft Sensors" />
 
@@ -153,7 +171,7 @@ const sensorDescription = ref('');
                     <div class="mb-4">
                         <label class="mb-1 block text-sm">MQTT Broker</label>
                         <input
-                            v-model="modelBroker"
+                            v-model="modelId"
                             type="text"
                             class="w-full rounded border bg-transparent px-2 py-1"
                             placeholder=""
@@ -178,10 +196,10 @@ const sensorDescription = ref('');
                             v-model="predictionInterval"
                             class="w-full rounded border bg-transparent px-2 py-1"
                         >
-                            <option value="30">30 seconds</option>
                             <option value="60">60 seconds</option>
                             <option value="120">120 seconds</option>
-                            <option value="300">300 seconds</option>
+                            <option value="180">180 seconds</option>
+                            <option value="240">240 seconds</option>
                         </select>
                     </div>
                 </div>
@@ -189,13 +207,44 @@ const sensorDescription = ref('');
                 <div class="mt-6 flex justify-end gap-2">
                     <button
                         @click="showForm = false"
-                        class="rounded-lg border px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        class="rounded-lg border px-4 py-2"
                     >
                         Cancel
                     </button>
 
-                    <button class="rounded-lg border">Save Soft Sensor</button>
+                    <button
+                        @click="saveSensor"
+                        class="rounded-lg border px-4 py-2"
+                    >
+                        Save Soft Sensor
+                    </button>
                 </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div
+                v-for="sensor in page.props.sensors"
+                :key="sensor.id"
+                class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
+            >
+                <h3 class="mb-2 text-lg font-semibold">
+                    Soft Sensor #{{ sensor.id }}
+                </h3>
+
+                <p><strong>MQTT Broker:</strong> {{ sensor.mqtt_broker }}</p>
+                <p><strong>MQTT Topic:</strong> {{ sensor.mqtt_topic }}</p>
+                <p><strong>Model ID:</strong> {{ sensor.model_id }}</p>
+                <p>
+                    <strong>Time Interval:</strong>
+                    {{ sensor.time_interval }} sec
+                </p>
+                <button
+                    @click="router.delete(`/soft-sensors/${sensor.id}`)"
+                    class="mt-4 rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
+                >
+                    Delete
+                </button>
             </div>
         </div>
     </AppLayout>

@@ -13,9 +13,17 @@ return new class extends Migration
     {
         Schema::create('soft_sensors', function (Blueprint $table) {
             $table->id();
+            $table->string('mqtt_broker');
+            $table->string('mqtt_topic');
+            $table->string('username')->nullable();
+            $table->string('password')->nullable();
+            $table->string('organization_id');
+            $table->string('model_id');
+            $table->integer('time_interval'); // min 60 seconds
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
