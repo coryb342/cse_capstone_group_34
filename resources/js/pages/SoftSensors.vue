@@ -14,15 +14,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const page = usePage();
 
-
 const showForm = ref(false);
-
 
 const mqttBroker = ref('');
 const mqttTopic = ref('');
 const modelBroker = ref('');
 const modelTopic = ref('');
 const predictionInterval = ref(30);
+const sensorName = ref('');
+const sensorDescription = ref('');
 </script>
 
 <template>
@@ -39,7 +39,40 @@ const predictionInterval = ref(30);
         <div
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
-            <!-- Header Card -->
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Active Sensors -->
+                <div
+                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
+                >
+                    <p class="text-sm text-gray-500">Active Sensors</p>
+                    <p class="mt-1 text-2xl font-semibold">--</p>
+                </div>
+
+                <!-- Total Sensors -->
+                <div
+                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
+                >
+                    <p class="text-sm text-gray-500">Total Sensors</p>
+                    <p class="mt-1 text-2xl font-semibold">--</p>
+                </div>
+
+                <!-- Avg Model Accuracy -->
+                <div
+                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
+                >
+                    <p class="text-sm text-gray-500">Avg Model Accuracy</p>
+                    <p class="mt-1 text-2xl font-semibold">--</p>
+                </div>
+
+                <!-- Models Online -->
+                <div
+                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
+                >
+                    <p class="text-sm text-gray-500">Models Online</p>
+                    <p class="mt-1 text-2xl font-semibold">--</p>
+                </div>
+            </div>
             <div
                 class="rounded-xl border border-sidebar-border/70 p-6 dark:border-sidebar-border"
             >
@@ -60,12 +93,33 @@ const predictionInterval = ref(30);
                 </div>
             </div>
 
-            <!-- Form Card -->
             <div
                 v-if="showForm"
                 class="rounded-xl border border-sidebar-border/70 p-6 dark:border-sidebar-border"
             >
                 <h2 class="mb-4 text-xl font-semibold">New Soft Sensor</h2>
+
+                <!-- Name and Description -->
+                <div class="mb-6">
+                    <div class="mb-4">
+                        <label class="mb-1 block text-sm">Name</label>
+                        <input
+                            v-model="sensorName"
+                            type="text"
+                            class="w-full rounded border bg-transparent px-2 py-1"
+                            placeholder=" "
+                        />
+                    </div>
+
+                    <div>
+                        <label class="mb-1 block text-sm">Description</label>
+                        <textarea
+                            v-model="sensorDescription"
+                            class="w-full rounded border bg-transparent px-2 py-1"
+                            placeholder="Short description of what this soft sensor does"
+                        ></textarea>
+                    </div>
+                </div>
 
                 <!-- MQTT Connection -->
                 <div class="mb-6">
@@ -77,6 +131,7 @@ const predictionInterval = ref(30);
                             v-model="mqttBroker"
                             type="text"
                             class="w-full rounded border bg-transparent px-2 py-1"
+                            placeholder=""
                         />
                     </div>
 
@@ -86,6 +141,7 @@ const predictionInterval = ref(30);
                             v-model="mqttTopic"
                             type="text"
                             class="w-full rounded border bg-transparent px-2 py-1"
+                            placeholder=""
                         />
                     </div>
                 </div>
@@ -100,6 +156,7 @@ const predictionInterval = ref(30);
                             v-model="modelBroker"
                             type="text"
                             class="w-full rounded border bg-transparent px-2 py-1"
+                            placeholder=""
                         />
                     </div>
 
@@ -109,6 +166,7 @@ const predictionInterval = ref(30);
                             v-model="modelTopic"
                             type="text"
                             class="w-full rounded border bg-transparent px-2 py-1"
+                            placeholder=""
                         />
                     </div>
 
@@ -118,7 +176,7 @@ const predictionInterval = ref(30);
                         >
                         <select
                             v-model="predictionInterval"
-                            class="w-full rounded border px-2 py-1"
+                            class="w-full rounded border bg-transparent px-2 py-1"
                         >
                             <option value="30">30 seconds</option>
                             <option value="60">60 seconds</option>
@@ -128,7 +186,6 @@ const predictionInterval = ref(30);
                     </div>
                 </div>
 
-                <!-- Buttons -->
                 <div class="mt-6 flex justify-end gap-2">
                     <button
                         @click="showForm = false"
@@ -137,11 +194,7 @@ const predictionInterval = ref(30);
                         Cancel
                     </button>
 
-                    <button
-                        class="rounded-lg border bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                    >
-                        Save Soft Sensor
-                    </button>
+                    <button class="rounded-lg border">Save Soft Sensor</button>
                 </div>
             </div>
         </div>
