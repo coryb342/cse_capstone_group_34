@@ -216,10 +216,6 @@ function deleteModel() {
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <Button variant="outline">
-                                <HardDriveDownload class="mr-2 h-4 w-4" />
-                                Export
-                            </Button>
                             <Button  @click="showSettingsModal = true">
                                 <Settings class="mr-2 h-4 w-4" />
                                 Settings
@@ -230,7 +226,8 @@ function deleteModel() {
                             </Button>
                             <Dialog v-model:open="isDialogOpen">
                                 <DialogTrigger as-child>
-                                    <Button @click="resetDialogue">
+                                    <Button @click="resetDialogue"
+                                    :disabled="model.status !== 'active'">
                                         <Play class="mr-2 h-4 w-4" />
                                         Run Prediction
                                     </Button>
