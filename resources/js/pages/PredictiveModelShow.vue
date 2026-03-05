@@ -884,7 +884,7 @@ function submitActual(runId: number) {
                         </tr>
 
                         <tr v-if="!runResults?.length">
-                            <td colspan="6" class="px-6 py-6 text-center text-slate-500 dark:text-slate-400">
+                            <td colspan="6" class="px-6 py-6 text-center text-red-500 dark:text-red-400">
                                 No run results yet.
                             </td>
                         </tr>
@@ -896,11 +896,11 @@ function submitActual(runId: number) {
                 <div class="flex items-center justify-between border-t px-6 py-4 dark:border-slate-700">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium text-slate-400 dark:text-slate-500">Export:</span>
-                        <a :href="route('predictive-models.export.csv', model.id)"
-                        class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
-                        font-medium text-slate-700 transition-colors hover:bg-slate-50
-                        disabled:cursor-not-allowed disabled:opacity-40
-                        dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        <a :href="runResults.length > 0 ? route('predictive-models.export.csv', model.id) : undefined"
+                           :class="runResults.length === 0 ? 'pointer-events-none opacity-40 cursor-not-allowed' : ''"
+                           class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
+               font-medium text-slate-700 transition-colors hover:bg-slate-50
+               dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
                         <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -910,11 +910,10 @@ function submitActual(runId: number) {
                         CSV
                         </a>
 
-
-                        <a :href="route('predictive-models.export.excel', model.id)"
-                        class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
+                        <a :href="runResults.length > 0 ? route('predictive-models.export.excel', model.id) : undefined"
+                           :class="runResults.length === 0 ? 'pointer-events-none opacity-40 cursor-not-allowed' : ''"
+                           class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
                         font-medium text-slate-700 transition-colors hover:bg-slate-50
-                        disabled:cursor-not-allowed disabled:opacity-40
                         dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
                         <svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
