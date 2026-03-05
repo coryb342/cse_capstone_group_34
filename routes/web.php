@@ -43,6 +43,11 @@ Route::patch('/predictive-models/{model}/status', [PredictiveModelController::cl
     ->name('predictive-models.status');
 Route::delete('/predictive-models/{model}', [PredictiveModelController::class, 'destroy'])
     ->name('predictive-models.destroy');
+Route::patch('/predictive-model-run-results/{result}/actual', [PredictiveModelController::class, 'updateActual'])->middleware(['auth', 'verified'])->name('predictive-model-run-results.actual');
+Route::get('/predictive-models/{model}/export/csv', [PredictiveModelController::class, 'exportCsv'])->middleware(['auth', 'verified'])
+    ->name('predictive-models.export.csv');
+Route::get('/predictive-models/{model}/export/excel', [PredictiveModelController::class, 'exportExcel'])->middleware(['auth', 'verified'])
+    ->name('predictive-models.export.excel');
 
 // Soft Sensor
 Route::get('/soft-sensors', function () {

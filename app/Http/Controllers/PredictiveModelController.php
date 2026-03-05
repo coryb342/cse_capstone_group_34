@@ -6,6 +6,7 @@ use App\Models\PredictiveModel;
 use App\Models\PredictiveModelRunResult;
 use App\Services\DockerExecutionService;
 use App\Services\PredictiveModelAnalyticsService;
+use App\Exports\RunResultsExport;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PredictiveModelController extends Controller
 {
@@ -24,6 +26,7 @@ class PredictiveModelController extends Controller
     )
     {
     }
+
     public function index()
     {
         $user = Auth::user();
@@ -32,7 +35,7 @@ class PredictiveModelController extends Controller
 
         $modelsData = [];
 
-        foreach ($predictive_models as $pm){
+        foreach ($predictive_models as $pm) {
             $modelsData[] = [
                 'model' => $pm,
                 'accuracy' => $pm->analytics?->accuracy,
@@ -47,7 +50,8 @@ class PredictiveModelController extends Controller
         return Inertia::render('PredictiveModels', ['models' => $predictive_models, 'total_predictions' => $totalPredictions, 'modelData' => $modelsData]);
     }
 
-    public function upload(Request $request) {
+    public function upload(Request $request)
+    {
         $user = Auth::user();
         if (!$user->isAdmin()) {
             return redirect()->back()->withErrors(['Unauthorized action.']);
@@ -92,6 +96,7 @@ class PredictiveModelController extends Controller
 
         return redirect()->back()->with(['success' => $predictive_model->name . ' uploaded successfully.']);
     }
+
     public function show($id)
     {
         $model = PredictiveModel::with('runResults', 'analytics')->findOrFail($id);
@@ -113,7 +118,7 @@ class PredictiveModelController extends Controller
             if ($jsonOrScalar === null) return null;
 
             if (is_string($jsonOrScalar) && is_numeric($jsonOrScalar)) {
-                return (float) $jsonOrScalar;
+                return (float)$jsonOrScalar;
             }
 
             if (is_string($jsonOrScalar)) {
@@ -125,21 +130,21 @@ class PredictiveModelController extends Controller
 
                 $v = $decoded;
 
-                if (is_numeric($v)) return (float) $v;
+                if (is_numeric($v)) return (float)$v;
 
-                if (is_string($v) && is_numeric($v)) return (float) $v;
+                if (is_string($v) && is_numeric($v)) return (float)$v;
 
                 if (is_array($v)) {
                     foreach (['value', 'result', 'prediction', 'y', 'pred'] as $key) {
                         if (array_key_exists($key, $v) && is_numeric($v[$key])) {
-                            return (float) $v[$key];
+                            return (float)$v[$key];
                         }
                     }
 
                     if (count($v) === 1) {
                         $first = array_values($v)[0];
-                        if (is_numeric($first)) return (float) $first;
-                        if (is_string($first) && is_numeric($first)) return (float) $first;
+                        if (is_numeric($first)) return (float)$first;
+                        if (is_string($first) && is_numeric($first)) return (float)$first;
                     }
                 }
             }
@@ -151,7 +156,7 @@ class PredictiveModelController extends Controller
 
         foreach ($runs as $r) {
             $pred = $extractNumber($r->result);
-            $act  = $extractNumber($r->actual);
+            $act = $extractNumber($r->actual);
 
             if ($pred === null || $act === null) continue;
 
@@ -165,7 +170,9 @@ class PredictiveModelController extends Controller
         return Inertia::render('PredictiveModelShow', ['model' => $model, 'runResults' => $runResults, 'totalPredictions' => $totalPredictions, 'analytics' => $analytics, 'modelCreatedDate' => $modelCreatedDate, 'modelLastTrainedDate' => $modelLastTrainedDate, 'residualScatter' => [
             'points' => $points]]);
     }
-    public function run(Request $request) {
+
+    public function run(Request $request)
+    {
         $request->validate([
             'model_id' => 'required',
             'parameters' => 'required',
@@ -189,8 +196,8 @@ class PredictiveModelController extends Controller
             return redirect()->back()->withErrors(['prediction_failed' => 'Prediction failed']);
         }
 
-        if(Str::contains($prediction, 'Error:')) {
-            return redirect()->back()->with(['prediction_failed' =>$prediction, 'mapped_parameters' => $mapped_parameters]);
+        if (Str::contains($prediction, 'Error:')) {
+            return redirect()->back()->with(['prediction_failed' => $prediction, 'mapped_parameters' => $mapped_parameters]);
         }
 
         $result = trim($prediction);
@@ -199,7 +206,7 @@ class PredictiveModelController extends Controller
             'model_id' => $request->get('model_id'),
             'result' => json_encode($result),
             'inputs' => json_encode($mapped_parameters),
-            'actual' => $request->get('actual') ?? null,
+            'actual' => !empty($request->get('actual')) ? json_encode($request->get('actual')) : null,
         ]);
 
         app(PredictiveModelAnalyticsService::class)->recomputeForModel($model->id);
@@ -207,6 +214,7 @@ class PredictiveModelController extends Controller
 
         return redirect()->back()->with(['model_run_result' => $result, 'mapped_parameters' => $mapped_parameters]);
     }
+
     public function updateStatus(Request $request, PredictiveModel $model)
     {
         $request->validate([
@@ -226,4 +234,31 @@ class PredictiveModelController extends Controller
 
         return redirect()->route('predictive-models');
     }
+
+    public function updateActual(Request $request, PredictiveModelRunResult $result)
+    {
+        $request->validate([
+            'actual' => 'required|numeric',
+        ]);
+
+        $result->update([
+            'actual' => json_encode($request->actual),
+        ]);
+        app(PredictiveModelAnalyticsService::class)->recomputeForModel($result->model_id);
+
+        return back();
+    }
+
+    public function exportCsv(PredictiveModel $model)
+    {
+        $filename = $model->name . '_runs_' . now()->format('m-d-Y_H-i-s');
+        return Excel::download(new RunResultsExport($model), $filename . '.csv', \Maatwebsite\Excel\Excel::CSV);
+    }
+
+    public function exportExcel(PredictiveModel $model)
+    {
+        $filename = $model->name . '_runs_' . now()->format('m-d-Y_H-i-s');
+        return Excel::download(new RunResultsExport($model), $filename . '.xlsx');
+    }
 }
+

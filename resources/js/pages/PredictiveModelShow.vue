@@ -9,7 +9,6 @@ import {
     Settings,
     Database,
     Play,
-    HardDriveDownload,
     CalendarDays,
     ChartLine,
     TrendingUp,
@@ -196,6 +195,19 @@ function toggleStatus() {
 
 function deleteModel() {
     router.delete(route('predictive-models.destroy', { model: props.model.id }))
+}
+
+const actualInputs = ref<Record<number, string>>({});
+
+function submitActual(runId: number) {
+    router.patch(route('predictive-model-run-results.actual', runId), {
+        actual: actualInputs.value[runId],
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            delete actualInputs.value[runId];
+        },
+    });
 }
 </script>
 
@@ -763,14 +775,14 @@ function deleteModel() {
         >
             <div
                 class="flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border bg-white shadow-xl
-           dark:border-slate-700 dark:bg-slate-900"
+       dark:border-slate-700 dark:bg-slate-900"
                 role="dialog"
                 aria-modal="true"
             >
                 <!-- Header -->
                 <div
                     class="flex items-center justify-between border-b px-6 py-4
-             dark:border-slate-700"
+         dark:border-slate-700"
                 >
                     <div>
                         <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -783,17 +795,18 @@ function deleteModel() {
                     <button
                         @click="showRunDataModal = false"
                         class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200
-               dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+           dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
                         X
                     </button>
                 </div>
+
                 <!-- Table -->
                 <div class="flex-1 overflow-auto">
                     <table class="min-w-full text-left text-sm">
                         <thead
                             class="sticky top-0 z-10 border-b bg-white/95 backdrop-blur
-                 dark:border-slate-700 dark:bg-slate-900/95"
+             dark:border-slate-700 dark:bg-slate-900/95"
                         >
                         <tr>
                             <th class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300">ID</th>
@@ -832,8 +845,33 @@ function deleteModel() {
                                 {{ toNumber(run.result) ?? '—' }}
                             </td>
 
+                            <!-- Actual -->
                             <td class="px-6 py-3 font-medium text-rose-700 dark:text-rose-400">
-                                {{ toNumber(run.actual) ?? '—' }}
+                                <div v-if="toNumber(run.actual) !== null">
+                                    {{ toNumber(run.actual) }}
+                                </div>
+                                <div v-else class="flex items-center gap-2">
+                                    <input
+                                        v-model="actualInputs[run.id]"
+                                        type="number"
+                                        step="any"
+                                        placeholder="Enter actual"
+                                        class="w-32 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm
+                   text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2
+                   focus:ring-slate-300 dark:border-slate-600 dark:bg-slate-800
+                   dark:text-slate-200 dark:placeholder-slate-500"
+                                    />
+                                    <button
+                                        @click="submitActual(run.id)"
+                                        :disabled="!actualInputs[run.id]"
+                                        class="rounded-lg bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700
+                   hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-40
+                   transition-colors dark:bg-slate-700 dark:text-slate-200
+                   dark:hover:bg-slate-600"
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
                             </td>
 
                             <td class="px-6 py-3 font-medium text-slate-800 dark:text-slate-100">
@@ -856,36 +894,35 @@ function deleteModel() {
 
                 <!-- Footer -->
                 <div class="flex items-center justify-between border-t px-6 py-4 dark:border-slate-700">
-
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium text-slate-400 dark:text-slate-500">Export:</span>
-
-                        <button
-                            class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
-                   font-medium text-slate-700 transition-colors hover:bg-slate-50
-                   disabled:cursor-not-allowed disabled:opacity-40
-                   dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        <a :href="route('predictive-models.export.csv', model.id)"
+                        class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
+                        font-medium text-slate-700 transition-colors hover:bg-slate-50
+                        disabled:cursor-not-allowed disabled:opacity-40
+                        dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
-                            <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                       a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            CSV
-                        </button>
+                        <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
+                 a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        CSV
+                        </a>
 
-                        <button
-                            class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
-                   font-medium text-slate-700 transition-colors hover:bg-slate-50
-                   disabled:cursor-not-allowed disabled:opacity-40
-                   dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+
+                        <a :href="route('predictive-models.export.excel', model.id)"
+                        class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
+                        font-medium text-slate-700 transition-colors hover:bg-slate-50
+                        disabled:cursor-not-allowed disabled:opacity-40
+                        dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
-                            <svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M3 10h18M3 14h18M10 3v18M3 3h18v18H3V3z"/>
-                            </svg>
-                            Excel
-                        </button>
+                        <svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M3 10h18M3 14h18M10 3v18M3 3h18v18H3V3z"/>
+                        </svg>
+                        Excel
+                        </a>
                     </div>
                 </div>
             </div>
