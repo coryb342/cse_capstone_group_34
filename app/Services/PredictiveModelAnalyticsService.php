@@ -4,7 +4,6 @@ namespace App\Services;
 use App\Models\PredictiveModel;
 use App\Models\PredictiveModelAnalytics;
 use Illuminate\Support\Facades\DB;
-
 class PredictiveModelAnalyticsService
 {
     public function recomputeForModel(int $modelId): PredictiveModelAnalytics
