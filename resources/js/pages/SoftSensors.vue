@@ -3,7 +3,20 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
+
+import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/Components/ui/dialog';
+
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Label } from '@/Components/ui/label';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,219 +27,214 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const page = usePage();
 
-const showForm = ref(false);
+const isDialogOpen = ref(false);
 
-const mqttBroker = ref('');
-const mqttTopic = ref('');
-const modelId = ref('');
-const timeInterval = ref(60);
+const csrfToken = page.props.csrf_token;
 
-function saveSensor() {
-    router.post(
-        route('soft-sensors.store'),
-        {
-            mqtt_broker: mqttBroker.value,
-            mqtt_topic: mqttTopic.value,
-            model_id: modelId.value,
-            time_interval: timeInterval.value,
+
+const form = reactive({
+    mqtt_broker: '',
+    mqtt_topic: '',
+    username: '',
+    password: '',
+    model_id: '',
+    time_interval: 60,
+});
+
+function submit() {
+
+    router.post('/soft-sensors', form, {
+        onSuccess: () => {
+            isDialogOpen.value = false;
         },
-        {
-            onSuccess: () => {
-                showForm.value = false;
-
-                mqttBroker.value = '';
-                mqttTopic.value = '';
-                modelId.value = '';
-                timeInterval.value = 60;
-            },
-        },
-    );
+    });
 }
 </script>
+
 <template>
     <Head title="Soft Sensors" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+
         <!-- Error Display -->
         <div v-if="page.props.errors">
-            <div v-for="(index, error) in page.props.errors" :key="index">
+            <div v-for="(error, index) in page.props.errors" :key="index">
                 <span class="text-red-600">{{ error }}</span>
             </div>
         </div>
 
-        <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
-        >
+        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+
             <!-- Stats Bar -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <!-- Active Sensors -->
-                <div
-                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
-                >
+                <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Active Sensors</p>
                     <p class="mt-1 text-2xl font-semibold">--</p>
                 </div>
 
-                <!-- Total Sensors -->
-                <div
-                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
-                >
+                <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Total Sensors</p>
                     <p class="mt-1 text-2xl font-semibold">--</p>
                 </div>
 
-                <!-- Avg Model Accuracy -->
-                <div
-                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
-                >
+                <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Avg Model Accuracy</p>
                     <p class="mt-1 text-2xl font-semibold">--</p>
                 </div>
 
-                <!-- Models Online -->
-                <div
-                    class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
-                >
+                <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Models Online</p>
                     <p class="mt-1 text-2xl font-semibold">--</p>
                 </div>
             </div>
-            <div
-                class="rounded-xl border border-sidebar-border/70 p-6 dark:border-sidebar-border"
-            >
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-3xl font-semibold">Soft Sensors</h1>
-                        <p class="mt-1 text-sm text-gray-500">
-                            Manage and configure soft sensor models.
-                        </p>
-                    </div>
 
-                    <button
-                        @click="showForm = !showForm"
-                        class="rounded-lg border px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                        Create Soft Sensor
-                    </button>
-                </div>
-            </div>
+            <Dialog v-model:open="isDialogOpen">
 
-            <div
-                v-if="showForm"
-                class="rounded-xl border border-sidebar-border/70 p-6 dark:border-sidebar-border"
-            >
-                <h2 class="mb-4 text-xl font-semibold">New Soft Sensor</h2>
+                <div class="rounded-xl border p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-semibold">Soft Sensors</h1>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Manage and configure soft sensor models.
+                            </p>
+                        </div>
 
-                <!-- Name and Description -->
-                <div class="mb-6">
-                    <div class="mb-4">
-                        <label class="mb-1 block text-sm">Name</label>
-                        <input
-                            v-model="sensorName"
-                            type="text"
-                            class="w-full rounded border bg-transparent px-2 py-1"
-                            placeholder=" "
-                        />
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-sm">Description</label>
-                        <textarea
-                            v-model="sensorDescription"
-                            class="w-full rounded border bg-transparent px-2 py-1"
-                            placeholder="Short description of what this soft sensor does"
-                        ></textarea>
+                        <!-- Trigger MUST be inside Dialog -->
+                        <DialogTrigger as-child>
+                            <Button @click="isDialogOpen = true">
+                                <Plus class="mr-2 h-4 w-4" />
+                                Create Soft Sensor
+                            </Button>
+                        </DialogTrigger>
                     </div>
                 </div>
 
-                <!-- MQTT Connection -->
-                <div class="mb-6">
-                    <h3 class="mb-2 font-semibold">MQTT Connection</h3>
+                <!-- Form Stuff-->
+                <DialogContent class="max-h-[90vh] overflow-y-auto">
 
-                    <div class="mb-4">
-                        <label class="mb-1 block text-sm">MQTT Broker</label>
-                        <input
-                            v-model="mqttBroker"
-                            type="text"
-                            class="w-full rounded border bg-transparent px-2 py-1"
-                            placeholder=""
-                        />
-                    </div>
+                    <div class="font-bold text-red-600">THIS IS THE REAL MODAL</div>
 
-                    <div>
-                        <label class="mb-1 block text-sm">MQTT Topic</label>
-                        <input
-                            v-model="mqttTopic"
-                            type="text"
-                            class="w-full rounded border bg-transparent px-2 py-1"
-                            placeholder=""
-                        />
-                    </div>
-                </div>
+                    <DialogHeader>
+                        <DialogTitle>Create Soft Sensor</DialogTitle>
+                        <DialogDescription>
+                            Configure MQTT settings and select a predictive model.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <!-- Model Settings -->
-                <div>
-                    <h3 class="mb-2 font-semibold">Model Settings</h3>
+                    <form @submit.prevent="submit">
+                        <input type="hidden" name="csrf_token" :value="csrfToken" />
 
-                    <div class="mb-4">
-                        <label class="mb-1 block text-sm">MQTT Broker</label>
-                        <input
-                            v-model="modelId"
-                            type="text"
-                            class="w-full rounded border bg-transparent px-2 py-1"
-                            placeholder=""
-                        />
-                    </div>
+                        <!-- MQTT Section -->
+                        <div class="grid gap-4 p-2">
+                            <h3 class="text-lg font-semibold">MQTT Connection</h3>
 
-                    <div class="mb-4">
-                        <label class="mb-1 block text-sm">MQTT Topic</label>
-                        <input
-                            v-model="modelTopic"
-                            type="text"
-                            class="w-full rounded border bg-transparent px-2 py-1"
-                            placeholder=""
-                        />
-                    </div>
+                            <div class="grid">
+                                <Label for="mqtt_broker">MQTT Broker</Label>
+                                <Input
+                                    v-model="form.mqtt_broker"
+                                    id="mqtt_broker"
+                                    name="mqtt_broker"
+                                    placeholder="tcp://localhost:1883"
+                                    required
+                                />
+                            </div>
 
-                    <div>
-                        <label class="mb-1 block text-sm"
-                            >Time Between Predictions</label
-                        >
-                        <select
-                            v-model="predictionInterval"
-                            class="w-full rounded border bg-transparent px-2 py-1"
-                        >
-                            <option value="60">60 seconds</option>
-                            <option value="120">120 seconds</option>
-                            <option value="180">180 seconds</option>
-                            <option value="240">240 seconds</option>
-                        </select>
-                    </div>
-                </div>
+                            <div class="grid">
+                                <Label for="mqtt_topic">MQTT Topic</Label>
+                                <Input
+                                    v-model="form.mqtt_topic"
+                                    id="mqtt_topic"
+                                    name="mqtt_topic"
+                                    placeholder="sensors/level"
+                                    required
+                                />
+                            </div>
 
-                <div class="mt-6 flex justify-end gap-2">
-                    <button
-                        @click="showForm = false"
-                        class="rounded-lg border px-4 py-2"
-                    >
-                        Cancel
-                    </button>
+                            <div class="grid">
+                                <Label for="username">Username (optional)</Label>
+                                <Input
+                                    v-model="form.username"
+                                    id="username"
+                                    name="username"
+                                    placeholder="MQTT Username"
+                                />
+                            </div>
 
-                    <button
-                        @click="saveSensor"
-                        class="rounded-lg border px-4 py-2"
-                    >
-                        Save Soft Sensor
-                    </button>
-                </div>
-            </div>
+                            <div class="grid">
+                                <Label for="password">Password (optional)</Label>
+                                <Input
+                                    v-model="form.password"
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    placeholder="MQTT Password"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Model Settings -->
+                        <div class="grid gap-4 p-2">
+                            <h3 class="text-lg font-semibold">Model Settings</h3>
+
+                            <div class="grid">
+                                <Label for="model_id">Select Model</Label>
+                                <select
+                                    v-model="form.model_id"
+                                    id="model_id"
+                                    name="model_id"
+                                    class="rounded border p-2"
+                                    required
+                                >
+                                    <option disabled value="">Select a model</option>
+
+                                    <option
+                                        v-for="model in page.props.models"
+                                        :key="model.id"
+                                        :value="model.id"
+                                    >
+                                        {{ model.name }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="grid">
+                                <Label for="time_interval">Prediction Interval</Label>
+                                <select
+                                    v-model="form.time_interval"
+                                    id="time_interval"
+                                    name="time_interval"
+                                    class="rounded border p-2"
+                                    required
+                                >
+                                    <option value="30">30 seconds</option>
+                                    <option value="60">60 seconds</option>
+                                    <option value="120">120 seconds</option>
+                                    <option value="300">300 seconds</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex justify-end gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                @click="isDialogOpen = false"
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit">Create Soft Sensor</Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
 
+        <!-- Sensor Cards -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div
                 v-for="sensor in page.props.sensors"
                 :key="sensor.id"
-                class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
+                class="rounded-xl border p-4"
             >
                 <h3 class="mb-2 text-lg font-semibold">
                     Soft Sensor #{{ sensor.id }}
@@ -239,6 +247,7 @@ function saveSensor() {
                     <strong>Time Interval:</strong>
                     {{ sensor.time_interval }} sec
                 </p>
+
                 <button
                     @click="router.delete(`/soft-sensors/${sensor.id}`)"
                     class="mt-4 rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
@@ -247,5 +256,6 @@ function saveSensor() {
                 </button>
             </div>
         </div>
+
     </AppLayout>
 </template>
