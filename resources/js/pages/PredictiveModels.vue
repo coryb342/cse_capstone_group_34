@@ -34,6 +34,7 @@ import {
 import { route } from 'ziggy-js';
 import type { BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/vue3';
+import { join } from 'es-toolkit/compat';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -81,6 +82,7 @@ function getAccuracyForModel(modelId){
 const page = usePage();
 
 const props = defineProps({
+    uploaded_model: Object,
     models: Array,
     total_predictions: Number,
     modelData: Object,
@@ -89,26 +91,47 @@ const props = defineProps({
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
 const isDialogOpen = ref(false);
+const isLoading = ref(false)
+const showConfirmation = ref(false)
+const uploadedModel = ref(null)
 const show = ref(false);
+const confirmingDelete = ref(false)
 
 const form = useForm({
     model_name: '',
     model_description: '',
-    required_parameters: '',
-    target: '',
-    model_type: '',
     model_accuracy: '',
     last_trained_on: '',
     model_file: null,
 });
 
 function submit() {
+    isLoading.value = true
     form.post(route('predictive-models-upload'), {
-        onSuccess: () => {
-            isDialogOpen.value = false
+        onSuccess: (page) => {
+            uploadedModel.value = page.props.flash.uploaded_model
+            showConfirmation.value = true
             form.reset()
         },
-    });
+        onFinish: () => {
+            isLoading.value = false
+        }
+    })
+}
+
+function acceptModel() {
+    isDialogOpen.value = false
+    showConfirmation.value = false
+}
+
+function discardModel() {
+    router.delete(route('predictive-models.destroy', uploadedModel.value.id), {
+        onSuccess: () => {
+            isDialogOpen.value = false
+            showConfirmation.value = false
+            confirmingDelete.value = false
+        }
+    })
 }
 
 watch(
@@ -156,6 +179,7 @@ watch(
                     <Dialog
                         v-model:open="isDialogOpen"
                         v-if="page.props.auth.user_roles.some(role => role.name === 'Admin')"
+
                     >
                         <DialogTrigger as-child>
                             <Button @click="isDialogOpen = true">
@@ -163,7 +187,107 @@ watch(
                                 Upload Model
                             </Button>
                         </DialogTrigger>
-                        <DialogContent class="max-h-[90vh] overflow-y-auto">
+                        <DialogContent
+                            v-if="isLoading"
+                            class="max-h-[90vh] overflow-y-auto"
+                        >
+                            <DialogHeader>
+                                <DialogTitle
+                                >Gathering Model Info...</DialogTitle
+                                >
+                                <DialogDescription
+                                >Doing some magic</DialogDescription
+                                >
+                            </DialogHeader>
+                            <div
+                                class="flex h-24 items-center justify-center"
+                            >
+                                <svg
+                                    class="h-8 w-8 animate-spin text-blue-600"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        class="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                    ></circle>
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                    ></path>
+                                </svg>
+                            </div>
+                        </DialogContent>
+                        <DialogContent v-else-if="showConfirmation" class="">
+                            <DialogHeader>
+                                <DialogTitle
+                                >Model Uploaded Successfully</DialogTitle
+                                >
+                                <DialogDescription
+                                >Please Verify Model Info</DialogDescription
+                                >
+                            </DialogHeader>
+                            <div v-if="showConfirmation" class="space-y-4">
+
+                                <div class="border rounded p-3">
+                                    <p><strong class="dark:text-slate-200 text-black text-lg">Name:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.name }}</span></p>
+
+                                    <p><strong class="dark:text-slate-200 text-black text-lg">Description:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.description }}</span></p>
+
+                                    <p><strong class="dark:text-slate-200 text-black text-lg">Target:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.target }}</span></p>
+
+                                    <p class="break-words"><strong class="dark:text-slate-200 text-black text-lg">Required Parameters: <br></strong> <span class="dark:text-slate-400 text-slate-800">{{ JSON.parse(uploadedModel.required_parameters).join(', ') }}</span></p>
+
+                                    <p><strong class="dark:text-slate-200 text-black text-lg">Type:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.type }} </span></p>
+
+                                    <p><strong class="dark:text-slate-200 text-black text-lg">Accuracy:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.accuracy ?? 'Not Provided' }}</span></p>
+                                </div>
+
+                                <div class="flex justify-end gap-3">
+                                    <Button @click="acceptModel"
+                                            class="mt-3 rounded-lg border border-green-300 bg-white px-3 py-1.5 text-xs font-medium
+                                       text-gray-600 transition-colors hover:bg-green-50
+                                       dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30">
+                                        Accept
+                                    </Button>
+
+                                    <button
+                                        v-if="!confirmingDelete"
+                                        @click="confirmingDelete = true"
+                                        class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium
+                                       text-rose-600 transition-colors hover:bg-rose-50
+                                       dark:border-rose-800 dark:bg-transparent dark:text-rose-400 dark:hover:bg-rose-900/30"
+                                    >
+                                        Discard
+                                    </button>
+                                    <div v-else class="mt-3 flex items-center gap-2">
+                                        <span class="text-xs text-rose-600 dark:text-rose-400">Are you sure?</span>
+                                        <button
+                                            @click="discardModel"
+                                            class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white
+                                            hover:bg-rose-700 transition-colors"
+                                        >
+                                            Yes, Discard
+                                        </button>
+                                        <button
+                                            @click="confirmingDelete = false"
+                                            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium
+                                           text-slate-600 hover:bg-slate-50 transition-colors
+                                           dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
+                        <DialogContent class="max-h-[90vh] overflow-y-auto" v-else>
                             <DialogHeader>
                                 <DialogTitle>Upload a Model</DialogTitle>
                                 <DialogDescription
@@ -171,6 +295,7 @@ watch(
                                     Model</DialogDescription
                                 >
                                 <Form
+                                    v-if="!isLoading && !showConfirmation && isDialogOpen"
                                     @submit.prevent="submit"
                                     enctype="multipart/form-data"
                                 >
@@ -210,69 +335,6 @@ watch(
                                                 type="text"
                                                 id="model_description"
                                                 name="model_description"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                                            />
-                                        </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="required_parameters"
-                                                class="mb-1 grid text-left"
-                                            >
-                                                Required Parameters
-                                                <Label
-                                                    required
-                                                    class="text-sm text-slate-900 dark:text-slate-500"
-                                                >Enter the inputs for
-                                                    the model in the order
-                                                    the model expects
-                                                    separating by
-                                                    commas.</Label
-                                                >
-                                            </Label>
-                                            <Input
-                                                v-model="
-                                                            form.required_parameters
-                                                        "
-                                                id="required_parameters"
-                                                name="required_parameters"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                                                placeholder="ex. Flow, River Levels, Rainfall"
-                                            />
-                                        </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="target"
-                                                class="mb-1 grid text-left"
-                                            >
-                                                Target
-                                                <Label
-                                                    required
-                                                    class="text-sm text-slate-900 dark:text-slate-500"
-                                                >The name of the Target value this model predicts</Label
-                                                >
-                                            </Label>
-                                            <Input
-                                                v-model="
-                                                            form.target
-                                                        "
-                                                id="target"
-                                                name="target"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                                                placeholder="ex. Influent Flow"
-                                            />
-                                        </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="model_type"
-                                                class="mb-1 text-left"
-                                            >
-                                                Model Type
-                                            </Label>
-                                            <Input
-                                                v-model="form.model_type"
-                                                required
-                                                id="model_type"
-                                                name="model_type"
                                                 class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
                                             />
                                         </div>
