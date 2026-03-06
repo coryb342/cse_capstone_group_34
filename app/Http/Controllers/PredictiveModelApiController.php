@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class PredictiveModelApiController extends Controller
 {
-    private const API_RATE_LIMIT_PER_MIN = 2;
-    private const API_RATE_LIMIT_KEY_PREFIX = 'api-hit:';
+    private const API_RATE_LIMIT_PER_MIN_DESCRIBE = 5;
+    private const API_RATE_LIMIT_KEY_PREFIX_DESCRIBE = 'api-hit-describe:';
+    private const API_RATE_LIMIT_PER_MIN_EXECUTE = 2;
+    private const API_RATE_LIMIT_KEY_PREFIX_EXECUTE = 'api-hit-execute:';
     public function __construct(
         protected PredictiveModelApiService $api_service
     )
@@ -23,9 +25,9 @@ class PredictiveModelApiController extends Controller
     public function describeModel(Request $request): JsonResponse
     {
         $source_ip = $request->ip();
-        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX . $source_ip;
+        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX_DESCRIBE . $source_ip;
 
-        if (RateLimiter::tooManyAttempts($rate_limit_key, $perMinute = self::API_RATE_LIMIT_PER_MIN)) {
+        if (RateLimiter::tooManyAttempts($rate_limit_key, $perMinute = self::API_RATE_LIMIT_PER_MIN_DESCRIBE)) {
             $this->api_service->logApiHit($source_ip, 'describe', '429');
             return response()->json(['error' => 'Too many attempts.'], 429);
         }
@@ -56,9 +58,9 @@ class PredictiveModelApiController extends Controller
     public function executePrediction(Request $request): JsonResponse
     {
         $source_ip = $request->ip();
-        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX . $source_ip;
+        $rate_limit_key = self::API_RATE_LIMIT_KEY_PREFIX_EXECUTE . $source_ip;
 
-        if (RateLimiter::tooManyAttempts($rate_limit_key, $perMinute = self::API_RATE_LIMIT_PER_MIN)) {
+        if (RateLimiter::tooManyAttempts($rate_limit_key, $perMinute = self::API_RATE_LIMIT_PER_MIN_EXECUTE)) {
             $this->api_service->logApiHit($source_ip, 'execute', '429');
             return response()->json(['error' => 'Too many attempts.'], 429);
         }
