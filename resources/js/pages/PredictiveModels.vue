@@ -26,10 +26,10 @@ import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
+    DialogDescription, DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
+    DialogTrigger
 } from '@/components/ui/dialog';
 import { route } from 'ziggy-js';
 import type { BreadcrumbItem } from '@/types';
@@ -189,7 +189,9 @@ watch(
                         </DialogTrigger>
                         <DialogContent
                             v-if="isLoading"
-                            class="max-h-[90vh] overflow-y-auto"
+                            class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                            role="dialog"
+                            aria-modal="true"
                         >
                             <DialogHeader>
                                 <DialogTitle
@@ -224,7 +226,10 @@ watch(
                                 </svg>
                             </div>
                         </DialogContent>
-                        <DialogContent v-else-if="showConfirmation" class="">
+                        <DialogContent v-else-if="showConfirmation" class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl
+                                 dark:border-slate-700 dark:bg-slate-900"
+                                       role="dialog"
+                                       aria-modal="true">
                             <DialogHeader>
                                 <DialogTitle
                                 >Model Uploaded Successfully</DialogTitle
@@ -233,25 +238,28 @@ watch(
                                 >Please Verify Model Info</DialogDescription
                                 >
                             </DialogHeader>
-                            <div v-if="showConfirmation" class="space-y-4">
+                            <div v-if="showConfirmation" class="border rounded-2xl dark:border-slate-700 px-3 py-4">
 
-                                <div class="border rounded p-3">
-                                    <p><strong class="dark:text-slate-200 text-black text-lg">Name:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.name }}</span></p>
 
-                                    <p><strong class="dark:text-slate-200 text-black text-lg">Description:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.description }}</span></p>
+                                    <Label>Name</Label> <Input :model-value="uploadedModel.name" :disabled="true"></Input>
 
-                                    <p><strong class="dark:text-slate-200 text-black text-lg">Target:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.target }}</span></p>
+                                    <Label>Description</Label> <textarea :value="uploadedModel.description" :disabled="true" class="w-full bg-slate-700/10 rounded px-2 py-1 text-sm disabled:opacity-50"/>
 
-                                    <p class="break-words"><strong class="dark:text-slate-200 text-black text-lg">Required Parameters: <br></strong> <span class="dark:text-slate-400 text-slate-800">{{ JSON.parse(uploadedModel.required_parameters).join(', ') }}</span></p>
+                                    <Label>Target</Label> <Input :model-value="uploadedModel.target" :disabled="true"></Input>
 
-                                    <p><strong class="dark:text-slate-200 text-black text-lg">Type:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.type }} </span></p>
+                                    <Label>Required Parameters</Label> <Input v-for="(param, key) in JSON.parse(uploadedModel.required_parameters)" :key="key" :model-value="param" :disabled="true" class="border-transparent"></Input>
 
-                                    <p><strong class="dark:text-slate-200 text-black text-lg">Accuracy:</strong><br> <span class="dark:text-slate-400 text-slate-800">{{ uploadedModel.accuracy ?? 'Not Provided' }}</span></p>
-                                </div>
+                                    <Label>Type</Label> <Input :model-value="uploadedModel.type" :disabled="true"></Input>
 
+                                    <Label>Accuracy</Label> <Input :model-value="uploadedModel.accuracy ?? 'Not Provided'" :disabled="true"></Input>
+
+                                    <Label>Last Trained On</Label> <Input :model-value="uploadedModel.last_trained_on ?? 'Not Provided'" :disabled="true"></Input>
+
+                            </div>
+                            <DialogFooter>
                                 <div class="flex justify-end gap-3">
                                     <Button @click="acceptModel"
-                                            class="mt-3 rounded-lg border border-green-300 bg-white px-3 py-1.5 text-xs font-medium
+                                            class="mt-3 rounded-lg border border-green-300 bg-white px-3 py-1.5 text-sm font-medium
                                        text-gray-600 transition-colors hover:bg-green-50
                                        dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30">
                                         Accept
@@ -260,7 +268,7 @@ watch(
                                     <button
                                         v-if="!confirmingDelete"
                                         @click="confirmingDelete = true"
-                                        class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium
+                                        class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm font-medium
                                        text-rose-600 transition-colors hover:bg-rose-50
                                        dark:border-rose-800 dark:bg-transparent dark:text-rose-400 dark:hover:bg-rose-900/30"
                                     >
@@ -285,134 +293,143 @@ watch(
                                         </button>
                                     </div>
                                 </div>
-                            </div>
+                            </DialogFooter>
                         </DialogContent>
-                        <DialogContent class="max-h-[90vh] overflow-y-auto" v-else>
+                        <DialogContent class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                                       role="dialog"
+                                       aria-modal="true" v-else>
                             <DialogHeader>
                                 <DialogTitle>Upload a Model</DialogTitle>
                                 <DialogDescription
                                 >Use this form to add a new Predictive
                                     Model</DialogDescription
                                 >
-                                <Form
-                                    v-if="!isLoading && !showConfirmation && isDialogOpen"
-                                    @submit.prevent="submit"
-                                    enctype="multipart/form-data"
-                                >
-                                    <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        :value="csrfToken"
-                                    />
-                                    <div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="model_name"
-                                                class="mb-1 text-left"
-                                            >
-                                                Model Name
-                                            </Label>
-                                            <Input
-                                                v-model="form.model_name"
-                                                required
-                                                id="model_name"
-                                                name="model_name"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                                            />
-                                        </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="model_description"
-                                                class="mb-1 text-left"
-                                            >
-                                                Model Description
-                                            </Label>
-                                            <textarea
-                                                v-model="
-                                                            form.model_description
-                                                        "
-                                                required
-                                                type="text"
-                                                id="model_description"
-                                                name="model_description"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                                            />
-                                        </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="model_accuracy"
-                                                class="mb-1 grid text-left"
-                                            >
-                                                Accuracy
-                                                <Label
-                                                    class="text-sm text-slate-900 dark:text-slate-500"
-                                                >Enter the Accuracy of
-                                                    the model if it is
-                                                    known.</Label
-                                                >
-                                            </Label>
-                                            <Input
-                                                v-model="
-                                                            form.model_accuracy
-                                                        "
-                                                type="number"
-                                                id="model_accuracy"
-                                                name="model_accuracy"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                                            />
-                                        </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="last_trained_on"
-                                                class="mb-1 grid text-left"
-                                            >
-                                                Date Last Trained
-                                                <Label
-                                                    class="text-sm text-slate-900 dark:text-slate-500"
-                                                >Default will be today
-                                                    if no date is
-                                                    selected.</Label
-                                                >
-                                            </Label>
-                                            <Input
-                                                v-model="
-                                                            form.last_trained_on
-                                                        "
-                                                type="date"
-                                                id="last_trained_on"
-                                                name="last_trained_on"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400 dark:bg-slate-700"
-                                            />
-                                        </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="model_file"
-                                                class="mb-1 text-left"
-                                            >
-                                                Model File
-                                            </Label>
-                                            <Input
-                                                required
-                                                type="file"
-                                                @change="
-                                                            (e) =>
-                                                                (form.model_file =
-                                                                    e.target.files[0])
-                                                        "
-                                                id="model_file"
-                                                name="model_file"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400 dark:bg-slate-700"
-                                                accept=".joblib,.pkl,.pickle"
-                                            />
-                                        </div>
-                                        <div class="mt-5 mr-2 mb-5 flex justify-end">
-                                            <Button type="submit">
-                                                Upload Model
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </Form>
                             </DialogHeader>
+                            <Form
+                                v-if="!isLoading && !showConfirmation && isDialogOpen"
+                                @submit.prevent="submit"
+                                enctype="multipart/form-data"
+
+                            >
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    :value="csrfToken"
+                                />
+                                <div class="border rounded-2xl dark:border-slate-700 px-3 py-3">
+                                    <div class="grid p-2">
+                                        <Label
+                                            for="model_name"
+                                            class="mb-1 text-left"
+                                        >
+                                            Model Name
+                                        </Label>
+                                        <Input
+                                            v-model="form.model_name"
+                                            required
+                                            id="model_name"
+                                            name="model_name"
+                                            class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
+                                        />
+                                    </div>
+                                    <div class="grid p-2">
+                                        <Label
+                                            for="model_description"
+                                            class="mb-1 text-left"
+                                        >
+                                            Model Description
+                                        </Label>
+                                        <textarea
+                                            v-model="
+                                                        form.model_description
+                                                    "
+                                            required
+                                            type="text"
+                                            id="model_description"
+                                            name="model_description"
+                                            class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400 text-sm"
+                                        />
+                                    </div>
+                                    <div class="grid p-2">
+                                        <Label
+                                            for="model_accuracy"
+                                            class="mb-1 grid text-left"
+                                        >
+                                            Accuracy
+                                            <Label
+                                                class="text-sm text-slate-900 dark:text-slate-500"
+                                            >Enter the Accuracy of
+                                                the model if it is
+                                                known.</Label
+                                            >
+                                        </Label>
+                                        <Input
+                                            v-model="
+                                                        form.model_accuracy
+                                                    "
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="100"
+                                            id="model_accuracy"
+                                            name="model_accuracy"
+                                            class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
+                                        />
+                                    </div>
+                                    <div class="grid p-2">
+                                        <Label
+                                            for="last_trained_on"
+                                            class="mb-1 grid text-left"
+                                        >
+                                            Date Last Trained
+                                            <Label
+                                                class="text-sm text-slate-900 dark:text-slate-500"
+                                            >Default will be today
+                                                if no date is
+                                                selected.</Label
+                                            >
+                                        </Label>
+                                        <Input
+                                            v-model="
+                                                        form.last_trained_on
+                                                    "
+                                            type="date"
+                                            id="last_trained_on"
+                                            name="last_trained_on"
+                                            class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400 dark:bg-slate-700"
+                                        />
+                                    </div>
+                                    <div class="grid p-2">
+                                        <Label
+                                            for="model_file"
+                                            class="mb-1 text-left"
+                                        >
+                                            Model File
+                                        </Label>
+                                        <Input
+                                            required
+                                            type="file"
+                                            @change="
+                                                        (e) =>
+                                                            (form.model_file =
+                                                                e.target.files[0])
+                                                    "
+                                            id="model_file"
+                                            name="model_file"
+                                            class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400 dark:bg-slate-700"
+                                            accept=".joblib,.pkl,.pickle"
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter class="pt-2">
+                                    <Button type="submit"
+                                            class="mt-3 rounded-lg border border-green-300 bg-white font-medium
+                                                       text-gray-600 transition-colors hover:bg-green-50
+                                                       dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30">
+                                        Submit
+                                    </Button>
+                                </DialogFooter>
+                            </Form>
                         </DialogContent>
                     </Dialog>
                 </CardHeader>
