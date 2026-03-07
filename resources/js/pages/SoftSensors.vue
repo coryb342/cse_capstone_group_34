@@ -41,12 +41,23 @@ const form = reactive({
     time_interval: 60,
 });
 
+const resetForm = () => {
+    form.name = '';
+    form.mqtt_broker = '';
+    form.mqtt_topic = '';
+    form.username = '';
+    form.password = '';
+    form.model_id = '';
+    form.time_interval = 60;
+};
+
 function submit() {
     router.post(
         '/soft-sensors',
         { ...form },
         {
             onSuccess: () => {
+                resetForm();
                 isDialogOpen.value = false;
             },
         },
@@ -159,17 +170,6 @@ function confirmDelete(id) {
                             />
                         </div>
 
-                        <div class="grid p-2">
-                            <Label for="description" class="mb-1 text-left">
-                                Description
-                            </Label>
-                            <textarea
-                                v-model="form.description"
-                                id="description"
-                                name="description"
-                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                            ></textarea>
-                        </div>
                         <!-- MQTT Broker -->
                         <div class="grid p-2">
                             <Label for="mqtt_broker" class="mb-1 text-left">
@@ -236,7 +236,7 @@ function confirmDelete(id) {
                                 id="model_id"
                                 name="model_id"
                                 required
-                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
+                                class="col-span-3 rounded border border-slate-900 bg-white px-2 py-1 text-slate-900 dark:border-slate-400 dark:bg-slate-800 dark:text-slate-100"
                             >
                                 <option disabled value="">
                                     Select a model
@@ -256,12 +256,13 @@ function confirmDelete(id) {
                             <Label for="time_interval" class="mb-1 text-left">
                                 Prediction Interval (seconds)
                             </Label>
+
                             <select
                                 v-model="form.time_interval"
                                 id="time_interval"
                                 name="time_interval"
                                 required
-                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
+                                class="col-span-3 rounded border border-slate-900 bg-white px-2 py-1 text-slate-900 dark:border-slate-400 dark:bg-slate-800 dark:text-slate-100"
                             >
                                 <option value="30">30 seconds</option>
                                 <option value="60">60 seconds</option>
@@ -286,90 +287,86 @@ function confirmDelete(id) {
         </div>
 
         <!-- Sensor Cards -->
-        <div
-            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
+        <div class="mx-auto max-w-7xl px-4 py-6">
             <div
-                v-for="sensor in page.props.sensors"
-                :key="sensor.id"
-                class="group w-full rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             >
-                <!-- Header -->
-                <div class="mb-3 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold">
-                        {{ sensor.name }}
-                    </h3>
+                <div
+                    v-for="sensor in page.props.sensors"
+                    :key="sensor.id"
+                    class="group w-full rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                >
+                    <!-- Header -->
+                    <div class="mb-3 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold">
+                            {{ sensor.name }}
+                        </h3>
+
+                        <div
+                            class="text-slate-400 transition group-hover:text-slate-200"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M12 6v6l4 2"
+                                />
+                            </svg>
+                        </div>
+                    </div>
 
                     <div
-                        class="text-slate-400 transition group-hover:text-slate-200"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M12 6v6l4 2"
-                            />
-                        </svg>
+                        class="h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 transition-transform group-hover:scale-x-110 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700"
+                    ></div>
+
+                    <!-- Stats -->
+                    <div class="mt-4 space-y-1 text-sm">
+                        <p>
+                            <span class="font-semibold">MQTT Broker:</span>
+                            {{ sensor.mqtt_broker }}
+                        </p>
+                        <p>
+                            <span class="font-semibold">MQTT Topic:</span>
+                            {{ sensor.mqtt_topic }}
+                        </p>
+                        <p>
+                            <span class="font-semibold">Model:</span>
+                            {{ getModelName(sensor.model_id) }}
+                        </p>
+                        <p>
+                            <span class="font-semibold">Interval:</span>
+                            {{ sensor.time_interval }} sec
+                        </p>
+                        <p>
+                            <span class="font-semibold">Actual Value:</span>
+                            {{ sensor.actual_value }}
+                        </p>
+                        <p>
+                            <span class="font-semibold">Predicted Value:</span>
+                            {{ sensor.predicted_value }}
+                        </p>
+                        <p>
+                            <span class="font-semibold">Last Prediction:</span>
+                            {{ sensor.time_since_last_prediction }}
+                        </p>
                     </div>
-                </div>
 
-                <div
-                    class="h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 transition-transform group-hover:scale-x-110 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700"
-                ></div>
-
-                <!-- Stats -->
-                <div class="mt-4 space-y-1 text-sm">
-                    <p>
-                        <span class="font-semibold">MQTT Broker:</span>
-                        {{ sensor.mqtt_broker }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">MQTT Topic:</span
-                        >{{ sensor.mqtt_topic }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Model:</span
-                        >{{ getModelName(sensor.model_id) }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Interval:</span
-                        >{{ sensor.time_interval }} sec
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Actual Value:</span
-                        >{{ sensor.actual_value }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Predicted Value:</span>
-                        {{ sensor.predicted_value }}
-                    </p>
-
-                    <p>
-                        <span class="font-semibold">Last Prediction:</span>
-                        {{ sensor.time_since_last_prediction }}
-                    </p>
-                </div>
-
-                <!-- Footer -->
-                <div class="mt-5 flex justify-end">
-                    <button
-                        @click="confirmDelete(sensor.id)"
-                        class="mt-4 rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
-                    >
-                        Delete
-                    </button>
+                    <!-- Footer -->
+                    <div class="mt-5 flex justify-end">
+                        <button
+                            @click="confirmDelete(sensor.id)"
+                            class="mt-4 rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
+                        >
+                            Delete
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

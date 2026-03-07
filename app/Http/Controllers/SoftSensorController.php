@@ -6,21 +6,20 @@ use App\Models\SoftSensor;
 use App\Models\PredictiveModel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Hash;
+
 
 class SoftSensorController extends Controller
 {
     public function index()
     {
+        $organizationId = auth()->user()->organization_id;
+
         return Inertia::render('SoftSensors', [
-            'sensors' => SoftSensor::all()->map(function ($sensor) {
-                return [
-                    ...$sensor->toArray(),
-                    'time_since_last_prediction' => $sensor->last_prediction_at
-                        ? $sensor->last_prediction_at->diffForHumans()
-                        : 'No Predictions Yet',
-                ];
-            }),
-            'models' => PredictiveModel::all(['id', 'name']),
+            'sensors' => SoftSensor::where('organization_id', $organizationId)->get(),
+            'models' => PredictiveModel::where('organization_id', $organizationId)
+                ->get(['id', 'name']),
+
         ]);
     }
 
@@ -30,6 +29,8 @@ class SoftSensorController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'mqtt_broker' => ['required', 'string'],
             'mqtt_topic' => ['required', 'string'],
+            'username' => ['nullable', 'string'],
+            'password' => ['nullable', 'string'],
             'model_id' => ['required', 'integer'],
             'time_interval' => ['required', 'integer', 'min:60'],
         ]);
@@ -38,8 +39,8 @@ class SoftSensorController extends Controller
             'name' => $request->name,
             'mqtt_broker' => $request->mqtt_broker,
             'mqtt_topic' => $request->mqtt_topic,
-            'username' => $request->username,
-            'password' => $request->password,
+            'username' => $request->username ?: null,
+            'password' => $request->password ? Hash::make($request->password) : null,
             'model_id' => $request->model_id,
             'time_interval' => $request->time_interval,
             'organization_id' => auth()->user()->organization_id,
