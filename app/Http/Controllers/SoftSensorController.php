@@ -18,6 +18,7 @@ class SoftSensorController extends Controller
         return Inertia::render('SoftSensors', [
             'sensors' => SoftSensor::where('organization_id', $organizationId)->get(),
             'models' => PredictiveModel::where('organization_id', $organizationId)
+                ->where('status', 'active')
                 ->get(['id', 'name']),
 
         ]);

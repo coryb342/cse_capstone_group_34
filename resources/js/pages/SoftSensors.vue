@@ -287,10 +287,9 @@ function confirmDelete(id) {
         </div>
 
         <!-- Sensor Cards -->
-        <div class="mx-auto max-w-7xl px-4 py-6">
-            <div
-                class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            >
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
                 <div
                     v-for="sensor in page.props.sensors"
                     :key="sensor.id"
@@ -298,64 +297,25 @@ function confirmDelete(id) {
                 >
                     <!-- Header -->
                     <div class="mb-3 flex items-center justify-between">
-                        <h3 class="text-lg font-semibold">
-                            {{ sensor.name }}
-                        </h3>
-
-                        <div
-                            class="text-slate-400 transition group-hover:text-slate-200"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M12 6v6l4 2"
-                                />
+                        <h3 class="text-lg font-semibold">{{ sensor.name }}</h3>
+                        <div class="text-slate-400 transition group-hover:text-slate-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6l4 2" />
                             </svg>
                         </div>
                     </div>
 
-                    <div
-                        class="h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 transition-transform group-hover:scale-x-110 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700"
-                    ></div>
+                    <div class="h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 transition-transform group-hover:scale-x-110"></div>
 
                     <!-- Stats -->
                     <div class="mt-4 space-y-1 text-sm">
-                        <p>
-                            <span class="font-semibold">MQTT Broker:</span>
-                            {{ sensor.mqtt_broker }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">MQTT Topic:</span>
-                            {{ sensor.mqtt_topic }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Model:</span>
-                            {{ getModelName(sensor.model_id) }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Interval:</span>
-                            {{ sensor.time_interval }} sec
-                        </p>
-                        <p>
-                            <span class="font-semibold">Actual Value:</span>
-                            {{ sensor.actual_value }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Predicted Value:</span>
-                            {{ sensor.predicted_value }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Last Prediction:</span>
-                            {{ sensor.time_since_last_prediction }}
-                        </p>
+                        <p><span class="font-semibold">MQTT Broker:</span> {{ sensor.mqtt_broker }}</p>
+                        <p><span class="font-semibold">MQTT Topic:</span> {{ sensor.mqtt_topic }}</p>
+                        <p><span class="font-semibold">Model:</span> {{ getModelName(sensor.model_id) }}</p>
+                        <p><span class="font-semibold">Interval:</span> {{ sensor.time_interval }} sec</p>
+                        <p><span class="font-semibold">Actual Value:</span> {{ sensor.actual_value }}</p>
+                        <p><span class="font-semibold">Predicted Value:</span> {{ sensor.predicted_value }}</p>
+                        <p><span class="font-semibold">Last Prediction:</span> {{ sensor.time_since_last_prediction }}</p>
                     </div>
 
                     <!-- Footer -->
@@ -368,6 +328,7 @@ function confirmDelete(id) {
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
     </AppLayout>
