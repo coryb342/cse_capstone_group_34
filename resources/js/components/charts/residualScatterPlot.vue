@@ -176,8 +176,6 @@ const chartOptions = computed(() => ({
                     weight: 'bold'
                 }
             },
-            min: 20,
-            max: 50,
             border: {
                 color: colors.value.border
             },
@@ -190,7 +188,8 @@ const chartOptions = computed(() => ({
             grid: {
                 color: colors.value.grid,
                 drawBorder: false
-            }
+            },
+            grace: '10%',
         },
         y: {
             title: {
@@ -202,8 +201,6 @@ const chartOptions = computed(() => ({
                     weight: 'bold'
                 }
             },
-            min: -14,
-            max: 14,
             border: {
                 color: colors.value.border
             },
@@ -216,7 +213,8 @@ const chartOptions = computed(() => ({
             grid: {
                 color: colors.value.grid,
                 drawBorder: false
-            }
+            },
+            grace: '10%',
         },
     },
 }))

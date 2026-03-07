@@ -215,8 +215,7 @@ const chartOptions = computed(() => ({
                 color: colors.value.grid,
                 drawBorder: false
             },
-            min: 20,
-            max: 50,
+            grace: '10%',
         },
         y: {
             type: 'linear' as const,
@@ -242,8 +241,7 @@ const chartOptions = computed(() => ({
                 color: colors.value.grid,
                 drawBorder: false
             },
-            min: 20,
-            max: 60,
+            grace: '10%',
         },
     },
 }))
