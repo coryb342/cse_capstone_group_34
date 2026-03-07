@@ -250,8 +250,8 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-        <div class="h-120 w-300">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 w-full">
+        <div class="relative w-full h-120">
             <Scatter :data="chartData" :options="chartOptions" :plugins="[perfectPredictionLine, chartAreaBackground]"/>
         </div>
 
