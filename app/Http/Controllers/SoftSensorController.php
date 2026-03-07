@@ -12,7 +12,14 @@ class SoftSensorController extends Controller
     public function index()
     {
         return Inertia::render('SoftSensors', [
-            'sensors' => SoftSensor::all(),
+            'sensors' => SoftSensor::all()->map(function ($sensor) {
+                return [
+                    ...$sensor->toArray(),
+                    'time_since_last_prediction' => $sensor->last_prediction_at
+                        ? $sensor->last_prediction_at->diffForHumans()
+                        : 'No Predictions Yet',
+                ];
+            }),
             'models' => PredictiveModel::all(['id', 'name']),
         ]);
     }
@@ -27,14 +34,12 @@ class SoftSensorController extends Controller
         ]);
 
         SoftSensor::create([
-            'mqtt_broker' => $validated['mqtt_broker'],
-            'mqtt_topic' => $validated['mqtt_topic'],
-            'model_id' => $validated['model_id'],
-            'time_interval' => $validated['time_interval'],
-
-
-            'username' => auth()->user()->name,
-            'password' => auth()->user()->password,
+            'mqtt_broker' => $request->mqtt_broker,
+            'mqtt_topic' => $request->mqtt_topic,
+            'username' => $request->username,   // MQTT username
+            'password' => $request->password,   // MQTT password
+            'model_id' => $request->model_id,
+            'time_interval' => $request->time_interval,
             'organization_id' => auth()->user()->organization_id,
         ]);
 

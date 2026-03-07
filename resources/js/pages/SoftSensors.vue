@@ -47,6 +47,22 @@ function submit() {
         },
     });
 }
+
+const getModelName = (id) => {
+    const models = page.props.models;
+
+    if (!models) return 'Unknown Model';
+
+    const list = Array.isArray(models)
+        ? models
+        : Array.isArray(models.data)
+          ? models.data
+          : [];
+
+    const model = list.find((m) => Number(m.id) === Number(id));
+
+    return model?.name ?? 'Unknown Model';
+};
 </script>
 
 <template>
@@ -98,8 +114,11 @@ function submit() {
 
                         <!-- Trigger MUST be inside Dialog -->
                         <DialogTrigger as-child>
-                            <Button @click="isDialogOpen = true" class="flex justify-center">
-                                <Plus/>
+                            <Button
+                                @click="isDialogOpen = true"
+                                class="flex justify-center"
+                            >
+                                <Plus />
                                 Create Soft Sensor
                             </Button>
                         </DialogTrigger>
@@ -116,7 +135,6 @@ function submit() {
                     </DialogHeader>
 
                     <Form @submit.prevent="submit">
-
                         <div class="grid p-2">
                             <Label for="name" class="mb-1 text-left">
                                 Sensor Name
@@ -269,11 +287,19 @@ function submit() {
 
                 <p><strong>MQTT Broker:</strong> {{ sensor.mqtt_broker }}</p>
                 <p><strong>MQTT Topic:</strong> {{ sensor.mqtt_topic }}</p>
-                <p><strong>Model ID:</strong> {{ sensor.model_id }}</p>
+                <p>
+                    <strong>Model:</strong> {{ getModelName(sensor.model_id) }}
+                </p>
                 <p>
                     <strong>Time Interval:</strong>
                     {{ sensor.time_interval }} sec
                 </p>
+                <p><strong>Actual Value:</strong> {{ sensor.actual_value }}</p>
+                <p>
+                    <strong>Predicted Value:</strong>
+                    {{ sensor.predicted_value }}
+                </p>
+                <p> <strong>Time Since Last Prediction:</strong>{{ sensor.time_since_last_prediction }}</p>
 
                 <button
                     @click="router.delete(`/soft-sensors/${sensor.id}`)"
