@@ -22,10 +22,10 @@ import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
+    DialogDescription, DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
+    DialogTrigger
 } from '@/components/ui/dialog';
 import { route } from 'ziggy-js';
 import { router } from '@inertiajs/vue3';
@@ -252,7 +252,9 @@ function submitActual(runId: number) {
                                             hasViewedResult) &&
                                         !isLoadingResult
                                     "
-                                    class="max-h-[90vh] overflow-y-auto"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 rounded-2xl"
+                                    role="dialog"
+                                    aria-modal="true"
                                 >
                                     <DialogHeader>
                                         <DialogTitle
@@ -269,71 +271,78 @@ function submitActual(runId: number) {
                                             name="model_id"
                                             :value="form.model_id = model.id"
                                         />
-                                        <div
-                                            v-for="(
-                                                parameter, index
-                                            ) in JSON.parse(
-                                                model.required_parameters,
-                                            )"
-                                            :key="index"
-                                        >
+                                        <div class="border rounded-2xl dark:border-slate-700 px-3 py-3">
+                                            <div
+                                                v-for="(
+                                                    parameter, index
+                                                ) in JSON.parse(
+                                                    model.required_parameters,
+                                                )"
+                                                :key="index"
+                                            >
+                                                <div class="grid p-2">
+                                                    <Label
+                                                        :for="'parameter_' + index"
+                                                        class="mb-1 text-left"
+                                                    >
+                                                        {{
+                                                            parameter
+                                                                .toString()
+                                                                .toUpperCase()
+                                                        }}
+                                                    </Label>
+                                                    <Input
+                                                        required
+                                                        :id="'parameter_' + index"
+                                                        :name="
+                                                            'parameters[' +
+                                                            index +
+                                                            ']'
+                                                        "
+                                                        v-model="
+                                                            form.parameters[index]
+                                                        "
+                                                        class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
+                                                    />
+                                                </div>
+                                            </div>
                                             <div class="grid p-2">
                                                 <Label
-                                                    :for="'parameter_' + index"
-                                                    class="mb-1 text-left"
+                                                    for="actual"
+                                                    class="mb-1 flex flex-col items-start text-left"
                                                 >
-                                                    {{
-                                                        parameter
-                                                            .toString()
-                                                            .toUpperCase()
-                                                    }}
+                                                    <span class="text-left"
+                                                        >Actual</span
+                                                    >
+                                                    <span class="text-left text-xs"
+                                                        >Entering an Actual value
+                                                        will update the Model
+                                                        Accuracy</span
+                                                    >
                                                 </Label>
                                                 <Input
-                                                    required
-                                                    :id="'parameter_' + index"
-                                                    :name="
-                                                        'parameters[' +
-                                                        index +
-                                                        ']'
-                                                    "
-                                                    v-model="
-                                                        form.parameters[index]
-                                                    "
+                                                    id="actual"
+                                                    name="actual"
+                                                    v-model="form.actual"
                                                     class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
                                                 />
                                             </div>
                                         </div>
-                                        <div class="grid p-2">
-                                            <Label
-                                                for="actual"
-                                                class="mb-1 flex flex-col items-start text-left"
-                                            >
-                                                <span class="text-left"
-                                                    >Actual</span
-                                                >
-                                                <span class="text-left text-xs"
-                                                    >Entering an Actual value
-                                                    will update the Model
-                                                    Accuracy</span
-                                                >
-                                            </Label>
-                                            <Input
-                                                id="actual"
-                                                name="actual"
-                                                v-model="form.actual"
-                                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
-                                            />
-                                        </div>
-                                        <div
-                                            class="mt-5 mr-2 mb-5 flex justify-end"
-                                        >
-                                            <Button type="submit"> Run </Button>
-                                        </div>
+                                        <DialogFooter class="pt-2">
+                                            <Button type="submit"
+                                                    class="mt-3 rounded-lg border border-green-300 bg-white font-medium
+                                                       text-gray-600 transition-colors hover:bg-green-50
+                                                       dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30">
+                                                Run
+                                            </Button>
+                                        </DialogFooter>
                                     </Form>
                                 </DialogContent>
                                 <DialogContent
                                     v-else-if="isLoadingResult"
-                                    class="max-h-[90vh] overflow-y-auto"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                                    role="dialog"
+                                    aria-modal="true"
                                 >
                                     <DialogHeader>
                                         <DialogTitle
@@ -372,7 +381,9 @@ function submitActual(runId: number) {
                                     v-else-if="
                                         page.props.flash.prediction_failed
                                     "
-                                    class="max-h-[90vh] overflow-y-auto"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                                    role="dialog"
+                                    aria-modal="true"
                                 >
                                     <DialogHeader>
                                         <DialogTitle class="text-red-600">
@@ -405,7 +416,9 @@ function submitActual(runId: number) {
                                 </DialogContent>
                                 <DialogContent
                                     v-else
-                                    class="max-h-[90vh] overflow-y-auto"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                                    role="dialog"
+                                    aria-modal="true"
                                 >
                                     <DialogHeader>
                                         <DialogTitle class="text-green-500">
@@ -416,12 +429,12 @@ function submitActual(runId: number) {
                                             Below</DialogDescription
                                         >
                                     </DialogHeader>
-                                    <span class="text-lg font-bold"
+                                    <Label class="font-bold text-md"
                                         >Inputs Given:
-                                    </span>
+                                    </Label>
                                     <div class="flex flex-col gap-1">
                                         <span
-                                            class="text-sm"
+                                            class="text-sm text-black/80 dark:text-white/50"
                                             v-for="(parameter, index) in page
                                                 .props.flash.mapped_parameters"
                                             :key="index"
@@ -429,10 +442,10 @@ function submitActual(runId: number) {
                                             {{ index }}: {{ parameter }}
                                         </span>
                                     </div>
-                                    <span class="text-lg font-bold"
-                                        >Result:</span
+                                    <Label class="text-md font-bold"
+                                        >Result:</Label
                                     >
-                                    <span
+                                    <span class="text-black/80 dark:text-white/50 text-sm"
                                         >Predicted {{ model.target }}:
                                         {{
                                             Number(

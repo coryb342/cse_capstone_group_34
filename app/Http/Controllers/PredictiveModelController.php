@@ -60,24 +60,22 @@ class PredictiveModelController extends Controller
         $request->validate([
             'model_name' => 'required',
             'model_description' => 'required',
-            'model_type' => 'required',
-            'required_parameters' => 'required',
-            'target' => 'required',
             'model_file' => 'required|file|max:256000',
             'model_accuracy' => 'nullable|max:100|min:0',
             'last_trained_on' => 'nullable|date',
         ]);
 
-        $required_parameters = preg_split('/\s*,\s*/', $request->input('required_parameters'), -1, PREG_SPLIT_NO_EMPTY);
         $model_file = $request->file('model_file');
+
+        $model_info = $this->execution_service->getModelInfo($model_file);
 
         $predictive_model = PredictiveModel::create([
             'organization_id' => $user->organization_id,
             'name' => $request->input('model_name'),
             'description' => $request->input('model_description'),
-            'type' => $request->input('model_type'),
-            'required_parameters' => json_encode($required_parameters),
-            'target' => $request->input('target'),
+            'type' => $model_info->model_type,
+            'required_parameters' => json_encode($model_info->features),
+            'target' => $model_info->target,
             'accuracy' => $request->input('model_accuracy') ? $request->input('model_accuracy') : null,
             'last_trained_on' => $request->input('last_trained_on') ? $request->input('last_trained_on') : now(),
         ]);
@@ -94,7 +92,7 @@ class PredictiveModelController extends Controller
 
         $predictive_model->update(['path' => $directory_path . '/' . $model_file->getClientOriginalName()]);
 
-        return redirect()->back()->with(['success' => $predictive_model->name . ' uploaded successfully.']);
+        return redirect()->back()->with(['success' => $predictive_model->name . ' uploaded successfully.', 'uploaded_model' => $predictive_model]);
     }
 
     public function show($id)
