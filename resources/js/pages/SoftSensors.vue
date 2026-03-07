@@ -32,6 +32,7 @@ const isDialogOpen = ref(false);
 const csrfToken = page.props.csrf_token;
 
 const form = reactive({
+    name: '',
     mqtt_broker: '',
     mqtt_topic: '',
     username: '',
@@ -41,11 +42,15 @@ const form = reactive({
 });
 
 function submit() {
-    router.post('/soft-sensors', form, {
-        onSuccess: () => {
-            isDialogOpen.value = false;
+    router.post(
+        '/soft-sensors',
+        { ...form },
+        {
+            onSuccess: () => {
+                isDialogOpen.value = false;
+            },
         },
-    });
+    );
 }
 
 const getModelName = (id) => {
@@ -63,6 +68,12 @@ const getModelName = (id) => {
 
     return model?.name ?? 'Unknown Model';
 };
+
+function confirmDelete(id) {
+    if (!confirm('Are you sure you want to delete this soft sensor?')) return;
+
+    router.delete(`/soft-sensors/${id}`);
+}
 </script>
 
 <template>
@@ -139,7 +150,7 @@ const getModelName = (id) => {
                             <Label for="name" class="mb-1 text-left">
                                 Sensor Name
                             </Label>
-                            <Input
+                            <input
                                 v-model="form.name"
                                 id="name"
                                 name="name"
@@ -275,38 +286,91 @@ const getModelName = (id) => {
         </div>
 
         <!-- Sensor Cards -->
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div
+            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
             <div
                 v-for="sensor in page.props.sensors"
                 :key="sensor.id"
-                class="rounded-xl border p-4"
+                class="group w-full rounded-xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
             >
-                <h3 class="mb-2 text-lg font-semibold">
-                    Soft Sensor #{{ sensor.id }}
-                </h3>
+                <!-- Header -->
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">
+                        {{ sensor.name }}
+                    </h3>
 
-                <p><strong>MQTT Broker:</strong> {{ sensor.mqtt_broker }}</p>
-                <p><strong>MQTT Topic:</strong> {{ sensor.mqtt_topic }}</p>
-                <p>
-                    <strong>Model:</strong> {{ getModelName(sensor.model_id) }}
-                </p>
-                <p>
-                    <strong>Time Interval:</strong>
-                    {{ sensor.time_interval }} sec
-                </p>
-                <p><strong>Actual Value:</strong> {{ sensor.actual_value }}</p>
-                <p>
-                    <strong>Predicted Value:</strong>
-                    {{ sensor.predicted_value }}
-                </p>
-                <p> <strong>Time Since Last Prediction:</strong>{{ sensor.time_since_last_prediction }}</p>
+                    <div
+                        class="text-slate-400 transition group-hover:text-slate-200"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M12 6v6l4 2"
+                            />
+                        </svg>
+                    </div>
+                </div>
 
-                <button
-                    @click="router.delete(`/soft-sensors/${sensor.id}`)"
-                    class="mt-4 rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
-                >
-                    Delete
-                </button>
+                <div
+                    class="h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 transition-transform group-hover:scale-x-110 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700"
+                ></div>
+
+                <!-- Stats -->
+                <div class="mt-4 space-y-1 text-sm">
+                    <p>
+                        <span class="font-semibold">MQTT Broker:</span>
+                        {{ sensor.mqtt_broker }}
+                    </p>
+
+                    <p>
+                        <span class="font-semibold">MQTT Topic:</span
+                        >{{ sensor.mqtt_topic }}
+                    </p>
+
+                    <p>
+                        <span class="font-semibold">Model:</span
+                        >{{ getModelName(sensor.model_id) }}
+                    </p>
+
+                    <p>
+                        <span class="font-semibold">Interval:</span
+                        >{{ sensor.time_interval }} sec
+                    </p>
+
+                    <p>
+                        <span class="font-semibold">Actual Value:</span
+                        >{{ sensor.actual_value }}
+                    </p>
+
+                    <p>
+                        <span class="font-semibold">Predicted Value:</span>
+                        {{ sensor.predicted_value }}
+                    </p>
+
+                    <p>
+                        <span class="font-semibold">Last Prediction:</span>
+                        {{ sensor.time_since_last_prediction }}
+                    </p>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-5 flex justify-end">
+                    <button
+                        @click="confirmDelete(sensor.id)"
+                        class="mt-4 rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
+                    >
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     </AppLayout>

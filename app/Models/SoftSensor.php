@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SoftSensor extends Model
 {
     protected $fillable = [
+        "name",
         'mqtt_broker',
         'mqtt_topic',
         'model_id',

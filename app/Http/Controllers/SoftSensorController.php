@@ -27,6 +27,7 @@ class SoftSensorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
             'mqtt_broker' => ['required', 'string'],
             'mqtt_topic' => ['required', 'string'],
             'model_id' => ['required', 'integer'],
@@ -34,10 +35,11 @@ class SoftSensorController extends Controller
         ]);
 
         SoftSensor::create([
+            'name' => $request->name,
             'mqtt_broker' => $request->mqtt_broker,
             'mqtt_topic' => $request->mqtt_topic,
-            'username' => $request->username,   // MQTT username
-            'password' => $request->password,   // MQTT password
+            'username' => $request->username,
+            'password' => $request->password,
             'model_id' => $request->model_id,
             'time_interval' => $request->time_interval,
             'organization_id' => auth()->user()->organization_id,
@@ -45,7 +47,6 @@ class SoftSensorController extends Controller
 
         return redirect()->back();
     }
-
     public function destroy(SoftSensor $sensor)
     {
         $sensor->delete();
