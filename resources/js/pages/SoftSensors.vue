@@ -12,7 +12,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-} from '@/Components/ui/dialog';
+} from '@/Components/ui/dialog/index';
 
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
@@ -29,7 +29,7 @@ const page = usePage();
 
 const isDialogOpen = ref(false);
 
-const csrfToken = page.props.csrf_token;
+//const csrfToken = page.props.csrf_token;
 
 const form = reactive({
     name: '',
