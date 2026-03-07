@@ -12,11 +12,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-} from '@/Components/ui/dialog/index';
+} from '@/components/ui/dialog/index';
 
-import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Label } from '@/Components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
