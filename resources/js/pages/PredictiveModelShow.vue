@@ -766,12 +766,12 @@ function submitActual(runId: number) {
                 </CardContent>
             </Card>
         </div>
-        <div class="flex justify-center p-4">
+        <div class="w-full p-8">
             <ResidualScatterPlot
                 :points="props.residualScatter?.points ?? []"
             />
         </div>
-        <div class="flex justify-center p-4">
+        <div class="w-full p-8">
             <ActualVsPredScatterPlot
                 :points="
                     (props.residualScatter?.points ?? []).map((p) => ({

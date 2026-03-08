@@ -154,8 +154,12 @@ const chartOptions = computed(() => ({
             callbacks: {
                 label: (ctx: any) => {
                     const p = ctx.raw as Point
-                    const extra = p.created_at ? ` • ${p.created_at}` : ''
-                    return `Pred: ${ctx.parsed.x}, Residual: ${ctx.parsed.y}${extra}`
+                    const extra = p.created_at ? ` ${p.created_at}` : ''
+                    return [
+                        `Predicted: ${ctx.parsed.x}`,
+                        `Residual: ${ctx.parsed.y}`,
+                        `Date: ${extra}`
+                    ]
                 },
             },
         },
@@ -172,8 +176,6 @@ const chartOptions = computed(() => ({
                     weight: 'bold'
                 }
             },
-            min: 20,
-            max: 50,
             border: {
                 color: colors.value.border
             },
@@ -186,7 +188,8 @@ const chartOptions = computed(() => ({
             grid: {
                 color: colors.value.grid,
                 drawBorder: false
-            }
+            },
+            grace: '10%',
         },
         y: {
             title: {
@@ -198,8 +201,6 @@ const chartOptions = computed(() => ({
                     weight: 'bold'
                 }
             },
-            min: -14,
-            max: 14,
             border: {
                 color: colors.value.border
             },
@@ -212,15 +213,16 @@ const chartOptions = computed(() => ({
             grid: {
                 color: colors.value.grid,
                 drawBorder: false
-            }
+            },
+            grace: '10%',
         },
     },
 }))
 </script>
 
 <template>
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-        <div class="h-120 w-300">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 w-full">
+        <div class="relative w-full h-120">
             <Scatter :data="chartData" :options="chartOptions" :plugins="[zeroLinePlugin, chartAreaBackground]"/>
         </div>
 

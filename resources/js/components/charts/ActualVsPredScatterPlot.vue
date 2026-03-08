@@ -215,8 +215,7 @@ const chartOptions = computed(() => ({
                 color: colors.value.grid,
                 drawBorder: false
             },
-            min: 20,
-            max: 50,
+            grace: '10%',
         },
         y: {
             type: 'linear' as const,
@@ -242,16 +241,15 @@ const chartOptions = computed(() => ({
                 color: colors.value.grid,
                 drawBorder: false
             },
-            min: 20,
-            max: 60,
+            grace: '10%',
         },
     },
 }))
 </script>
 
 <template>
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-        <div class="h-120 w-300">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 w-full">
+        <div class="relative w-full h-120">
             <Scatter :data="chartData" :options="chartOptions" :plugins="[perfectPredictionLine, chartAreaBackground]"/>
         </div>
 
