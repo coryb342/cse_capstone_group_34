@@ -7,7 +7,7 @@ use App\Models\PredictiveModel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
-
+use Carbon\Carbon;
 
 class SoftSensorController extends Controller
 {
@@ -15,11 +15,39 @@ class SoftSensorController extends Controller
     {
         $organizationId = auth()->user()->organization_id;
 
+        $sensors = SoftSensor::where('organization_id', $organizationId)->get();
+        $models = PredictiveModel::where('organization_id', $organizationId)
+            ->where('status', 'active')
+            ->with('analytics')
+            ->get();
+
+        $activeSensors = SoftSensor::where('organization_id', $organizationId)
+            ->whereNotNull('updated_at')
+            ->where('updated_at', '>=', now()->subMinutes(5))
+            ->count();
+        $totalSensors = $sensors->count();
+
+        $avgAccuracy = round(
+            $models
+                ->filter(fn($m) => $m->analytics?->accuracy !== null && $m->analytics->accuracy != 0)
+                ->avg(fn($m) => $m->analytics->accuracy) ?? 0,
+            2
+        );
+
+        $modelsOnline = $models->count();
+
+
+
         return Inertia::render('SoftSensors', [
-            'sensors' => SoftSensor::where('organization_id', $organizationId)->get(),
-            'models' => PredictiveModel::where('organization_id', $organizationId)
-                ->where('status', 'active')
-                ->get(['id', 'name']),
+            'sensors' => $sensors,
+            'models' => $models,
+            'stats' => [
+                'activeSensors' => $activeSensors,
+                'totalSensors' => $totalSensors,
+                'avgAccuracy' => $avgAccuracy,
+                'modelsOnline' => $modelsOnline,
+            ],
+
 
         ]);
     }
