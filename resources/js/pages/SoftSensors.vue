@@ -305,24 +305,6 @@ function confirmDelete(id) {
                     <div class="flex items-center justify-between">
                         <CardTitle>{{ sensor.name }}</CardTitle>
 
-                        <div
-                            class="text-slate-400 transition group-hover:text-slate-200"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M12 6v6l4 2"
-                                />
-                            </svg>
-                        </div>
                     </div>
                 </CardHeader>
 
