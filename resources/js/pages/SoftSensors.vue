@@ -295,65 +295,67 @@ function confirmDelete(id) {
         </div>
 
         <!-- Sensor Cards -->
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card
-                v-for="sensor in page.props.sensors"
-                :key="sensor.id"
-                class="transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-            >
-                <CardHeader>
-                    <div class="flex items-center justify-between">
-                        <CardTitle>{{ sensor.name }}</CardTitle>
+        <div class="min-h-screen px-4">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card
+                    v-for="sensor in page.props.sensors"
+                    :key="sensor.id"
+                    class="transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                >
+                    <CardHeader>
+                        <div class="flex items-center justify-between">
+                            <CardTitle>{{ sensor.name }}</CardTitle>
 
-                    </div>
-                </CardHeader>
+                        </div>
+                    </CardHeader>
 
-                <CardContent>
-                    <div
-                        class="mb-4 h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300"
-                    ></div>
+                    <CardContent>
+                        <div
+                            class="mb-4 h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300"
+                        ></div>
 
-                    <div class="space-y-1 text-sm">
-                        <p>
-                            <span class="font-semibold">MQTT Broker:</span>
-                            {{ sensor.mqtt_broker }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">MQTT Topic:</span>
-                            {{ sensor.mqtt_topic }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Model:</span>
-                            {{ getModelName(sensor.model_id) }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Interval:</span>
-                            {{ sensor.time_interval }} sec
-                        </p>
-                        <p>
-                            <span class="font-semibold">Actual Value:</span>
-                            {{ sensor.actual_value }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Predicted Value:</span>
-                            {{ sensor.predicted_value }}
-                        </p>
-                        <p>
-                            <span class="font-semibold">Last Prediction:</span>
-                            {{ sensor.time_since_last_prediction }}
-                        </p>
-                    </div>
-                </CardContent>
+                        <div class="space-y-1 text-sm">
+                            <p>
+                                <span class="font-semibold">MQTT Broker:</span>
+                                {{ sensor.mqtt_broker }}
+                            </p>
+                            <p>
+                                <span class="font-semibold">MQTT Topic:</span>
+                                {{ sensor.mqtt_topic }}
+                            </p>
+                            <p>
+                                <span class="font-semibold">Model:</span>
+                                {{ getModelName(sensor.model_id) }}
+                            </p>
+                            <p>
+                                <span class="font-semibold">Interval:</span>
+                                {{ sensor.time_interval }} sec
+                            </p>
+                            <p>
+                                <span class="font-semibold">Actual Value:</span>
+                                {{ sensor.actual_value }}
+                            </p>
+                            <p>
+                                <span class="font-semibold">Predicted Value:</span>
+                                {{ sensor.predicted_value }}
+                            </p>
+                            <p>
+                                <span class="font-semibold">Last Prediction:</span>
+                                {{ sensor.time_since_last_prediction }}
+                            </p>
+                        </div>
+                    </CardContent>
 
-                <CardFooter class="flex justify-end">
-                    <button
-                        @click="confirmDelete(sensor.id)"
-                        class="rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
-                    >
-                        Delete
-                    </button>
-                </CardFooter>
-            </Card>
+                    <CardFooter class="flex justify-end">
+                        <button
+                            @click="confirmDelete(sensor.id)"
+                            class="rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
+                        >
+                            Delete
+                        </button>
+                    </CardFooter>
+                </Card>
+            </div>
         </div>
     </AppLayout>
-</template>
+</template>>
