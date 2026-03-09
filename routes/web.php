@@ -4,6 +4,7 @@ use App\Http\Controllers\PredictiveModelAccessTokenController;
 use App\Http\Controllers\PredictiveModelController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SoftSensorController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -54,6 +55,12 @@ Route::get('/soft-sensors', function () {
     return Inertia::render('SoftSensors');
 })->middleware(['auth', 'verified'])->name('soft-sensors');
 
+Route::get('/soft-sensors', [SoftSensorController::class, 'index'])
+    ->name('soft-sensors.index');
+
+Route::post('/soft-sensors', [SoftSensorController::class, 'store'])
+    ->name('soft-sensors.store');
+Route::delete('/soft-sensors/{sensor}', [SoftSensorController::class, 'destroy']);
 
 
 require __DIR__.'/settings.php';
