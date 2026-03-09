@@ -189,7 +189,7 @@ watch(
                         </DialogTrigger>
                         <DialogContent
                             v-if="isLoading"
-                            class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                            class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
                             role="dialog"
                             aria-modal="true"
                         >
@@ -227,7 +227,7 @@ watch(
                             </div>
                         </DialogContent>
                         <DialogContent v-else-if="showConfirmation" class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl
-                                 dark:border-slate-700 dark:bg-slate-900"
+                                 dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
                                        role="dialog"
                                        aria-modal="true">
                             <DialogHeader>
@@ -295,7 +295,7 @@ watch(
                                 </div>
                             </DialogFooter>
                         </DialogContent>
-                        <DialogContent class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                        <DialogContent class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
                                        role="dialog"
                                        aria-modal="true" v-else>
                             <DialogHeader>
