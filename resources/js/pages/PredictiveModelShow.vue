@@ -252,7 +252,7 @@ function submitActual(runId: number) {
                                             hasViewedResult) &&
                                         !isLoadingResult
                                     "
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 rounded-2xl"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 rounded-2xl max-h-[90vh] overflow-y-auto"
                                     role="dialog"
                                     aria-modal="true"
                                 >
@@ -340,7 +340,7 @@ function submitActual(runId: number) {
                                 </DialogContent>
                                 <DialogContent
                                     v-else-if="isLoadingResult"
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
                                     role="dialog"
                                     aria-modal="true"
                                 >
@@ -381,7 +381,7 @@ function submitActual(runId: number) {
                                     v-else-if="
                                         page.props.flash.prediction_failed
                                     "
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
                                     role="dialog"
                                     aria-modal="true"
                                 >
@@ -416,7 +416,7 @@ function submitActual(runId: number) {
                                 </DialogContent>
                                 <DialogContent
                                     v-else
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
                                     role="dialog"
                                     aria-modal="true"
                                 >
