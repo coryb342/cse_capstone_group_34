@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('predictive_model_access_tokens', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('model_id');
-            $table->foreignId('model_id')->constrained('predictive_models')->cascadeOnDelete();
+            $table->dropForeign(['model_id']);
+
+            $table->foreign('model_id')
+                ->references('id')
+                ->on('predictive_models')
+                ->cascadeOnDelete();
         });
     }
 
@@ -23,8 +27,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('predictive_model_access_tokens', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('model_id');
-            $table->foreignId('model_id')->constrained('predictive_models');
+            $table->dropForeign(['model_id']);
+
+            $table->foreign('model_id')
+                ->references('id')
+                ->on('predictive_models');
         });
     }
 };
