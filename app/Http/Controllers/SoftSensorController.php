@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SoftSensor;
 use App\Models\PredictiveModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -13,9 +14,14 @@ class SoftSensorController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $organizationId = auth()->user()->organization_id;
 
-        $sensors = SoftSensor::where('organization_id', $organizationId)->get();
+        $sensors = SoftSensor::where('organization_id', $organizationId)->with(['runResults' => fn($q) => $q->latest()])->get();
+
         $models = PredictiveModel::where('organization_id', $organizationId)
             ->where('status', 'active')
             ->with('analytics')
@@ -23,8 +29,9 @@ class SoftSensorController extends Controller
 
         $activeSensors = SoftSensor::where('organization_id', $organizationId)
             ->whereNotNull('updated_at')
-            ->where('updated_at', '>=', now()->subMinutes(5))
+            ->where('last_prediction_time', '>=', now()->subMinutes(5))
             ->count();
+
         $totalSensors = $sensors->count();
 
         $avgAccuracy = round(
@@ -36,8 +43,6 @@ class SoftSensorController extends Controller
 
         $modelsOnline = $models->count();
 
-
-
         return Inertia::render('SoftSensors', [
             'sensors' => $sensors,
             'models' => $models,
@@ -47,8 +52,6 @@ class SoftSensorController extends Controller
                 'avgAccuracy' => $avgAccuracy,
                 'modelsOnline' => $modelsOnline,
             ],
-
-
         ]);
     }
 
@@ -61,7 +64,7 @@ class SoftSensorController extends Controller
             'username' => ['nullable', 'string'],
             'password' => ['nullable', 'string'],
             'model_id' => ['required', 'integer'],
-            'time_interval' => ['required', 'integer', 'min:60'],
+            'time_interval' => ['required', 'integer', 'min:10'],
         ]);
 
         SoftSensor::create([
@@ -69,7 +72,7 @@ class SoftSensorController extends Controller
             'mqtt_broker' => $request->mqtt_broker,
             'mqtt_topic' => $request->mqtt_topic,
             'username' => $request->username ?: null,
-            'password' => $request->password ? Hash::make($request->password) : null,
+            'password' => $request->password ? Crypt::encryptString($request->password) : null,
             'model_id' => $request->model_id,
             'time_interval' => $request->time_interval,
             'organization_id' => auth()->user()->organization_id,
