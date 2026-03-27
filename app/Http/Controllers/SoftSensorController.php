@@ -14,9 +14,14 @@ class SoftSensorController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $organizationId = auth()->user()->organization_id;
 
-        $sensors = SoftSensor::where('organization_id', $organizationId)->get();
+        $sensors = SoftSensor::where('organization_id', $organizationId)->with(['runResults' => fn($q) => $q->latest()])->get();
+
         $models = PredictiveModel::where('organization_id', $organizationId)
             ->where('status', 'active')
             ->with('analytics')
@@ -24,8 +29,9 @@ class SoftSensorController extends Controller
 
         $activeSensors = SoftSensor::where('organization_id', $organizationId)
             ->whereNotNull('updated_at')
-            ->where('updated_at', '>=', now()->subMinutes(5))
+            ->where('last_prediction_time', '>=', now()->subMinutes(5))
             ->count();
+
         $totalSensors = $sensors->count();
 
         $avgAccuracy = round(
@@ -58,7 +64,7 @@ class SoftSensorController extends Controller
             'username' => ['nullable', 'string'],
             'password' => ['nullable', 'string'],
             'model_id' => ['required', 'integer'],
-            'time_interval' => ['required', 'integer', 'min:60'],
+            'time_interval' => ['required', 'integer', 'min:10'],
         ]);
 
         SoftSensor::create([
