@@ -10,6 +10,15 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
+
+        $organizationId = $user->organization_id;
+
+        $models = \App\Models\PredictiveModel::where('organization_id', $organizationId)
+            ->where('status', 'active')
+            ->select('id', 'name')
+            ->get();
+
         $zip = $request->input('zip') ?: '89502';
         $gauge = $request->input('gauge');
 
@@ -66,6 +75,8 @@ class DashboardController extends Controller
 
         // Send all back to dashboard
         return inertia('Dashboard', [
+            'models' => $models,
+
             'weather' => $weather,
             'zip' => $zip,
             'gauge' => $siteNumber,
@@ -76,4 +87,5 @@ class DashboardController extends Controller
             'state' => $state,
         ]);
     }
+
 }
