@@ -3,8 +3,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage, router } from '@inertiajs/vue3';
-import { ref, reactive } from 'vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogTrigger,
@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import mqtt from 'mqtt';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,9 +28,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const page = usePage();
 
-const isDialogOpen = ref(false);
+const props = defineProps({
+    sensors: Array,
+    models: Array,
+    stats: Object,
+});
 
-//const csrfToken = page.props.csrf_token;
+const isDialogOpen = ref(false);
 
 const form = reactive({
     name: '',
@@ -51,6 +56,10 @@ const resetForm = () => {
     form.time_interval = 60;
 };
 
+setInterval(() => {
+    router.reload({ only: ['sensors'] })
+}, 1000)
+
 function submit() {
     router.post(
         '/soft-sensors',
@@ -65,19 +74,15 @@ function submit() {
 }
 
 const getModelName = (id) => {
-    const models = page.props.models;
+    if (props.models.length < 1) {
+        return "Model Not Found"
+    }
 
-    if (!models) return 'Unknown Model';
-
-    const list = Array.isArray(models)
-        ? models
-        : Array.isArray(models.data)
-          ? models.data
-          : [];
-
-    const model = list.find((m) => Number(m.id) === Number(id));
-
-    return model?.name ?? 'Unknown Model';
+    for (const model of props.models) {
+        if (model.id == id) {
+            return model.name
+        }
+    }
 };
 
 function confirmDelete(id) {
@@ -85,6 +90,31 @@ function confirmDelete(id) {
 
     router.delete(`/soft-sensors/${id}`);
 }
+
+const clients = new Map()
+const sensorActualValues = ref<number[]>([])
+
+onMounted(() => {
+    for (const sensor of props.sensors) {
+        const client = mqtt.connect(sensor.mqtt_broker)
+        client.on("connect", () => {
+            client.subscribe(sensor.mqtt_topic)
+        })
+        client.on("message", (topic, message) => {
+            if (topic === sensor.mqtt_topic) {
+                const dataPayload = JSON.parse(message.toString());
+                sensorActualValues.value[sensor.id] = dataPayload.sensor_actual;
+            }
+        })
+
+        clients.set(sensor.id, client)
+    }
+})
+
+onUnmounted(() => {
+    clients.forEach(client => client.end())
+})
+
 </script>
 
 <template>
@@ -106,28 +136,28 @@ function confirmDelete(id) {
                 <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Active Sensors</p>
                     <p class="mt-1 text-2xl font-semibold">
-                        {{ page.props.stats.activeSensors }}
+                        {{ props.stats?.activeSensors }}
                     </p>
                 </div>
 
                 <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Total Sensors</p>
                     <p class="mt-1 text-2xl font-semibold">
-                        {{ page.props.stats.totalSensors }}
+                        {{ props.stats?.totalSensors }}
                     </p>
                 </div>
 
                 <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Avg Model Accuracy</p>
                     <p class="mt-1 text-2xl font-semibold">
-                        {{ page.props.stats.avgAccuracy }}%
+                        {{ props.stats?.avgAccuracy }}%
                     </p>
                 </div>
 
                 <div class="rounded-xl border p-4">
                     <p class="text-sm text-gray-500">Models Online</p>
                     <p class="mt-1 text-2xl font-semibold">
-                        {{ page.props.stats.modelsOnline }}
+                        {{ props.stats?.modelsOnline }}
                     </p>
                 </div>
             </div>
@@ -148,7 +178,6 @@ function confirmDelete(id) {
                                 @click="isDialogOpen = true"
                                 class="flex justify-center"
                             >
-                                <Plus />
                                 Create Soft Sensor
                             </Button>
                         </DialogTrigger>
@@ -164,7 +193,7 @@ function confirmDelete(id) {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <Form @submit.prevent="submit">
+                    <form @submit.prevent="submit">
                         <div class="grid p-2">
                             <Label for="name" class="mb-1 text-left">
                                 Sensor Name
@@ -250,7 +279,7 @@ function confirmDelete(id) {
                                     Select a model
                                 </option>
                                 <option
-                                    v-for="model in page.props.models"
+                                    v-for="model in props.models"
                                     :key="model.id"
                                     :value="model.id"
                                 >
@@ -272,6 +301,7 @@ function confirmDelete(id) {
                                 required
                                 class="col-span-3 rounded border border-slate-900 bg-white px-2 py-1 text-slate-900 dark:border-slate-400 dark:bg-slate-800 dark:text-slate-100"
                             >
+                                <option value="10">10 seconds</option>
                                 <option value="30">30 seconds</option>
                                 <option value="60">60 seconds</option>
                                 <option value="120">120 seconds</option>
@@ -289,72 +319,85 @@ function confirmDelete(id) {
                             </Button>
                             <Button type="submit">Create Soft Sensor</Button>
                         </div>
-                    </Form>
+                    </form>
                 </DialogContent>
             </Dialog>
         </div>
 
         <!-- Sensor Cards -->
         <div class="min-h-screen px-4">
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card
-                    v-for="sensor in page.props.sensors"
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(400px,400px))] gap-4 justify-start">
+                <div
+                    v-for="sensor in props.sensors"
                     :key="sensor.id"
                     class="transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
                 >
-                    <CardHeader>
-                        <div class="flex items-center justify-between">
+
+                    <Card>
+                        <CardHeader>
                             <CardTitle>{{ sensor.name }}</CardTitle>
+                        </CardHeader>
 
-                        </div>
-                    </CardHeader>
-
-                    <CardContent>
-                        <div
-                            class="mb-4 h-1 w-full rounded-full bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300"
-                        ></div>
-
-                        <div class="space-y-1 text-sm">
-                            <p>
-                                <span class="font-semibold">MQTT Broker:</span>
-                                {{ sensor.mqtt_broker }}
-                            </p>
-                            <p>
-                                <span class="font-semibold">MQTT Topic:</span>
-                                {{ sensor.mqtt_topic }}
-                            </p>
-                            <p>
-                                <span class="font-semibold">Model:</span>
-                                {{ getModelName(sensor.model_id) }}
-                            </p>
-                            <p>
-                                <span class="font-semibold">Interval:</span>
-                                {{ sensor.time_interval }} sec
-                            </p>
-                            <p>
-                                <span class="font-semibold">Actual Value:</span>
-                                {{ sensor.actual_value }}
-                            </p>
-                            <p>
-                                <span class="font-semibold">Predicted Value:</span>
-                                {{ sensor.predicted_value }}
-                            </p>
-                            <p>
-                                <span class="font-semibold">Last Prediction:</span>
-                                {{ sensor.time_since_last_prediction }}
-                            </p>
-                        </div>
-                    </CardContent>
-
-                    <CardFooter class="flex justify-end">
-                        <button
-                            @click="confirmDelete(sensor.id)"
-                            class="rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
-                        >
-                            Delete
-                        </button>
-                    </CardFooter>
-                </Card>
+                        <CardContent class="grid grid-cols-2 gap-2">
+                            <div>
+                                <CardHeader class="font-bold">
+                                    Actual
+                                </CardHeader>
+                                <CardContent v-if="Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) < 20" class="bg-green-500/30 border-2 border-green-500 rounded-2xl px-4 py-12 text-center">
+                                    <span class="text-5xl">{{ sensorActualValues[sensor.id] ?? "..." }}</span>
+                                </CardContent>
+                                <CardContent v-else-if="Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) >= 20 && Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) < 50" class="bg-yellow-500/30 border-2 border-yellow-500 rounded-2xl px-4 py-12 text-center">
+                                    <span class="text-5xl">{{ sensorActualValues[sensor.id] ?? "..." }}</span>
+                                </CardContent>
+                                <CardContent v-else class="bg-red-500/30 border-2 border-red-500 rounded-2xl px-4 py-12 text-center">
+                                    <span class="text-5xl">{{  sensorActualValues[sensor.id] ?? "..." }}</span>
+                                </CardContent>
+                                <CardFooter class="justify-between py-2">
+                                    <Label>Deviation:</Label>
+                                    <span>{{ Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) }}%</span>
+                                </CardFooter>
+                            </div>
+                            <div>
+                                <CardHeader>
+                                    Predicted
+                                </CardHeader>
+                                <CardContent class="bg-slate-300 dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-800 rounded-2xl px-4 py-12 text-center">
+                                    <span class="text-5xl">{{ Number(sensor.run_results[0]?.result).toFixed(2) ?? '...' }}</span>
+                                </CardContent>
+                                <CardFooter class="justify-between py-2">
+                                    <Label>Next:</Label>
+                                    <span>{{ Number((((new Date(sensor.last_prediction_time + 'Z').getTime()) + (sensor.time_interval * 1000)) - Date.now()) / 1000).toFixed(0)  }} sec</span>
+                                </CardFooter>
+                            </div>
+                        </CardContent>
+                        <CardFooter class="items-end justify-between">
+                            <div class="text-sm">
+                                <p>
+                                    <span class="font-semibold">MQTT Broker:</span>
+                                    {{ sensor.mqtt_broker }}
+                                </p>
+                                <p>
+                                    <span class="font-semibold">MQTT Topic:</span>
+                                    {{ sensor.mqtt_topic }}
+                                </p>
+                                <p>
+                                    <span class="font-semibold">Model:</span>
+                                    {{ getModelName(sensor.model_id) }}
+                                </p>
+                                <p>
+                                    <span class="font-semibold">Interval:</span>
+                                    {{ sensor.time_interval }} sec
+                                </p>
+                            </div>
+                            <button
+                                @click="confirmDelete(sensor.id)"
+                                class="rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
+                            >
+                                Delete
+                            </button>
+                        </CardFooter>
+                    </Card>
+                </div>
             </div>
         </div>
     </AppLayout>
