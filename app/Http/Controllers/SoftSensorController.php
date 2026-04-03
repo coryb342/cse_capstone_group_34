@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SensorViewingSession;
 use App\Models\SoftSensor;
 use App\Models\PredictiveModel;
 use Illuminate\Http\Request;
@@ -77,6 +78,50 @@ class SoftSensorController extends Controller
             'time_interval' => $request->time_interval,
             'organization_id' => auth()->user()->organization_id,
         ]);
+
+        return redirect()->back();
+    }
+
+    public function initiateViewingSession(Request $request)
+    {
+        $user = auth()->user();
+        $organization_id = $user->organization_id;
+
+        $viewing_session = SensorViewingSession::query()->where('user_id', $user->id)->first();
+
+        if ($viewing_session) {
+            $viewing_session->touch();
+
+            return redirect()->back();
+        }
+
+        SensorViewingSession::create([
+            'organization_id' => $organization_id,
+            'user_id' => $user->id,
+        ]);
+
+        return redirect()->back();
+    }
+
+    public function viewingSessionHeartbeat(Request $request)
+    {
+        $user = auth()->user();
+
+        $viewing_session = SensorViewingSession::query()->where('user_id', $user->id)->first();
+
+        $viewing_session->touch();
+
+        return redirect()->back();
+    }
+
+    public function terminateViewingSession(Request $request)
+    {
+        $user = auth()->user();
+        $active_session = SensorViewingSession::query()->where('user_id', $user->id)->first();
+
+        if ($active_session) {
+            $active_session->delete();
+        }
 
         return redirect()->back();
     }

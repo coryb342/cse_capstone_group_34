@@ -2,8 +2,8 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage, router } from '@inertiajs/vue3';
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { Head, usePage, router, useForm } from '@inertiajs/vue3';
+import { ref, reactive, onMounted, onUnmounted, watch } from 'vue';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
@@ -17,6 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { route } from 'ziggy-js';
+
 import mqtt from 'mqtt';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -27,6 +29,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const page = usePage();
+
+const viewingSession = useForm({});
 
 const props = defineProps({
     sensors: Array,
@@ -91,8 +95,11 @@ function confirmDelete(id) {
     router.delete(`/soft-sensors/${id}`);
 }
 
-const clients = new Map()
-const sensorActualValues = ref<number[]>([])
+function startHeartbeat() {
+    heartbeat = setInterval(() => {
+        viewingSession.post(route('soft-sensors.viewing-session-heartbeat'))
+    }, 10000)
+}
 
 onMounted(() => {
     for (const sensor of props.sensors) {
@@ -113,6 +120,28 @@ onMounted(() => {
 
 onUnmounted(() => {
     clients.forEach(client => client.end())
+    clearInterval(heartbeat)
+    viewingSession.post(route('soft-sensors.terminate-viewing-session'))
+})
+
+setInterval(() => {
+    router.reload({ only: ['sensors'] })
+    let newest_sensor = props.sensors[props.sensors.length - 1]
+    if (newest_sensor && !clients.has(newest_sensor.id)) {
+        establishDatastreamConnection(newest_sensor);
+    }
+}, 1000)
+
+window.addEventListener('beforeunload', () => {
+    navigator.sendBeacon(route('soft-sensors.terminate-viewing-session'));
+})
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        clearInterval(heartbeat)
+    } else {
+        startHeartbeat()
+    }
 })
 
 </script>

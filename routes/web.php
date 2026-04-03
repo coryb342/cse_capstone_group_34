@@ -51,16 +51,16 @@ Route::get('/predictive-models/{model}/export/excel', [PredictiveModelController
     ->name('predictive-models.export.excel');
 
 // Soft Sensor
-Route::get('/soft-sensors', function () {
-    return Inertia::render('SoftSensors');
-})->middleware(['auth', 'verified'])->name('soft-sensors');
-
-Route::get('/soft-sensors', [SoftSensorController::class, 'index'])
+Route::get('/soft-sensors', [SoftSensorController::class, 'index'])->middleware(['auth', 'verified'])
     ->name('soft-sensors.index');
-
-Route::post('/soft-sensors', [SoftSensorController::class, 'store'])
+Route::post('/soft-sensors', [SoftSensorController::class, 'store'])->middleware(['auth', 'verified'])
     ->name('soft-sensors.store');
-Route::delete('/soft-sensors/{sensor}', [SoftSensorController::class, 'destroy']);
+Route::delete('/soft-sensors/{sensor}', [SoftSensorController::class, 'destroy'])->middleware(['auth', 'verified']);
+
+// Sensor Viewing Sessions
+Route::post('/soft-sensors/initiate_session', [SoftSensorController::class, 'initiateViewingSession'])->middleware(['auth', 'verified'])->name('soft-sensors.initiate-viewing-session');
+Route::post('/soft-sensors/hearbeat', [SoftSensorController::class, 'viewingSessionHeartbeat'])->middleware(['auth', 'verified'])->name('soft-sensors.viewing-session-heartbeat');
+Route::post('/soft-sensors/terminate_viweing_session', [SoftSensorController::class, 'terminateViewingSession'])->middleware(['auth', 'verified'])->name('soft-sensors.terminate-viewing-session');
 
 
 require __DIR__.'/settings.php';
