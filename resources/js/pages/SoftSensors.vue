@@ -401,11 +401,14 @@ document.addEventListener('visibilitychange', () => {
                                     Predicted
                                 </CardHeader>
                                 <CardContent class="bg-slate-300 dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-800 rounded-2xl px-4 py-12 text-center">
-                                    <span class="text-5xl">{{ Number(sensor.run_results[0]?.result).toFixed(2) ?? '...' }}</span>
+                                    <span class="text-5xl">{{ sensor.run_results[0] ? Number(sensor.run_results[0].result).toFixed(2) : '...' }}</span>
                                 </CardContent>
                                 <CardFooter class="justify-between py-2">
                                     <Label>Next:</Label>
-                                    <span>{{ Number((((new Date(sensor.last_prediction_time + 'Z').getTime()) + (sensor.time_interval * 1000)) - Date.now()) / 1000).toFixed(0)  }} sec</span>
+                                    <span v-if="(Number((((new Date(sensor.last_prediction_time + 'Z').getTime()) + (sensor.time_interval * 1000)) - Date.now()) / 1000).toFixed(0)).includes('-')"
+                                          class="inline-block w-4 h-4 border-2 rounded-full animate-spin border-black/30 border-t-black dark:border-white/30 dark:border-t-white">
+                                    </span>
+                                    <span v-else>{{ Number((((new Date(sensor.last_prediction_time + 'Z').getTime()) + (sensor.time_interval * 1000)) - Date.now()) / 1000).toFixed(0) }} sec(s)</span>
                                 </CardFooter>
                             </div>
                         </CardContent>
