@@ -60,9 +60,21 @@ const resetForm = () => {
     form.time_interval = 60;
 };
 
-setInterval(() => {
-    router.reload({ only: ['sensors'] })
-}, 1000)
+const getModelName = (id) => {
+    if (props.models.length < 1) {
+        return "Model Not Found"
+    }
+
+    for (const model of props.models) {
+        if (model.id == id) {
+            return model.name
+        }
+    }
+};
+
+const clients = new Map()
+const sensorActualValues = ref<number[]>([])
+let heartbeat: string | number | NodeJS.Timeout | null | undefined = null
 
 function submit() {
     router.post(
@@ -77,18 +89,6 @@ function submit() {
     );
 }
 
-const getModelName = (id) => {
-    if (props.models.length < 1) {
-        return "Model Not Found"
-    }
-
-    for (const model of props.models) {
-        if (model.id == id) {
-            return model.name
-        }
-    }
-};
-
 function confirmDelete(id) {
     if (!confirm('Are you sure you want to delete this soft sensor?')) return;
 
@@ -101,21 +101,31 @@ function startHeartbeat() {
     }, 10000)
 }
 
-onMounted(() => {
+function establishDatastreamConnections() {
     for (const sensor of props.sensors) {
-        const client = mqtt.connect(sensor.mqtt_broker)
-        client.on("connect", () => {
-            client.subscribe(sensor.mqtt_topic)
-        })
-        client.on("message", (topic, message) => {
-            if (topic === sensor.mqtt_topic) {
-                const dataPayload = JSON.parse(message.toString());
-                sensorActualValues.value[sensor.id] = dataPayload.sensor_actual;
-            }
-        })
-
-        clients.set(sensor.id, client)
+        establishDatastreamConnection(sensor)
     }
+}
+
+function establishDatastreamConnection(sensor) {
+    const client = mqtt.connect(sensor.mqtt_broker)
+    client.on("connect", () => {
+        client.subscribe(sensor.mqtt_topic)
+    })
+    client.on("message", (topic, message) => {
+        if (topic === sensor.mqtt_topic) {
+            const dataPayload = JSON.parse(message.toString());
+            sensorActualValues.value[sensor.id] = dataPayload.sensor_actual;
+        }
+    })
+
+    clients.set(sensor.id, client)
+}
+
+onMounted(() => {
+    establishDatastreamConnections()
+    viewingSession.post(route('soft-sensors.initiate-viewing-session'))
+    startHeartbeat()
 })
 
 onUnmounted(() => {
