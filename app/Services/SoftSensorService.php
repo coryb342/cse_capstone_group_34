@@ -81,6 +81,12 @@ Class SoftSensorService {
     public function updatePredictedValue(SoftSensor $soft_sensor): void
     {
         $run_result = $this->getPredictionRunResult($soft_sensor);
+
+        if (!$run_result) {
+            Log::error("SoftSensorService updatePredictedValue getPredictionRunResult failed.");
+            return;
+        }
+
         $run_result->save();
 
         $this->analytics_service->recomputeForModel($run_result->model_id);

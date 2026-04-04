@@ -97,7 +97,10 @@ function confirmDelete(id) {
 
 function startHeartbeat() {
     heartbeat = setInterval(() => {
-        viewingSession.post(route('soft-sensors.viewing-session-heartbeat'))
+        viewingSession.post(route('soft-sensors.viewing-session-heartbeat'), {
+            preserveScroll: true,
+            preserveState: true,
+        })
     }, 10000)
 }
 
