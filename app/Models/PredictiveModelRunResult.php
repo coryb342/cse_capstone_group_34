@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PredictiveModelRunResult extends Model
 {
@@ -58,6 +59,11 @@ class PredictiveModelRunResult extends Model
             $v = $decoded;
         }
         return is_numeric($v) ? (float) $v : null;
+    }
+
+    public function softSensors(): belongsToMany
+    {
+        return $this->belongsToMany(SoftSensor::class, 'soft_sensor_run_result');
     }
 
 

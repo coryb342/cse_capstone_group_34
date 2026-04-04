@@ -34,7 +34,6 @@ import {
 import { route } from 'ziggy-js';
 import type { BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/vue3';
-import { join } from 'es-toolkit/compat';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -84,7 +83,7 @@ const page = usePage();
 const props = defineProps({
     uploaded_model: Object,
     models: Array,
-    total_predictions: Number,
+    total_predictions: String,
     modelData: Object,
 });
 
@@ -178,7 +177,7 @@ watch(
                     </CardTitle>
                     <Dialog
                         v-model:open="isDialogOpen"
-                        v-if="page.props.auth.user_roles.some(role => role.name === 'Admin')"
+                        v-if="page.props.auth.user_roles.some((role: { name: string; }) => role.name === 'Admin')"
 
                     >
                         <DialogTrigger as-child>
