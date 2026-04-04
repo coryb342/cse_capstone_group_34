@@ -99,7 +99,6 @@ function startHeartbeat() {
     heartbeat = setInterval(() => {
         viewingSession.post(route('soft-sensors.viewing-session-heartbeat'), {
             preserveScroll: true,
-            preserveState: true,
         })
     }, 10000)
 }
@@ -386,13 +385,13 @@ document.addEventListener('visibilitychange', () => {
                                     Actual
                                 </CardHeader>
                                 <CardContent v-if="Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) < 20" class="bg-green-500/30 border-2 border-green-500 rounded-2xl px-4 py-12 text-center">
-                                    <span class="text-5xl">{{ sensorActualValues[sensor.id] ?? "..." }}</span>
+                                    <span class="text-5xl">{{ sensorActualValues[sensor.id] ? Number(sensorActualValues[sensor.id]).toFixed(2) : "..." }}</span>
                                 </CardContent>
                                 <CardContent v-else-if="Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) >= 20 && Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) < 50" class="bg-yellow-500/30 border-2 border-yellow-500 rounded-2xl px-4 py-12 text-center">
-                                    <span class="text-5xl">{{ sensorActualValues[sensor.id] ?? "..." }}</span>
+                                    <span class="text-5xl">{{ sensorActualValues[sensor.id] ? Number(sensorActualValues[sensor.id]).toFixed(2) : "..." }}</span>
                                 </CardContent>
                                 <CardContent v-else class="bg-red-500/30 border-2 border-red-500 rounded-2xl px-4 py-12 text-center">
-                                    <span class="text-5xl">{{  sensorActualValues[sensor.id] ?? "..." }}</span>
+                                    <span class="text-5xl">{{  sensorActualValues[sensor.id] ? Number(sensorActualValues[sensor.id]).toFixed(2) : "..." }}</span>
                                 </CardContent>
                                 <CardFooter class="justify-between py-2">
                                     <Label>Deviation:</Label>
