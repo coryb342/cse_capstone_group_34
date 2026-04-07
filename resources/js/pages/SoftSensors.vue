@@ -92,8 +92,9 @@ function submit() {
 }
 
 function confirmDelete(id) {
-    if (!confirm('Are you sure you want to delete this soft sensor?')) return;
-
+    if (!confirm('Are you sure you want to delete this soft sensor?'))
+        return;
+    clients.get(id).end()
     router.delete(`/soft-sensors/${id}`);
 }
 
