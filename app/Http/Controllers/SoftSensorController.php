@@ -60,6 +60,7 @@ class SoftSensorController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'websocket_address' => ['required', 'string', 'max:255'],
             'mqtt_broker' => ['required', 'string'],
             'mqtt_topic' => ['required', 'string'],
             'username' => ['nullable', 'string'],
@@ -70,6 +71,7 @@ class SoftSensorController extends Controller
 
         SoftSensor::create([
             'name' => $request->name,
+            'websocket_address' => $request->websocket_address,
             'mqtt_broker' => $request->mqtt_broker,
             'mqtt_topic' => $request->mqtt_topic,
             'username' => $request->username ?: null,

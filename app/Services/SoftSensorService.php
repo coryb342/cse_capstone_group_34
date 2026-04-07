@@ -20,9 +20,9 @@ Class SoftSensorService {
     {
         $broker = $soft_sensor->mqtt_broker;
         $topic = $soft_sensor->mqtt_topic;
-        $borker_parts = parse_url($broker);
+        $broker_parts = parse_url($broker);
 
-        $client = new MqttClient($borker_parts['host'], 1883);
+        $client = new MqttClient($broker_parts['host'], $broker_parts['port']);
 
         $client->connect();
 

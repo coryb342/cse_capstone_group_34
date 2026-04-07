@@ -9,6 +9,7 @@ class SoftSensor extends Model
 {
     protected $fillable = [
         "name",
+        "websocket_address",
         'mqtt_broker',
         'mqtt_topic',
         'model_id',

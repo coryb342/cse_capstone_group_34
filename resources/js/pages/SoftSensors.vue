@@ -42,6 +42,7 @@ const isDialogOpen = ref(false);
 
 const form = reactive({
     name: '',
+    websocket_address: '',
     mqtt_broker: '',
     mqtt_topic: '',
     username: '',
@@ -52,6 +53,7 @@ const form = reactive({
 
 const resetForm = () => {
     form.name = '';
+    form.websocket_address = '';
     form.mqtt_broker = '';
     form.mqtt_topic = '';
     form.username = '';
@@ -110,7 +112,7 @@ function establishDatastreamConnections() {
 }
 
 function establishDatastreamConnection(sensor) {
-    const client = mqtt.connect(sensor.mqtt_broker)
+    const client = mqtt.connect(sensor.websocket_address)
     client.on("connect", () => {
         client.subscribe(sensor.mqtt_topic)
     })
@@ -250,6 +252,17 @@ document.addEventListener('visibilitychange', () => {
 
                         <!-- MQTT Broker -->
                         <div class="grid p-2">
+                            <Label for="websocket_address" class="mb-1 text-left">
+                                Websocket Address
+                            </Label>
+                            <Input
+                                v-model="form.websocket_address"
+                                id="websocket_address"
+                                name="websocket_address"
+                                required
+                                placeholder="wss://myurl/mqtt"
+                                class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
+                            />
                             <Label for="mqtt_broker" class="mb-1 text-left">
                                 MQTT Broker
                             </Label>
@@ -258,7 +271,7 @@ document.addEventListener('visibilitychange', () => {
                                 id="mqtt_broker"
                                 name="mqtt_broker"
                                 required
-                                placeholder="tcp://localhost:1883"
+                                placeholder="mqtt://mymqttserver:1883"
                                 class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
                             />
                         </div>
