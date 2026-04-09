@@ -210,6 +210,9 @@ const page = usePage();
                 </div>
 
                 <PlaceholderPattern />
+                <p class="mt-4 text-center text-sm text-gray-500">
+                    Selected model: {{ selectedModel }}
+                </p>
             </div>
         </div>
     </AppLayout>
