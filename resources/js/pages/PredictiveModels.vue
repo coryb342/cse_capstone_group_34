@@ -18,7 +18,7 @@ import {
     Target,
     Sparkle,
 } from 'lucide-vue-next';
-import { usePage, useForm } from '@inertiajs/vue3';
+import { usePage, useForm, Head } from '@inertiajs/vue3';
 import { Form } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { Input } from '@/components/ui/input';
@@ -26,10 +26,11 @@ import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
-    DialogDescription, DialogFooter,
+    DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
+    DialogTrigger,
 } from '@/components/ui/dialog';
 import { route } from 'ziggy-js';
 import type { BreadcrumbItem } from '@/types';
@@ -54,7 +55,7 @@ const getStatusColor = (status) => {
 };
 
 function getAverageAccuracy(models) {
-    if (models.length === 0){
+    if (models.length === 0) {
         return '--';
     }
     // let sum_of_accuracies = 0;
@@ -64,17 +65,20 @@ function getAverageAccuracy(models) {
     // return sum_of_accuracies/models.length;
     let sumAccuracy = 0;
     let models_considered = 0;
-    for (const model of models){
-        if (getAccuracyForModel(model.id) != null && getAccuracyForModel(model.id) != 0){
+    for (const model of models) {
+        if (
+            getAccuracyForModel(model.id) != null &&
+            getAccuracyForModel(model.id) != 0
+        ) {
             sumAccuracy += getAccuracyForModel(model.id);
             models_considered += 1;
         }
     }
-    return sumAccuracy/models_considered;
+    return sumAccuracy / models_considered;
 }
 
-function getAccuracyForModel(modelId){
-    const m = props.models?.find(x => x.id === modelId);
+function getAccuracyForModel(modelId) {
+    const m = props.models?.find((x) => x.id === modelId);
     return m?.analytics?.accuracy ?? null;
 }
 
@@ -90,11 +94,11 @@ const props = defineProps({
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
 const isDialogOpen = ref(false);
-const isLoading = ref(false)
-const showConfirmation = ref(false)
-const uploadedModel = ref(null)
+const isLoading = ref(false);
+const showConfirmation = ref(false);
+const uploadedModel = ref(null);
 const show = ref(false);
-const confirmingDelete = ref(false)
+const confirmingDelete = ref(false);
 
 const form = useForm({
     model_name: '',
@@ -105,32 +109,32 @@ const form = useForm({
 });
 
 function submit() {
-    isLoading.value = true
+    isLoading.value = true;
     form.post(route('predictive-models-upload'), {
         onSuccess: (page) => {
-            uploadedModel.value = page.props.flash.uploaded_model
-            showConfirmation.value = true
-            form.reset()
+            uploadedModel.value = page.props.flash.uploaded_model;
+            showConfirmation.value = true;
+            form.reset();
         },
         onFinish: () => {
-            isLoading.value = false
-        }
-    })
+            isLoading.value = false;
+        },
+    });
 }
 
 function acceptModel() {
-    isDialogOpen.value = false
-    showConfirmation.value = false
+    isDialogOpen.value = false;
+    showConfirmation.value = false;
 }
 
 function discardModel() {
     router.delete(route('predictive-models.destroy', uploadedModel.value.id), {
         onSuccess: () => {
-            isDialogOpen.value = false
-            showConfirmation.value = false
-            confirmingDelete.value = false
-        }
-    })
+            isDialogOpen.value = false;
+            showConfirmation.value = false;
+            confirmingDelete.value = false;
+        },
+    });
 }
 
 watch(
@@ -148,6 +152,13 @@ watch(
 </script>
 
 <template>
+    <Head>
+        <title>Predictive Models</title>
+        <meta
+            name="description"
+            content="Organizations uploaded models page where you can select to view a models analytics, run predictions, and export results."
+        />
+    </Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div v-if="page.props.errors">
             <div v-for="(index, error) in page.props.errors" :key="index">
@@ -177,8 +188,12 @@ watch(
                     </CardTitle>
                     <Dialog
                         v-model:open="isDialogOpen"
-                        v-if="page.props.auth.user_roles.some((role: { name: string; }) => role.name === 'Admin')"
-
+                        v-if="
+                            page.props.auth.user_roles.some(
+                                (role: { name: string }) =>
+                                    role.name === 'Admin',
+                            )
+                        "
                     >
                         <DialogTrigger as-child>
                             <Button @click="isDialogOpen = true">
@@ -188,21 +203,19 @@ watch(
                         </DialogTrigger>
                         <DialogContent
                             v-if="isLoading"
-                            class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
+                            class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden overflow-y-auto rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
                             role="dialog"
                             aria-modal="true"
                         >
                             <DialogHeader>
                                 <DialogTitle
-                                >Gathering Model Info...</DialogTitle
+                                    >Gathering Model Info...</DialogTitle
                                 >
                                 <DialogDescription
-                                >Doing some magic</DialogDescription
+                                    >Doing some magic</DialogDescription
                                 >
                             </DialogHeader>
-                            <div
-                                class="flex h-24 items-center justify-center"
-                            >
+                            <div class="flex h-24 items-center justify-center">
                                 <svg
                                     class="h-8 w-8 animate-spin text-blue-600"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -225,68 +238,110 @@ watch(
                                 </svg>
                             </div>
                         </DialogContent>
-                        <DialogContent v-else-if="showConfirmation" class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl
-                                 dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
-                                       role="dialog"
-                                       aria-modal="true">
+                        <DialogContent
+                            v-else-if="showConfirmation"
+                            class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden overflow-y-auto rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                            role="dialog"
+                            aria-modal="true"
+                        >
                             <DialogHeader>
                                 <DialogTitle
-                                >Model Uploaded Successfully</DialogTitle
+                                    >Model Uploaded Successfully</DialogTitle
                                 >
                                 <DialogDescription
-                                >Please Verify Model Info</DialogDescription
+                                    >Please Verify Model Info</DialogDescription
                                 >
                             </DialogHeader>
-                            <div v-if="showConfirmation" class="border rounded-2xl dark:border-slate-700 px-3 py-4">
+                            <div
+                                v-if="showConfirmation"
+                                class="rounded-2xl border px-3 py-4 dark:border-slate-700"
+                            >
+                                <Label>Name</Label>
+                                <Input
+                                    :model-value="uploadedModel.name"
+                                    :disabled="true"
+                                ></Input>
 
+                                <Label>Description</Label>
+                                <textarea
+                                    :value="uploadedModel.description"
+                                    :disabled="true"
+                                    class="w-full rounded bg-slate-700/10 px-2 py-1 text-sm disabled:opacity-50"
+                                />
 
-                                    <Label>Name</Label> <Input :model-value="uploadedModel.name" :disabled="true"></Input>
+                                <Label>Target</Label>
+                                <Input
+                                    :model-value="uploadedModel.target"
+                                    :disabled="true"
+                                ></Input>
 
-                                    <Label>Description</Label> <textarea :value="uploadedModel.description" :disabled="true" class="w-full bg-slate-700/10 rounded px-2 py-1 text-sm disabled:opacity-50"/>
+                                <Label>Required Parameters</Label>
+                                <Input
+                                    v-for="(param, key) in JSON.parse(
+                                        uploadedModel.required_parameters,
+                                    )"
+                                    :key="key"
+                                    :model-value="param"
+                                    :disabled="true"
+                                    class="border-transparent"
+                                ></Input>
 
-                                    <Label>Target</Label> <Input :model-value="uploadedModel.target" :disabled="true"></Input>
+                                <Label>Type</Label>
+                                <Input
+                                    :model-value="uploadedModel.type"
+                                    :disabled="true"
+                                ></Input>
 
-                                    <Label>Required Parameters</Label> <Input v-for="(param, key) in JSON.parse(uploadedModel.required_parameters)" :key="key" :model-value="param" :disabled="true" class="border-transparent"></Input>
+                                <Label>Accuracy</Label>
+                                <Input
+                                    :model-value="
+                                        uploadedModel.accuracy ?? 'Not Provided'
+                                    "
+                                    :disabled="true"
+                                ></Input>
 
-                                    <Label>Type</Label> <Input :model-value="uploadedModel.type" :disabled="true"></Input>
-
-                                    <Label>Accuracy</Label> <Input :model-value="uploadedModel.accuracy ?? 'Not Provided'" :disabled="true"></Input>
-
-                                    <Label>Last Trained On</Label> <Input :model-value="uploadedModel.last_trained_on ?? 'Not Provided'" :disabled="true"></Input>
-
+                                <Label>Last Trained On</Label>
+                                <Input
+                                    :model-value="
+                                        uploadedModel.last_trained_on ??
+                                        'Not Provided'
+                                    "
+                                    :disabled="true"
+                                ></Input>
                             </div>
                             <DialogFooter>
                                 <div class="flex justify-end gap-3">
-                                    <Button @click="acceptModel"
-                                            class="mt-3 rounded-lg border border-green-300 bg-white px-3 py-1.5 text-sm font-medium
-                                       text-gray-600 transition-colors hover:bg-green-50
-                                       dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30">
+                                    <Button
+                                        @click="acceptModel"
+                                        class="mt-3 rounded-lg border border-green-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-green-50 dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30"
+                                    >
                                         Accept
                                     </Button>
 
                                     <button
                                         v-if="!confirmingDelete"
                                         @click="confirmingDelete = true"
-                                        class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm font-medium
-                                       text-rose-600 transition-colors hover:bg-rose-50
-                                       dark:border-rose-800 dark:bg-transparent dark:text-rose-400 dark:hover:bg-rose-900/30"
+                                        class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-800 dark:bg-transparent dark:text-rose-400 dark:hover:bg-rose-900/30"
                                     >
                                         Discard
                                     </button>
-                                    <div v-else class="mt-3 flex items-center gap-2">
-                                        <span class="text-xs text-rose-600 dark:text-rose-400">Are you sure?</span>
+                                    <div
+                                        v-else
+                                        class="mt-3 flex items-center gap-2"
+                                    >
+                                        <span
+                                            class="text-xs text-rose-600 dark:text-rose-400"
+                                            >Are you sure?</span
+                                        >
                                         <button
                                             @click="discardModel"
-                                            class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white
-                                            hover:bg-rose-700 transition-colors"
+                                            class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-rose-700"
                                         >
                                             Yes, Discard
                                         </button>
                                         <button
                                             @click="confirmingDelete = false"
-                                            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium
-                                           text-slate-600 hover:bg-slate-50 transition-colors
-                                           dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                                            class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                                         >
                                             Cancel
                                         </button>
@@ -294,28 +349,36 @@ watch(
                                 </div>
                             </DialogFooter>
                         </DialogContent>
-                        <DialogContent class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
-                                       role="dialog"
-                                       aria-modal="true" v-else>
+                        <DialogContent
+                            class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden overflow-y-auto rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                            role="dialog"
+                            aria-modal="true"
+                            v-else
+                        >
                             <DialogHeader>
                                 <DialogTitle>Upload a Model</DialogTitle>
                                 <DialogDescription
-                                >Use this form to add a new Predictive
+                                    >Use this form to add a new Predictive
                                     Model</DialogDescription
                                 >
                             </DialogHeader>
                             <Form
-                                v-if="!isLoading && !showConfirmation && isDialogOpen"
+                                v-if="
+                                    !isLoading &&
+                                    !showConfirmation &&
+                                    isDialogOpen
+                                "
                                 @submit.prevent="submit"
                                 enctype="multipart/form-data"
-
                             >
                                 <input
                                     type="hidden"
                                     name="csrf_token"
                                     :value="csrfToken"
                                 />
-                                <div class="border rounded-2xl dark:border-slate-700 px-3 py-3">
+                                <div
+                                    class="rounded-2xl border px-3 py-3 dark:border-slate-700"
+                                >
                                     <div class="grid p-2">
                                         <Label
                                             for="model_name"
@@ -339,14 +402,12 @@ watch(
                                             Model Description
                                         </Label>
                                         <textarea
-                                            v-model="
-                                                        form.model_description
-                                                    "
+                                            v-model="form.model_description"
                                             required
                                             type="text"
                                             id="model_description"
                                             name="model_description"
-                                            class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400 text-sm"
+                                            class="col-span-3 rounded border border-slate-900 px-2 py-1 text-sm dark:border-slate-400"
                                         />
                                     </div>
                                     <div class="grid p-2">
@@ -357,15 +418,12 @@ watch(
                                             Accuracy
                                             <Label
                                                 class="text-sm text-slate-900 dark:text-slate-500"
-                                            >Enter the Accuracy of
-                                                the model if it is
-                                                known.</Label
+                                                >Enter the Accuracy of the model
+                                                if it is known.</Label
                                             >
                                         </Label>
                                         <Input
-                                            v-model="
-                                                        form.model_accuracy
-                                                    "
+                                            v-model="form.model_accuracy"
                                             type="number"
                                             step="0.01"
                                             min="0"
@@ -383,15 +441,12 @@ watch(
                                             Date Last Trained
                                             <Label
                                                 class="text-sm text-slate-900 dark:text-slate-500"
-                                            >Default will be today
-                                                if no date is
-                                                selected.</Label
+                                                >Default will be today if no
+                                                date is selected.</Label
                                             >
                                         </Label>
                                         <Input
-                                            v-model="
-                                                        form.last_trained_on
-                                                    "
+                                            v-model="form.last_trained_on"
                                             type="date"
                                             id="last_trained_on"
                                             name="last_trained_on"
@@ -409,10 +464,10 @@ watch(
                                             required
                                             type="file"
                                             @change="
-                                                        (e) =>
-                                                            (form.model_file =
-                                                                e.target.files[0])
-                                                    "
+                                                (e) =>
+                                                    (form.model_file =
+                                                        e.target.files[0])
+                                            "
                                             id="model_file"
                                             name="model_file"
                                             class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400 dark:bg-slate-700"
@@ -421,10 +476,10 @@ watch(
                                     </div>
                                 </div>
                                 <DialogFooter class="pt-2">
-                                    <Button type="submit"
-                                            class="mt-3 rounded-lg border border-green-300 bg-white font-medium
-                                                       text-gray-600 transition-colors hover:bg-green-50
-                                                       dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30">
+                                    <Button
+                                        type="submit"
+                                        class="mt-3 rounded-lg border border-green-300 bg-white font-medium text-gray-600 transition-colors hover:bg-green-50 dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30"
+                                    >
                                         Submit
                                     </Button>
                                 </DialogFooter>
@@ -437,12 +492,18 @@ watch(
                         <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
                             <Card>
                                 <CardContent class="pt-6">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <div>
-                                            <p class="mb-1 text-sm text-slate-600 dark:text-white">
+                                            <p
+                                                class="mb-1 text-sm text-slate-600 dark:text-white"
+                                            >
                                                 Total Models
                                             </p>
-                                            <p class="text-2xl font-bold text-slate-900 dark:text-slate-400">
+                                            <p
+                                                class="text-2xl font-bold text-slate-900 dark:text-slate-400"
+                                            >
                                                 {{ models.length }}
                                             </p>
                                         </div>
@@ -452,46 +513,86 @@ watch(
                             </Card>
                             <Card>
                                 <CardContent class="pt-6">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <div>
-                                            <p class="mb-1 text-sm text-slate-600 dark:text-white">
+                                            <p
+                                                class="mb-1 text-sm text-slate-600 dark:text-white"
+                                            >
                                                 Active Models
                                             </p>
-                                            <p class="text-2xl font-bold text-slate-900 dark:text-slate-400">
-                                                {{ models.filter((m) => m.status === 'active',).length }}
+                                            <p
+                                                class="text-2xl font-bold text-slate-900 dark:text-slate-400"
+                                            >
+                                                {{
+                                                    models.filter(
+                                                        (m) =>
+                                                            m.status ===
+                                                            'active',
+                                                    ).length
+                                                }}
                                             </p>
                                         </div>
-                                        <MonitorCheck class="h-8 w-8 text-green-500" />
+                                        <MonitorCheck
+                                            class="h-8 w-8 text-green-500"
+                                        />
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent class="pt-6">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <div>
-                                            <p class="mb-1 text-sm text-slate-600 dark:text-white">
+                                            <p
+                                                class="mb-1 text-sm text-slate-600 dark:text-white"
+                                            >
                                                 Avg Accuracy
                                             </p>
-                                            <p class="text-2xl font-bold text-slate-900 dark:text-slate-400">
-                                                {{ total_predictions > 0 ? getAverageAccuracy(models).toFixed(2) + '%' : '--' }}
+                                            <p
+                                                class="text-2xl font-bold text-slate-900 dark:text-slate-400"
+                                            >
+                                                {{
+                                                    total_predictions > 0
+                                                        ? getAverageAccuracy(
+                                                              models,
+                                                          ).toFixed(2) + '%'
+                                                        : '--'
+                                                }}
                                             </p>
                                         </div>
-                                        <Target class="h-8 w-8 text-purple-500" />
+                                        <Target
+                                            class="h-8 w-8 text-purple-500"
+                                        />
                                     </div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent class="pt-6">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <div>
-                                            <p class="mb-1 text-sm text-slate-600 dark:text-white">
+                                            <p
+                                                class="mb-1 text-sm text-slate-600 dark:text-white"
+                                            >
                                                 Total Predictions
                                             </p>
-                                            <p class="text-2xl font-bold text-slate-900 dark:text-slate-400">
-                                                {{ total_predictions ? total_predictions : '--'  }}
+                                            <p
+                                                class="text-2xl font-bold text-slate-900 dark:text-slate-400"
+                                            >
+                                                {{
+                                                    total_predictions
+                                                        ? total_predictions
+                                                        : '--'
+                                                }}
                                             </p>
                                         </div>
-                                        <Sparkle class="h-8 w-8 text-orange-500" />
+                                        <Sparkle
+                                            class="h-8 w-8 text-orange-500"
+                                        />
                                     </div>
                                 </CardContent>
                             </Card>
@@ -502,16 +603,27 @@ watch(
                         class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
                     >
                         <Card
-                            class="hover:shadow-lg transition-shadow cursor-pointer group"
-                            v-for="model in props.models" :key="model.id"
-                            @click="router.visit(route('predictive-models.show', model.id))"
+                            class="group cursor-pointer transition-shadow hover:shadow-lg"
+                            v-for="model in props.models"
+                            :key="model.id"
+                            @click="
+                                router.visit(
+                                    route('predictive-models.show', model.id),
+                                )
+                            "
                         >
                             <CardHeader>
-                                <div class="mb-2 flex items-start justify-between">
-                                    <CardTitle class="text-lg transition-colors group-hover:text-blue-600">
+                                <div
+                                    class="mb-2 flex items-start justify-between"
+                                >
+                                    <CardTitle
+                                        class="text-lg transition-colors group-hover:text-blue-600"
+                                    >
                                         {{ model.name }}
                                     </CardTitle>
-                                    <ChevronRight class="h-5 w-5 text-slate-400 transition-all group-hover:translate-x-1 group-hover:text-blue-600" />
+                                    <ChevronRight
+                                        class="h-5 w-5 text-slate-400 transition-all group-hover:translate-x-1 group-hover:text-blue-600"
+                                    />
                                 </div>
                                 <CardDescription class="text-sm">{{
                                     model.description
@@ -519,13 +631,22 @@ watch(
                             </CardHeader>
                             <CardContent>
                                 <div class="space-y-3">
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <Badge variant="secondary">
                                             {{ model.type }}
                                         </Badge>
                                         <div class="flex items-center gap-2">
-                                            <div :class="getStatusColor(model.status)" class="h-2 w-2 animate-pulse rounded-full" />
-                                            <span class="text-sm text-slate-600 capitalize">
+                                            <div
+                                                :class="
+                                                    getStatusColor(model.status)
+                                                "
+                                                class="h-2 w-2 animate-pulse rounded-full"
+                                            />
+                                            <span
+                                                class="text-sm text-slate-900 dark:text-slate-400 capitalize"
+                                            >
                                                 {{ model.status }}
                                             </span>
                                         </div>
@@ -533,31 +654,61 @@ watch(
 
                                     <div class="grid grid-cols-2 gap-4 pt-2">
                                         <div>
-                                            <p class="mb-1 text-xs text-slate-500">
+                                            <p
+                                                class="mb-1 text-xs text-slate-900 dark:text-slate-400"
+                                            >
                                                 Accuracy
                                             </p>
-                                            <p class="text-2xl font-semibold text-slate-900 dark:text-slate-400">
-                                                {{ model.analytics?.accuracy != null ? Number(model.analytics.accuracy).toFixed(2) + '%' : '--' }}
+                                            <p
+                                                class="text-2xl font-semibold text-slate-900 dark:text-slate-400"
+                                            >
+                                                {{
+                                                    model.analytics?.accuracy !=
+                                                    null
+                                                        ? Number(
+                                                              model.analytics
+                                                                  .accuracy,
+                                                          ).toFixed(2) + '%'
+                                                        : '--'
+                                                }}
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="mb-1 text-xs text-slate-500">
+                                            <p
+                                                class="mb-1 text-xs text-slate-900 dark:text-slate-400"
+                                            >
                                                 Latest Prediction
                                             </p>
-                                            <p class="text-lg font-semibold text-slate-900 dark:text-slate-400" v-if="model.latest_run_result">
-                                                {{ (parseFloat(JSON.parse(model.latest_run_result.result))).toFixed(2) }}
-<!--                                                    {{ parseFloat(JSON.parse(model.run_results.at(-1).result)).toFixed(2) }}-->
-
+                                            <p
+                                                class="text-lg font-semibold text-slate-900 dark:text-slate-400"
+                                                v-if="model.latest_run_result"
+                                            >
+                                                {{
+                                                    parseFloat(
+                                                        JSON.parse(
+                                                            model
+                                                                .latest_run_result
+                                                                .result,
+                                                        ),
+                                                    ).toFixed(2)
+                                                }}
+                                                <!--                                                    {{ parseFloat(JSON.parse(model.run_results.at(-1).result)).toFixed(2) }}-->
                                             </p>
-                                            <p class="text-lg font-semibold text-slate-900 dark:text-slate-400" v-else>
+                                            <p
+                                                class="text-lg font-semibold text-slate-900 dark:text-slate-400"
+                                                v-else
+                                            >
                                                 --
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div class="flex items-center border-t pt-2 text-xs text-slate-500">
+                                    <div
+                                        class="flex items-center border-t pt-2 text-xs text-slate-900 dark:text-slate-400"
+                                    >
                                         <Calendar class="mr-1 h-3 w-3" />
-                                        Last trained: {{ model.last_trained_on }}
+                                        Last trained:
+                                        {{ model.last_trained_on }}
                                     </div>
                                 </div>
                             </CardContent>

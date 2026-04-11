@@ -14,7 +14,7 @@ import {
     TrendingUp,
     ChartScatter,
 } from 'lucide-vue-next';
-import { usePage, useForm } from '@inertiajs/vue3';
+import { usePage, useForm, Head } from '@inertiajs/vue3';
 import { Form } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { Input } from '@/components/ui/input';
@@ -22,10 +22,11 @@ import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
-    DialogDescription, DialogFooter,
+    DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
+    DialogTrigger,
 } from '@/components/ui/dialog';
 import { route } from 'ziggy-js';
 import { router } from '@inertiajs/vue3';
@@ -76,7 +77,7 @@ const hasViewedResult = ref(false);
 const getMetricStatus = (metric, value) => {
     switch (metric) {
         case 'MAE':
-            if (value < 2) return { label: 'Great', color: 'text-green-600' };
+            if (value < 2) return { label: 'Great', color: 'dark:text-green-500' };
             if (value < 3) return { label: 'Good', color: 'text-blue-600' };
             if (value < 5)
                 return { label: 'Needs Work', color: 'text-yellow-600' };
@@ -138,80 +139,103 @@ const page = usePage();
 
 function parseJsonSafe(v: any) {
     try {
-        return typeof v === 'string' ? JSON.parse(v) : v
+        return typeof v === 'string' ? JSON.parse(v) : v;
     } catch {
-        return v
+        return v;
     }
 }
 
 function toNumber(v: any): number | null {
-    if (v === null || v === undefined) return null
+    if (v === null || v === undefined) return null;
 
-    const decoded = parseJsonSafe(v)
+    const decoded = parseJsonSafe(v);
 
-    if (typeof decoded === 'number') return Number.isFinite(decoded) ? decoded : null
+    if (typeof decoded === 'number')
+        return Number.isFinite(decoded) ? decoded : null;
     if (typeof decoded === 'string') {
-        const n = Number(decoded)
-        return Number.isFinite(n) ? n : null
+        const n = Number(decoded);
+        return Number.isFinite(n) ? n : null;
     }
     if (Array.isArray(decoded)) {
-        const n = Number(decoded[0])
-        return Number.isFinite(n) ? n : null
+        const n = Number(decoded[0]);
+        return Number.isFinite(n) ? n : null;
     }
     if (decoded && typeof decoded === 'object') {
-        const maybe = (decoded.value ?? decoded.result ?? decoded.prediction ?? decoded.y ?? decoded.pred)
-        const n = Number(maybe)
-        return Number.isFinite(n) ? n : null
+        const maybe =
+            decoded.value ??
+            decoded.result ??
+            decoded.prediction ??
+            decoded.y ??
+            decoded.pred;
+        const n = Number(maybe);
+        return Number.isFinite(n) ? n : null;
     }
-    return null
+    return null;
 }
 
 function formatInputsPreview(inputs: any, maxPairs = 4) {
-    const obj = parseJsonSafe(inputs)
-    if (!obj || typeof obj !== 'object') return '—'
+    const obj = parseJsonSafe(inputs);
+    if (!obj || typeof obj !== 'object') return '—';
 
-    const entries = Object.entries(obj).slice(0, maxPairs)
-    const preview = entries.map(([k, v]) => `${k}: ${v}`).join(', ')
-    const total = Object.keys(obj).length
+    const entries = Object.entries(obj).slice(0, maxPairs);
+    const preview = entries.map(([k, v]) => `${k}: ${v}`).join(', ');
+    const total = Object.keys(obj).length;
 
-    return total > maxPairs ? `${preview} … (+${total - maxPairs})` : preview
+    return total > maxPairs ? `${preview} … (+${total - maxPairs})` : preview;
 }
 
-const showSettingsModal = ref(false)
-const confirmingDelete  = ref(false)
-const settingsStatus    = ref(props.model.status)
+const showSettingsModal = ref(false);
+const confirmingDelete = ref(false);
+const settingsStatus = ref(props.model.status);
 
 function toggleStatus() {
-    const newStatus = settingsStatus.value === 'active' ? 'inactive' : 'active'
-    settingsStatus.value = newStatus
+    const newStatus = settingsStatus.value === 'active' ? 'inactive' : 'active';
+    settingsStatus.value = newStatus;
 
-    router.patch(route('predictive-models.status', { model: props.model.id }), {
-        status: newStatus,
-    }, {
-        preserveScroll: true,
-        preserveState:  true,
-    })
+    router.patch(
+        route('predictive-models.status', { model: props.model.id }),
+        {
+            status: newStatus,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
 }
 
 function deleteModel() {
-    router.delete(route('predictive-models.destroy', { model: props.model.id }))
+    router.delete(
+        route('predictive-models.destroy', { model: props.model.id }),
+    );
 }
 
 const actualInputs = ref<Record<number, string>>({});
 
 function submitActual(runId: number) {
-    router.patch(route('predictive-model-run-results.actual', runId), {
-        actual: actualInputs.value[runId],
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            delete actualInputs.value[runId];
+    router.patch(
+        route('predictive-model-run-results.actual', runId),
+        {
+            actual: actualInputs.value[runId],
         },
-    });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                delete actualInputs.value[runId];
+            },
+        },
+    );
 }
 </script>
 
 <template>
+    <Head>
+        <title>Predictive Model Analytic Page</title>
+        <meta
+            name="description"
+            content="Specific organization predictive model page where they can run predictions, export data, view analytical and visual data for their model."
+        />
+    </Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-8">
             <Card>
@@ -228,7 +252,7 @@ function submitActual(runId: number) {
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <Button  @click="showSettingsModal = true">
+                            <Button @click="showSettingsModal = true">
                                 <Settings class="mr-2 h-4 w-4" />
                                 Settings
                             </Button>
@@ -238,8 +262,10 @@ function submitActual(runId: number) {
                             </Button>
                             <Dialog v-model:open="isDialogOpen">
                                 <DialogTrigger as-child>
-                                    <Button @click="resetDialogue"
-                                    :disabled="model.status !== 'active'">
+                                    <Button
+                                        @click="resetDialogue"
+                                        :disabled="model.status !== 'active'"
+                                    >
                                         <Play class="mr-2 h-4 w-4" />
                                         Run Prediction
                                     </Button>
@@ -252,7 +278,7 @@ function submitActual(runId: number) {
                                             hasViewedResult) &&
                                         !isLoadingResult
                                     "
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 rounded-2xl max-h-[90vh] overflow-y-auto"
+                                    class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden overflow-y-auto rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
                                     role="dialog"
                                     aria-modal="true"
                                 >
@@ -271,7 +297,9 @@ function submitActual(runId: number) {
                                             name="model_id"
                                             :value="form.model_id = model.id"
                                         />
-                                        <div class="border rounded-2xl dark:border-slate-700 px-3 py-3">
+                                        <div
+                                            class="rounded-2xl border px-3 py-3 dark:border-slate-700"
+                                        >
                                             <div
                                                 v-for="(
                                                     parameter, index
@@ -282,7 +310,9 @@ function submitActual(runId: number) {
                                             >
                                                 <div class="grid p-2">
                                                     <Label
-                                                        :for="'parameter_' + index"
+                                                        :for="
+                                                            'parameter_' + index
+                                                        "
                                                         class="mb-1 text-left"
                                                     >
                                                         {{
@@ -293,14 +323,18 @@ function submitActual(runId: number) {
                                                     </Label>
                                                     <Input
                                                         required
-                                                        :id="'parameter_' + index"
+                                                        :id="
+                                                            'parameter_' + index
+                                                        "
                                                         :name="
                                                             'parameters[' +
                                                             index +
                                                             ']'
                                                         "
                                                         v-model="
-                                                            form.parameters[index]
+                                                            form.parameters[
+                                                                index
+                                                            ]
                                                         "
                                                         class="col-span-3 rounded border border-slate-900 px-2 py-1 dark:border-slate-400"
                                                     />
@@ -314,10 +348,11 @@ function submitActual(runId: number) {
                                                     <span class="text-left"
                                                         >Actual</span
                                                     >
-                                                    <span class="text-left text-xs"
-                                                        >Entering an Actual value
-                                                        will update the Model
-                                                        Accuracy</span
+                                                    <span
+                                                        class="text-left text-xs"
+                                                        >Entering an Actual
+                                                        value will update the
+                                                        Model Accuracy</span
                                                     >
                                                 </Label>
                                                 <Input
@@ -329,10 +364,10 @@ function submitActual(runId: number) {
                                             </div>
                                         </div>
                                         <DialogFooter class="pt-2">
-                                            <Button type="submit"
-                                                    class="mt-3 rounded-lg border border-green-300 bg-white font-medium
-                                                       text-gray-600 transition-colors hover:bg-green-50
-                                                       dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30">
+                                            <Button
+                                                type="submit"
+                                                class="mt-3 rounded-lg border border-green-300 bg-white font-medium text-gray-600 transition-colors hover:bg-green-50 dark:border-green-800 dark:bg-transparent dark:text-gray-400 dark:hover:bg-green-900/30"
+                                            >
                                                 Run
                                             </Button>
                                         </DialogFooter>
@@ -340,7 +375,7 @@ function submitActual(runId: number) {
                                 </DialogContent>
                                 <DialogContent
                                     v-else-if="isLoadingResult"
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
+                                    class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden overflow-y-auto rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
                                     role="dialog"
                                     aria-modal="true"
                                 >
@@ -381,7 +416,7 @@ function submitActual(runId: number) {
                                     v-else-if="
                                         page.props.flash.prediction_failed
                                     "
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
+                                    class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden overflow-y-auto rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
                                     role="dialog"
                                     aria-modal="true"
                                 >
@@ -416,7 +451,7 @@ function submitActual(runId: number) {
                                 </DialogContent>
                                 <DialogContent
                                     v-else
-                                    class="flex w-full max-w-lg flex-col overflow-hidden border rounded-2xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 max-h-[90vh] overflow-y-auto"
+                                    class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden overflow-y-auto rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
                                     role="dialog"
                                     aria-modal="true"
                                 >
@@ -429,7 +464,7 @@ function submitActual(runId: number) {
                                             Below</DialogDescription
                                         >
                                     </DialogHeader>
-                                    <Label class="font-bold text-md"
+                                    <Label class="text-md font-bold"
                                         >Inputs Given:
                                     </Label>
                                     <div class="flex flex-col gap-1">
@@ -445,7 +480,8 @@ function submitActual(runId: number) {
                                     <Label class="text-md font-bold"
                                         >Result:</Label
                                     >
-                                    <span class="text-black/80 dark:text-white/50 text-sm"
+                                    <span
+                                        class="text-sm text-black/80 dark:text-white/50"
                                         >Predicted {{ model.target }}:
                                         {{
                                             Number(
@@ -787,18 +823,18 @@ function submitActual(runId: number) {
             @click.self="showRunDataModal = false"
         >
             <div
-                class="flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border bg-white shadow-xl
-       dark:border-slate-700 dark:bg-slate-900"
+                class="flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
                 role="dialog"
                 aria-modal="true"
             >
                 <!-- Header -->
                 <div
-                    class="flex items-center justify-between border-b px-6 py-4
-         dark:border-slate-700"
+                    class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-700"
                 >
                     <div>
-                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        <h2
+                            class="text-lg font-semibold text-slate-900 dark:text-slate-100"
+                        >
                             Run Results
                         </h2>
                         <p class="text-sm text-slate-500 dark:text-slate-400">
@@ -807,8 +843,7 @@ function submitActual(runId: number) {
                     </div>
                     <button
                         @click="showRunDataModal = false"
-                        class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200
-           dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                        class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
                         X
                     </button>
@@ -818,122 +853,211 @@ function submitActual(runId: number) {
                 <div class="flex-1 overflow-auto">
                     <table class="min-w-full text-left text-sm">
                         <thead
-                            class="sticky top-0 z-10 border-b bg-white/95 backdrop-blur
-             dark:border-slate-700 dark:bg-slate-900/95"
+                            class="sticky top-0 z-10 border-b bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95"
                         >
-                        <tr>
-                            <th class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300">ID</th>
-                            <th class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300">Date</th>
-                            <th class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300">Inputs</th>
-                            <th class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300">Predicted</th>
-                            <th class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300">Actual</th>
-                            <th class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300">Residual</th>
-                        </tr>
+                            <tr>
+                                <th
+                                    class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300"
+                                >
+                                    ID
+                                </th>
+                                <th
+                                    class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300"
+                                >
+                                    Date
+                                </th>
+                                <th
+                                    class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300"
+                                >
+                                    Inputs
+                                </th>
+                                <th
+                                    class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300"
+                                >
+                                    Predicted
+                                </th>
+                                <th
+                                    class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300"
+                                >
+                                    Actual
+                                </th>
+                                <th
+                                    class="px-6 py-3 font-medium text-slate-600 dark:text-slate-300"
+                                >
+                                    Residual
+                                </th>
+                            </tr>
                         </thead>
 
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                        <tr
-                            v-for="run in runResults"
-                            :key="run.id"
-                            class="hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                        <tbody
+                            class="divide-y divide-slate-100 dark:divide-slate-800"
                         >
-                            <td class="px-6 py-3 text-slate-500 dark:text-slate-400">
-                                {{ run.id }}
-                            </td>
-
-                            <td class="px-6 py-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
-                                {{ new Date(run.created_at).toLocaleString() }}
-                            </td>
-
-                            <td class="px-6 py-3 max-w-[420px]">
-                                <div
-                                    class="truncate text-slate-600 dark:text-slate-300"
-                                    :title="JSON.stringify(parseJsonSafe(run.inputs), null, 2)"
+                            <tr
+                                v-for="run in runResults"
+                                :key="run.id"
+                                class="hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                            >
+                                <td
+                                    class="px-6 py-3 text-slate-500 dark:text-slate-400"
                                 >
-                                    {{ formatInputsPreview(run.inputs) }}
-                                </div>
-                            </td>
+                                    {{ run.id }}
+                                </td>
 
-                            <td class="px-6 py-3 font-medium text-emerald-700 dark:text-emerald-400">
-                                {{ toNumber(run.result) ?? '—' }}
-                            </td>
+                                <td
+                                    class="px-6 py-3 whitespace-nowrap text-slate-700 dark:text-slate-200"
+                                >
+                                    {{
+                                        new Date(
+                                            run.created_at,
+                                        ).toLocaleString()
+                                    }}
+                                </td>
 
-                            <!-- Actual -->
-                            <td class="px-6 py-3 font-medium text-rose-700 dark:text-rose-400">
-                                <div v-if="toNumber(run.actual) !== null">
-                                    {{ toNumber(run.actual) }}
-                                </div>
-                                <div v-else class="flex items-center gap-2">
-                                    <input
-                                        v-model="actualInputs[run.id]"
-                                        type="number"
-                                        step="any"
-                                        placeholder="Enter actual"
-                                        class="w-32 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm
-                   text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2
-                   focus:ring-slate-300 dark:border-slate-600 dark:bg-slate-800
-                   dark:text-slate-200 dark:placeholder-slate-500"
-                                    />
-                                    <button
-                                        @click="submitActual(run.id)"
-                                        :disabled="!actualInputs[run.id]"
-                                        class="rounded-lg bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700
-                   hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-40
-                   transition-colors dark:bg-slate-700 dark:text-slate-200
-                   dark:hover:bg-slate-600"
+                                <td class="max-w-[420px] px-6 py-3">
+                                    <div
+                                        class="truncate text-slate-600 dark:text-slate-300"
+                                        :title="
+                                            JSON.stringify(
+                                                parseJsonSafe(run.inputs),
+                                                null,
+                                                2,
+                                            )
+                                        "
                                     >
-                                        Submit
-                                    </button>
-                                </div>
-                            </td>
+                                        {{ formatInputsPreview(run.inputs) }}
+                                    </div>
+                                </td>
 
-                            <td class="px-6 py-3 font-medium text-slate-800 dark:text-slate-100">
-                                {{
-                                    (toNumber(run.actual) !== null && toNumber(run.result) !== null)
-                                        ? (toNumber(run.actual)! - toNumber(run.result)!).toFixed(3)
-                                        : '—'
-                                }}
-                            </td>
-                        </tr>
+                                <td
+                                    class="px-6 py-3 font-medium text-emerald-700 dark:text-emerald-400"
+                                >
+                                    {{ toNumber(run.result) ?? '—' }}
+                                </td>
 
-                        <tr v-if="!runResults?.length">
-                            <td colspan="6" class="px-6 py-6 text-center text-red-500 dark:text-red-400">
-                                No run results yet.
-                            </td>
-                        </tr>
+                                <!-- Actual -->
+                                <td
+                                    class="px-6 py-3 font-medium text-rose-700 dark:text-rose-400"
+                                >
+                                    <div v-if="toNumber(run.actual) !== null">
+                                        {{ toNumber(run.actual) }}
+                                    </div>
+                                    <div v-else class="flex items-center gap-2">
+                                        <input
+                                            v-model="actualInputs[run.id]"
+                                            type="number"
+                                            step="any"
+                                            placeholder="Enter actual"
+                                            class="w-32 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-700 placeholder-slate-400 focus:ring-2 focus:ring-slate-300 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-500"
+                                        />
+                                        <button
+                                            @click="submitActual(run.id)"
+                                            :disabled="!actualInputs[run.id]"
+                                            class="rounded-lg bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                                        >
+                                            Submit
+                                        </button>
+                                    </div>
+                                </td>
+
+                                <td
+                                    class="px-6 py-3 font-medium text-slate-800 dark:text-slate-100"
+                                >
+                                    {{
+                                        toNumber(run.actual) !== null &&
+                                        toNumber(run.result) !== null
+                                            ? (
+                                                  toNumber(run.actual)! -
+                                                  toNumber(run.result)!
+                                              ).toFixed(3)
+                                            : '—'
+                                    }}
+                                </td>
+                            </tr>
+
+                            <tr v-if="!runResults?.length">
+                                <td
+                                    colspan="6"
+                                    class="px-6 py-6 text-center text-red-500 dark:text-red-400"
+                                >
+                                    No run results yet.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center justify-between border-t px-6 py-4 dark:border-slate-700">
+                <div
+                    class="flex items-center justify-between border-t px-6 py-4 dark:border-slate-700"
+                >
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-medium text-slate-400 dark:text-slate-500">Export:</span>
-                        <a :href="runResults.length > 0 ? route('predictive-models.export.csv', model.id) : undefined"
-                           :class="runResults.length === 0 ? 'pointer-events-none opacity-40 cursor-not-allowed' : ''"
-                           class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
-               font-medium text-slate-700 transition-colors hover:bg-slate-50
-               dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        <span
+                            class="text-xs font-medium text-slate-400 dark:text-slate-500"
+                            >Export:</span
                         >
-                        <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                 a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        CSV
+                        <a
+                            :href="
+                                runResults.length > 0
+                                    ? route(
+                                          'predictive-models.export.csv',
+                                          model.id,
+                                      )
+                                    : undefined
+                            "
+                            :class="
+                                runResults.length === 0
+                                    ? 'pointer-events-none cursor-not-allowed opacity-40'
+                                    : ''
+                            "
+                            class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        >
+                            <svg
+                                class="h-4 w-4 text-green-600"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
+                 a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            CSV
                         </a>
 
-                        <a :href="runResults.length > 0 ? route('predictive-models.export.excel', model.id) : undefined"
-                           :class="runResults.length === 0 ? 'pointer-events-none opacity-40 cursor-not-allowed' : ''"
-                           class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm
-                        font-medium text-slate-700 transition-colors hover:bg-slate-50
-                        dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        <a
+                            :href="
+                                runResults.length > 0
+                                    ? route(
+                                          'predictive-models.export.excel',
+                                          model.id,
+                                      )
+                                    : undefined
+                            "
+                            :class="
+                                runResults.length === 0
+                                    ? 'pointer-events-none cursor-not-allowed opacity-40'
+                                    : ''
+                            "
+                            class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
-                        <svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M3 10h18M3 14h18M10 3v18M3 3h18v18H3V3z"/>
-                        </svg>
-                        Excel
+                            <svg
+                                class="h-4 w-4 text-emerald-600"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3 10h18M3 14h18M10 3v18M3 3h18v18H3V3z"
+                                />
+                            </svg>
+                            Excel
                         </a>
                     </div>
                 </div>
@@ -942,25 +1066,36 @@ function submitActual(runId: number) {
         <div
             v-if="showSettingsModal"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-            @click.self="showSettingsModal = false; confirmingDelete = false"
+            @click.self="
+                showSettingsModal = false;
+                confirmingDelete = false;
+            "
         >
             <div
-                class="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border bg-white shadow-xl
-               dark:border-slate-700 dark:bg-slate-900"
+                class="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
                 role="dialog"
                 aria-modal="true"
             >
                 <!-- Header -->
-                <div class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-700">
+                <div
+                    class="flex items-center justify-between border-b px-6 py-4 dark:border-slate-700"
+                >
                     <div>
-                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        <h2
+                            class="text-lg font-semibold text-slate-900 dark:text-slate-100"
+                        >
                             Model Settings
                         </h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">{{ model.name }}</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">
+                            {{ model.name }}
+                        </p>
                     </div>
                     <button
-                        @click="showSettingsModal = false; confirmingDelete = false"
-                        class="text-slate-400 hover:text-slate-600 transition-colors dark:hover:text-slate-200"
+                        @click="
+                            showSettingsModal = false;
+                            confirmingDelete = false;
+                        "
+                        class="text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
                     >
                         ✕
                     </button>
@@ -968,97 +1103,141 @@ function submitActual(runId: number) {
 
                 <div class="flex flex-col gap-4 px-6 py-5">
                     <!-- Status toggle -->
-                    <div class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3
-                        dark:border-slate-700">
+                    <div
+                        class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 dark:border-slate-700"
+                    >
                         <div>
-                            <p class="text-sm font-medium text-slate-800 dark:text-slate-100">Model Status</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                            <p
+                                class="text-sm font-medium text-slate-800 dark:text-slate-100"
+                            >
+                                Model Status
+                            </p>
+                            <p
+                                class="text-xs text-slate-500 dark:text-slate-400"
+                            >
                                 Currently
-                                <span :class="settingsStatus === 'active'
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-slate-400'">
-                            {{ settingsStatus }}
-                        </span>
+                                <span
+                                    :class="
+                                        settingsStatus === 'active'
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-slate-400'
+                                    "
+                                >
+                                    {{ settingsStatus }}
+                                </span>
                             </p>
                         </div>
                         <button
                             @click="toggleStatus"
                             :class="[
-                        'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2',
-                        'border-transparent transition-colors duration-200 focus:outline-none',
-                        settingsStatus === 'active'
-                            ? 'bg-emerald-500'
-                            : 'bg-slate-300 dark:bg-slate-600'
-                    ]"
+                                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2',
+                                'border-transparent transition-colors duration-200 focus:outline-none',
+                                settingsStatus === 'active'
+                                    ? 'bg-emerald-500'
+                                    : 'bg-slate-300 dark:bg-slate-600',
+                            ]"
                         >
-                    <span
-                        :class="[
-                            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow',
-                            'transform transition duration-200',
-                            settingsStatus === 'active' ? 'translate-x-5' : 'translate-x-0'
-                        ]"
-                    />
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow',
+                                    'transform transition duration-200',
+                                    settingsStatus === 'active'
+                                        ? 'translate-x-5'
+                                        : 'translate-x-0',
+                                ]"
+                            />
                         </button>
                     </div>
 
                     <!-- Model info -->
-                    <div class="divide-y rounded-xl border border-slate-200 dark:border-slate-700 dark:divide-slate-700">
+                    <div
+                        class="divide-y rounded-xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700"
+                    >
                         <div class="flex items-start justify-between px-4 py-3">
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Type</span>
-                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right">{{ model.type ?? '—' }}</span>
+                            <span
+                                class="text-xs font-medium text-slate-500 dark:text-slate-400"
+                                >Type</span
+                            >
+                            <span
+                                class="text-right text-xs text-slate-800 dark:text-slate-100"
+                                >{{ model.type ?? '—' }}</span
+                            >
                         </div>
                         <div class="flex items-start justify-between px-4 py-3">
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Target</span>
-                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right">{{ model.target ?? '—' }}</span>
+                            <span
+                                class="text-xs font-medium text-slate-500 dark:text-slate-400"
+                                >Target</span
+                            >
+                            <span
+                                class="text-right text-xs text-slate-800 dark:text-slate-100"
+                                >{{ model.target ?? '—' }}</span
+                            >
                         </div>
                         <div class="flex items-start justify-between px-4 py-3">
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Required Parameters</span>
-                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right max-w-[60%]">
-                        {{ model.required_parameters ?? '—' }}</span>
+                            <span
+                                class="text-xs font-medium text-slate-500 dark:text-slate-400"
+                                >Required Parameters</span
+                            >
+                            <span
+                                class="max-w-[60%] text-right text-xs text-slate-800 dark:text-slate-100"
+                            >
+                                {{ model.required_parameters ?? '—' }}</span
+                            >
                         </div>
                         <div class="flex items-start justify-between px-4 py-3">
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Model File</span>
-                            <span class="text-xs text-slate-800 dark:text-slate-100 text-right max-w-[60%] break-all">
-                        {{ model.path ?? '—' }}</span>
+                            <span
+                                class="text-xs font-medium text-slate-500 dark:text-slate-400"
+                                >Model File</span
+                            >
+                            <span
+                                class="max-w-[60%] text-right text-xs break-all text-slate-800 dark:text-slate-100"
+                            >
+                                {{ model.path ?? '—' }}</span
+                            >
                         </div>
                     </div>
 
                     <!-- Delete button -->
-                    <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3
-                        dark:border-rose-900/50 dark:bg-rose-950/20">
-                        <p class="text-sm font-medium text-rose-700 dark:text-rose-400">Danger Zone</p>
-                        <p class="mt-0.5 text-xs text-rose-600/80 dark:text-rose-400/70">
-                            Permanently deletes this model and all its run results. This cannot be undone.
+                    <div
+                        class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 dark:border-rose-900/50 dark:bg-rose-950/20"
+                    >
+                        <p
+                            class="text-sm font-medium text-rose-700 dark:text-rose-400"
+                        >
+                            Danger Zone
+                        </p>
+                        <p
+                            class="mt-0.5 text-xs text-rose-600/80 dark:text-rose-400/70"
+                        >
+                            Permanently deletes this model and all its run
+                            results. This cannot be undone.
                         </p>
                         <button
                             v-if="!confirmingDelete"
                             @click="confirmingDelete = true"
-                            class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium
-                           text-rose-600 transition-colors hover:bg-rose-50
-                           dark:border-rose-800 dark:bg-transparent dark:text-rose-400 dark:hover:bg-rose-900/30"
+                            class="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-800 dark:bg-transparent dark:text-rose-400 dark:hover:bg-rose-900/30"
                         >
                             Delete Model
                         </button>
                         <div v-else class="mt-3 flex items-center gap-2">
-                            <span class="text-xs text-rose-600 dark:text-rose-400">Are you sure?</span>
+                            <span
+                                class="text-xs text-rose-600 dark:text-rose-400"
+                                >Are you sure?</span
+                            >
                             <button
                                 @click="deleteModel"
-                                class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white
-                               hover:bg-rose-700 transition-colors"
+                                class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-rose-700"
                             >
                                 Yes, delete
                             </button>
                             <button
                                 @click="confirmingDelete = false"
-                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium
-                               text-slate-600 hover:bg-slate-50 transition-colors
-                               dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                             >
                                 Cancel
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
