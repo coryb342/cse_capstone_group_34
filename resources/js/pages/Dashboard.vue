@@ -6,12 +6,17 @@ import { Head, usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Icon } from '@iconify/vue';
 
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const zip = ref('');
 const gauge = ref('');
 const selectedModel = ref('');
+
+import ResidualScatterPlot from '@/components/charts/residualScatterPlot.vue';
+import ActualVsPredScatterPlot from '@/components/charts/ActualVsPredScatterPlot.vue';
+import MetricChart from '@/components/charts/MetricChart.vue';
+const selectedGraph = ref('');
 
 function updateDashboard() {
     router.get('/dashboard', {
@@ -28,6 +33,28 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const page = usePage();
+const currentModel = computed(() => {
+    return (
+        page.props.models.find(
+            (model: any) => String(model.id) === String(selectedModel.value),
+        ) || null
+    );
+});
+
+const residualScatter = computed(() => {
+    return currentModel.value?.residualScatter ?? { points: [] };
+});
+
+const analytics = computed(() => {
+    return currentModel.value?.analytics ?? null;
+});
+
+const actualPredPoints = computed(() => {
+    return (residualScatter.value.points ?? []).map((p: any) => ({
+        predicted: p.x,
+        actual: p.x - p.y,
+    }));
+});
 </script>
 
 <template>
@@ -35,10 +62,8 @@ const page = usePage();
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <!-- Error Display -->
-        <div v-if="page.props.errors">
-            <div v-for="(index, error) in page.props.errors" :key="index">
-                <span class="text-red-600">{{ error }}</span>
-            </div>
+        <div v-for="(error, index) in page.props.errors" :key="index">
+            <span class="text-red-600">{{ error }}</span>
         </div>
 
         <!-- Main Dash -->
@@ -202,17 +227,62 @@ const page = usePage();
                         <option
                             v-for="model in page.props.models"
                             :key="model.id"
-                            :value="model.id"
+                            :value="String(model.id)"
                         >
                             {{ model.name }}
                         </option>
                     </select>
                 </div>
 
-                <PlaceholderPattern />
-                <p class="mt-4 text-center text-sm text-gray-500">
-                    Selected model: {{ selectedModel }}
-                </p>
+                <div class="absolute top-16 right-4 z-50">
+                    <select
+                        v-model="selectedGraph"
+                        class="rounded border px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100"
+                    >
+                        <option disabled value="">Select a Graph</option>
+                        <option value="residual">Residual Scatter</option>
+                        <option value="actualPred">Actual vs Predicted</option>
+                        <option value="metric">Metric Chart</option>
+                    </select>
+                </div>
+                <!-- Show nothing until both dropdowns are selected -->
+                <div
+                    v-if="!selectedModel || !selectedGraph"
+                    class="py-20 text-center text-gray-500"
+                >
+                    Select a model and a graph to view analytics
+                </div>
+
+                <div
+                    v-else-if="
+                        selectedGraph === 'residual' &&
+                        residualScatter.points?.length
+                    "
+                    class="w-full p-8"
+                >
+                    <ResidualScatterPlot :points="residualScatter.points" />
+                </div>
+
+                <div
+                    v-else-if="
+                        selectedGraph === 'actualPred' &&
+                        actualPredPoints.length
+                    "
+                    class="w-full p-8"
+                >
+                    <ActualVsPredScatterPlot :points="actualPredPoints" />
+                </div>
+
+                <div
+                    v-else-if="selectedGraph === 'metric' && analytics"
+                    class="w-full p-8"
+                >
+                    <MetricChart :analytics="analytics" />
+                </div>
+
+                <div v-else class="py-20 text-center text-gray-500">
+                    No data available for this graph
+                </div>
             </div>
         </div>
     </AppLayout>
