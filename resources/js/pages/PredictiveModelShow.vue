@@ -77,38 +77,32 @@ const hasViewedResult = ref(false);
 const getMetricStatus = (metric, value) => {
     switch (metric) {
         case 'MAE':
-            if (value < 2) return { label: 'Great', color: 'dark:text-green-500' };
-            if (value < 3) return { label: 'Good', color: 'text-blue-600' };
-            if (value < 5)
-                return { label: 'Needs Work', color: 'text-yellow-600' };
-            return { label: 'Poor', color: 'text-red-600' };
+            if (value < 2) return { label: 'Great', color: 'text-green-700 dark:text-green-400' };
+            if (value < 3) return { label: 'Good', color: 'text-blue-700 dark:text-blue-400' };
+            if (value < 5) return { label: 'Needs Work', color: 'text-yellow-700 dark:text-yellow-300' };
+            return { label: 'Poor', color: 'text-red-700 dark:text-red-400' };
 
         case 'MSE':
-            if (value < 10) return { label: 'Great', color: 'text-green-600' };
-            if (value < 25) return { label: 'Good', color: 'text-blue-600' };
-            if (value < 50)
-                return { label: 'Needs Work', color: 'text-yellow-600' };
-            return { label: 'Poor', color: 'text-red-600' };
+            if (value < 10) return { label: 'Great', color: 'text-green-700 dark:text-green-400' };
+            if (value < 25) return { label: 'Good', color: 'text-blue-700 dark:text-blue-400' };
+            if (value < 50) return { label: 'Needs Work', color: 'text-yellow-700 dark:text-yellow-300' };
+            return { label: 'Poor', color: 'text-red-700 dark:text-red-400' };
 
         case 'RMSE':
-            if (value < 2) return { label: 'Great', color: 'text-green-600' };
-            if (value < 3) return { label: 'Good', color: 'text-blue-600' };
-            if (value < 5)
-                return { label: 'Needs Work', color: 'text-yellow-600' };
-            return { label: 'Poor', color: 'text-red-600' };
+            if (value < 2) return { label: 'Great', color: 'text-green-700 dark:text-green-400' };
+            if (value < 3) return { label: 'Good', color: 'text-blue-700 dark:text-blue-400' };
+            if (value < 5) return { label: 'Needs Work', color: 'text-purple-700 dark:text-purple-400' };
+            return { label: 'Poor', color: 'text-red-700 dark:text-red-400' };
 
         case 'R2':
-            if (value > 0.85)
-                return { label: 'Excellent', color: 'text-green-600' };
-            if (value > 0.7)
-                return { label: 'Very Good', color: 'text-blue-600' };
-            if (value > 0.5) return { label: 'Good', color: 'text-yellow-600' };
-            if (value > 0.3)
-                return { label: 'Moderate', color: 'text-orange-600' };
-            return { label: 'Weak', color: 'text-red-600' };
+            if (value > 0.85) return { label: 'Excellent', color: 'text-green-700 dark:text-green-400' };
+            if (value > 0.7)  return { label: 'Very Good', color: 'text-blue-700 dark:text-blue-400' };
+            if (value > 0.5)  return { label: 'Good', color: 'text-yellow-700 dark:text-yellow-300' };
+            if (value > 0.3)  return { label: 'Moderate', color: 'text-orange-700 dark:text-orange-400' };
+            return { label: 'Weak', color: 'text-red-700 dark:text-red-400' };
 
         default:
-            return { label: '', color: 'text-gray-600' };
+            return { label: '', color: 'text-gray-700 dark:text-gray-400' };
     }
 };
 
@@ -587,9 +581,9 @@ function submitActual(runId: number) {
                                 >
                                     {{ props.totalPredictions }}
                                 </div>
-                                <div class="text-sm text-slate-500">
-                                    Last 30 days
-                                </div>
+<!--                                <div class="text-sm text-slate-500">-->
+<!--                                    Last 30 days-->
+<!--                                </div>-->
                             </CardContent>
                         </Card>
                     </div>

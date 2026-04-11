@@ -39,6 +39,13 @@ onUnmounted(() => {
 </script>
 
 <template>
+    <Head>
+        <title>Two Factor Authentication</title>
+        <meta
+            name="description"
+            content="Set up two factor authentication for FSF."
+        />
+    </Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head title="Two-Factor Authentication" />
         <SettingsLayout>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { usePage, useForm } from '@inertiajs/vue3';
+import { usePage, useForm, Head } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { ref, watch } from 'vue';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import { Label } from 'reka-ui';
 import {
     Table,
@@ -14,7 +14,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
     Card,
     CardContent,
@@ -41,17 +41,13 @@ const props = defineProps<{
 
 const show = ref(false);
 
-
 const userId = ref<string | number>('');
 const modelId = ref<string | number>('');
-
 
 const showActivateDialog = ref(false);
 const selectedToken = ref<any | null>(null);
 const tokenName = ref('');
 const generatedToken = ref('');
-
-
 
 // flash watcher
 watch(
@@ -64,7 +60,7 @@ watch(
             }, 3000);
         }
     },
-    { immediate: true }
+    { immediate: true },
 );
 watch(
     () => page.props.flash.token,
@@ -73,7 +69,7 @@ watch(
             generatedToken.value = newVal as string;
         }
     },
-    { immediate: true }
+    { immediate: true },
 );
 
 // grant access for selected user + model
@@ -94,21 +90,17 @@ function grantAccess() {
     });
 }
 
-
 function getCurrentUserAccessTokens() {
     const currentId = page.props.auth.user.id;
 
-    const user = props.users.find(u => u.id === currentId);
+    const user = props.users.find((u) => u.id === currentId);
     return user?.access_tokens ?? [];
 }
 
-
 function getAdminUsers() {
     const currentId = page.props.auth.user.id;
-    return props.users.filter(u => u.id !== currentId);
+    return props.users.filter((u) => u.id !== currentId);
 }
-
-
 
 // activate dialog helpers
 function openActivateDialog(token: any) {
@@ -117,9 +109,6 @@ function openActivateDialog(token: any) {
     generatedToken.value = '';
     showActivateDialog.value = true;
 }
-
-
-
 
 function generateToken() {
     if (!selectedToken.value) return;
@@ -141,10 +130,6 @@ function generateToken() {
     });
 }
 
-
-
-
-
 function deleteToken(tokenId: number) {
     if (!confirm('Are you sure you want to delete this token?')) {
         return;
@@ -160,10 +145,16 @@ function deleteToken(tokenId: number) {
         },
     });
 }
-
 </script>
 
 <template>
+    <Head>
+        <title>Model Access Token Management</title>
+        <meta
+            name="description"
+            content="Manage model access tokens on specific models within the organization."
+        />
+    </Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <!-- errors -->
         <div v-if="page.props.errors">
@@ -172,11 +163,10 @@ function deleteToken(tokenId: number) {
             </div>
         </div>
 
-
         <transition name="fade">
             <div
                 v-if="show && $page.props.flash.success"
-                class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded shadow-lg z-50"
+                class="fixed top-4 right-4 z-50 rounded bg-green-600 px-6 py-3 text-white shadow-lg"
             >
                 {{ page.props.flash.success }}
             </div>
@@ -186,7 +176,9 @@ function deleteToken(tokenId: number) {
             <Card>
                 <CardHeader>
                     <CardTitle>
-                        <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+                        <h1
+                            class="mb-2 text-4xl font-bold text-slate-900 dark:text-white"
+                        >
                             Model Access Tokens
                         </h1>
                         <p class="text-slate-600 dark:text-slate-400">
@@ -196,27 +188,41 @@ function deleteToken(tokenId: number) {
                 </CardHeader>
 
                 <!-- ADMIN SECTION -->
-                <div v-if="page.props.auth.user_roles.some(role => role.name === 'Admin')" class="ml-8 mr-8 space-y-6 mb-10">
+                <div
+                    v-if="
+                        page.props.auth.user_roles.some(
+                            (role) => role.name === 'Admin',
+                        )
+                    "
+                    class="mr-8 mb-10 ml-8 space-y-6"
+                >
                     <!-- Create token card -->
                     <Card>
                         <CardHeader>
-                            <CardTitle>Create Access Token</CardTitle>
+                            <h1 class="font-semibold">Create Access Token</h1>
                             <CardDescription>
-                                Select a user and model. Token will be auto generated.
+                                Select a user and model. Token will be auto
+                                generated.
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-4">
                             <div class="grid gap-4 md:grid-cols-3">
                                 <!-- Select User -->
                                 <div>
-                                    <Label for="user_id" class="mb-1 block">User</Label>
+                                    <Label for="user_id" class="mb-1 block"
+                                        >User</Label
+                                    >
                                     <select
                                         id="user_id"
                                         v-model="userId"
-                                        class="w-full rounded-md border border-sidebar-border/70 dark:border-sidebar-border bg-background px-3 py-2 text-sm"
+                                        class="w-full rounded-md border border-sidebar-border/70 bg-background px-3 py-2 text-sm dark:border-sidebar-border"
                                     >
                                         <option value="">Select user</option>
-                                        <option v-for="user in props.users" :key="user.id" :value="user.id">
+                                        <option
+                                            v-for="user in props.users"
+                                            :key="user.id"
+                                            :value="user.id"
+                                        >
                                             {{ user.name }} ({{ user.email }})
                                         </option>
                                     </select>
@@ -224,14 +230,20 @@ function deleteToken(tokenId: number) {
 
                                 <!-- Model select -->
                                 <div>
-                                    <Label for="model_id" class="mb-1 block">Model</Label>
+                                    <Label for="model_id" class="mb-1 block"
+                                        >Model</Label
+                                    >
                                     <select
                                         id="model_id"
                                         v-model="modelId"
-                                        class="w-full rounded-md border border-sidebar-border/70 dark:border-sidebar-border bg-background px-3 py-2 text-sm"
+                                        class="w-full rounded-md border border-sidebar-border/70 bg-background px-3 py-2 text-sm dark:border-sidebar-border"
                                     >
                                         <option value="">Select model</option>
-                                        <option v-for="model in props.models" :key="model.id" :value="model.id">
+                                        <option
+                                            v-for="model in props.models"
+                                            :key="model.id"
+                                            :value="model.id"
+                                        >
                                             {{ model.name }}
                                         </option>
                                     </select>
@@ -249,7 +261,7 @@ function deleteToken(tokenId: number) {
 
                     <!-- Admin tokens table (excluding current user) -->
                     <div
-                        class="mt-6 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border overflow-x-auto"
+                        class="mt-6 overflow-x-auto rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
                     >
                         <Table class="w-full border-collapse">
                             <TableHeader>
@@ -263,23 +275,39 @@ function deleteToken(tokenId: number) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                <template v-for="user in getAdminUsers()" :key="user.id">
+                                <template
+                                    v-for="user in getAdminUsers()"
+                                    :key="user.id"
+                                >
                                     <TableRow
                                         v-for="token in user.access_tokens"
                                         :key="token.id"
                                     >
-                                        <TableCell class="font-medium">{{ user.name }}</TableCell>
+                                        <TableCell class="font-medium">{{
+                                            user.name
+                                        }}</TableCell>
                                         <TableCell>{{ user.email }}</TableCell>
-                                        <TableCell>{{models.find(m => m.id === token.model_id).name}}</TableCell>
-                                        <TableCell>{{ token.token_name ?? `Token #${token.id}` }}</TableCell>
-                                        <TableCell>{{ token.status === 'inactive' ? 'Inactive' : 'Active' }}</TableCell>
+                                        <TableCell>{{
+                                            models.find(
+                                                (m) => m.id === token.model_id,
+                                            ).name
+                                        }}</TableCell>
+                                        <TableCell>{{
+                                            token.token_name ??
+                                            `Token #${token.id}`
+                                        }}</TableCell>
+                                        <TableCell>{{
+                                            token.status === 'inactive'
+                                                ? 'Inactive'
+                                                : 'Active'
+                                        }}</TableCell>
                                         <TableCell>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
                                                 @click="deleteToken(token.id)"
                                             >
-                                                <Trash2Icon class="w-4 h-4" />
+                                                <Trash2Icon class="h-4 w-4" />
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -289,18 +317,17 @@ function deleteToken(tokenId: number) {
                     </div>
                 </div>
 
-
-                <div class="ml-8 mr-8 mt-6 mb-10">
+                <div class="mt-6 mr-8 mb-10 ml-8">
                     <Card>
                         <CardHeader>
-                            <CardTitle>My Access Tokens</CardTitle>
+                            <h1 class="font-semibold">My Access Tokens</h1>
                             <CardDescription>
                                 Active access tokens assigned to you.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div
-                                class="rounded-xl border border-sidebar-border/70 dark:border-sidebar-border overflow-x-auto"
+                                class="overflow-x-auto rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
                             >
                                 <Table class="w-full border-collapse">
                                     <TableHeader>
@@ -317,31 +344,56 @@ function deleteToken(tokenId: number) {
                                             :key="token.id"
                                         >
                                             <TableCell class="font-medium">
-                                                {{models.find(m => m.id === token.model_id).name}}
+                                                {{
+                                                    models.find(
+                                                        (m) =>
+                                                            m.id ===
+                                                            token.model_id,
+                                                    ).name
+                                                }}
                                             </TableCell>
                                             <TableCell>
-                                                {{ token.token_name ?? `Token #${token.id}` }}
+                                                {{
+                                                    token.token_name ??
+                                                    `Token #${token.id}`
+                                                }}
                                             </TableCell>
                                             <TableCell>
                                                 <Button
-                                                    v-if="token.status === 'inactive'"
+                                                    v-if="
+                                                        token.status ===
+                                                        'inactive'
+                                                    "
                                                     size="sm"
-                                                    @click="openActivateDialog(token)"
+                                                    @click="
+                                                        openActivateDialog(
+                                                            token,
+                                                        )
+                                                    "
                                                 >
                                                     Activate
                                                 </Button>
                                                 <!-- otherwise just show status text -->
                                                 <span v-else>
-                                                    {{ token.status === 'active' ? 'Active' : token.status }}
+                                                    {{
+                                                        token.status ===
+                                                        'active'
+                                                            ? 'Active'
+                                                            : token.status
+                                                    }}
                                                 </span>
                                             </TableCell>
                                             <TableCell>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    @click="deleteToken(token.id)"
+                                                    @click="
+                                                        deleteToken(token.id)
+                                                    "
                                                 >
-                                                    <Trash2Icon class="w-4 h-4" />
+                                                    <Trash2Icon
+                                                        class="h-4 w-4"
+                                                    />
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
@@ -354,13 +406,13 @@ function deleteToken(tokenId: number) {
             </Card>
         </div>
 
-
-
         <div
             v-if="showActivateDialog"
             class="fixed inset-0 z-50 flex items-center justify-center"
         >
-            <Card class="w-full max-w-md border border-sidebar-border/70 dark:border-sidebar-border">
+            <Card
+                class="w-full max-w-md border border-sidebar-border/70 dark:border-sidebar-border"
+            >
                 <CardHeader>
                     <CardTitle>Activate Token</CardTitle>
                     <CardDescription>
@@ -374,23 +426,22 @@ function deleteToken(tokenId: number) {
                         <input
                             id="token_name"
                             v-model="tokenName"
-                            class="w-full rounded-md border border-sidebar-border/70 dark:border-sidebar-border px-3 py-2 text-sm"
+                            class="w-full rounded-md border border-sidebar-border/70 px-3 py-2 text-sm dark:border-sidebar-border"
                             placeholder="e.g. My Sensor Model Token"
                         />
-                        <Button @click="generateToken">
-                            Generate
-                        </Button>
+                        <Button @click="generateToken"> Generate </Button>
                     </div>
 
                     <div class="mb-4" v-if="page.props.flash.token">
                         <Label>Generated Token</Label>
                         <input
                             readonly
-                            class="w-full rounded-md border border-sidebar-border/70 dark:border-sidebar-border px-3 py-2 text-sm font-mono"
+                            class="w-full rounded-md border border-sidebar-border/70 px-3 py-2 font-mono text-sm dark:border-sidebar-border"
                             :value="generatedToken"
                         />
                         <p class="mt-1 text-xs text-slate-500">
-                            Copy this token now. It won't be shown again after you close this window.
+                            Copy this token now. It won't be shown again after
+                            you close this window.
                         </p>
                     </div>
                 </CardContent>
@@ -402,12 +453,9 @@ function deleteToken(tokenId: number) {
                     >
                         Close
                     </Button>
-
                 </div>
             </Card>
         </div>
-
-
     </AppLayout>
 </template>
 

@@ -16,6 +16,13 @@ defineProps<{
 </script>
 
 <template>
+    <Head>
+        <title>Forgot Password</title>
+        <meta
+            name="description"
+            content="Enter your email to recover a password reset link."
+        />
+    </Head>
     <AuthLayout
         title="Forgot password"
         description="Enter your email to receive a password reset link"

@@ -4,7 +4,13 @@ import { Head, Link } from '@inertiajs/vue3'
 </script>
 
 <template>
-    <Head title="Welcome" />
+    <Head>
+        <title>Welcome to Flow and Sensor Forecast</title>
+        <meta
+            name="description"
+            content="Register, Join, Login, or view about Flow & Sensor Forecast."
+        />
+    </Head>
 
     <main class="min-h-screen flex flex-col items-center justify-center ">
 

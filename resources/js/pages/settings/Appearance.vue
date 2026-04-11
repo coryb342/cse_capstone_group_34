@@ -18,6 +18,13 @@ const breadcrumbItems: BreadcrumbItem[] = [
 </script>
 
 <template>
+    <Head>
+        <title>Appearance</title>
+        <meta
+            name="description"
+            content="Change the website appearance within settings."
+        />
+    </Head>
     <AppLayout :breadcrumbs="breadcrumbItems">
         <Head title="Appearance settings" />
 

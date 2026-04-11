@@ -188,8 +188,8 @@ watch(
                                 <TableCell
                                     :class="
                                         user.status === 0
-                                            ? 'text-green-600'
-                                            : 'text-red-500'
+                                            ? 'text-green-700 dark:text-green-400'
+                                            : 'text-red-700 dark:text-red-400'
                                     "
                                     >{{
                                         user.status === 0
@@ -260,7 +260,7 @@ watch(
                     <div class="mr-5 max-w-[25vh] min-w-[25vh]">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Usage</CardTitle>
+                                <h1>Usage</h1>
                                 <CardDescription
                                     >Seats Used/Total</CardDescription
                                 >
@@ -280,11 +280,11 @@ watch(
                                     v-else-if="
                                         users.length / org_allowed_seats >= 0.75
                                     "
-                                    class="text-red-500"
+                                    class="text-red-700 dark:text-red-400"
                                 >
                                     {{ users.length }} / {{ org_allowed_seats }}
                                 </span>
-                                <span v-else class="text-green-600">
+                                <span v-else class="text-green-700 dark:text-green-400">
                                     {{ users.length }} / {{ org_allowed_seats }}
                                 </span>
                             </CardContent>
@@ -309,22 +309,25 @@ watch(
                                 Generate
                             </Button>
                             <div>
-                                <Input
-                                    disabled
-                                    :value="
-                                        page.props.flash.code
-                                            ? page.props.flash.code
-                                            : ''
-                                    "
-                                />
-                                <Label>
-                                    <span
-                                        v-if="page.props.flash.code"
-                                        class="text-black dark:text-white"
-                                        >Provide new user with this code. It is
-                                        valid for 24 hours.</span
-                                    >
+                                <Label for="invite-code" class="text-black dark:text-white">
+                                    Invite Code
+                                    <span v-if="page.props.flash.code" class="block text-sm font-normal">
+                        Provide new user with this code. It is valid for 24 hours.
+                    </span>
                                 </Label>
+                                <Input
+                                    id="invite-code"
+                                    disabled
+                                    :value="page.props.flash.code ?? ''"
+                                    aria-describedby="invite-code-hint"
+                                />
+                                <p
+                                    v-if="page.props.flash.code"
+                                    id="invite-code-hint"
+                                    class="text-sm text-muted-foreground"
+                                >
+                                    Valid for 24 hours.
+                                </p>
                             </div>
                         </div>
                     </div>

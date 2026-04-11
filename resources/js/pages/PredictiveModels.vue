@@ -616,13 +616,13 @@ watch(
                                 <div
                                     class="mb-2 flex items-start justify-between"
                                 >
-                                    <CardTitle
-                                        class="text-lg transition-colors group-hover:text-blue-600"
+                                    <h1
+                                        class="text-lg font-semibold transition-colors group-hover:text-blue-600 group-hover:dark:text-blue-400"
                                     >
                                         {{ model.name }}
-                                    </CardTitle>
+                                    </h1>
                                     <ChevronRight
-                                        class="h-5 w-5 text-slate-400 transition-all group-hover:translate-x-1 group-hover:text-blue-600"
+                                        class="h-5 w-5 text-slate-400 transition-all group-hover:translate-x-1 group-hover:text-blue-600 group-hover:dark:text-blue-400"
                                     />
                                 </div>
                                 <CardDescription class="text-sm">{{

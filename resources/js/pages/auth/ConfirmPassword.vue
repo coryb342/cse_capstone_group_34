@@ -10,6 +10,13 @@ import { LoaderCircle } from 'lucide-vue-next';
 </script>
 
 <template>
+    <Head>
+        <title>Confirm Password</title>
+        <meta
+            name="description"
+            content="Confirm your password before continuing."
+        />
+    </Head>
     <AuthLayout
         title="Confirm your password"
         description="This is a secure area of the application. Please confirm your password before continuing."

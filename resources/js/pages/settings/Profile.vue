@@ -33,6 +33,13 @@ const user = page.props.auth.user;
 </script>
 
 <template>
+    <Head>
+        <title>Profile</title>
+        <meta
+            name="description"
+            content="Update profile information like name or email and have the ability to delete your account."
+        />
+    </Head>
     <AppLayout :breadcrumbs="breadcrumbItems">
         <Head title="Profile settings" />
 

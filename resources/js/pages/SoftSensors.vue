@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { route } from 'ziggy-js';
 
-import mqtt from 'mqtt';
+// import mqtt from 'mqtt';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -162,7 +162,13 @@ document.addEventListener('visibilitychange', () => {
 </script>
 
 <template>
-    <Head title="Soft Sensors" />
+    <Head>
+        <title>Soft Sensors</title>
+        <meta
+            name="description"
+            content="User page for organization management and access code generation."
+        />
+    </Head>
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <!-- Error Display -->
@@ -178,28 +184,28 @@ document.addEventListener('visibilitychange', () => {
             <!-- Stats Bar -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-gray-500">Active Sensors</p>
+                    <p class="text-sm text-slate-900 dark:text-slate-400">Active Sensors</p>
                     <p class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.activeSensors }}
                     </p>
                 </div>
 
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-gray-500">Total Sensors</p>
+                    <p class="text-sm text-slate-900 dark:text-slate-400">Total Sensors</p>
                     <p class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.totalSensors }}
                     </p>
                 </div>
 
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-gray-500">Avg Model Accuracy</p>
+                    <p class="text-sm text-slate-900 dark:text-slate-400">Avg Model Accuracy</p>
                     <p class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.avgAccuracy }}%
                     </p>
                 </div>
 
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-gray-500">Models Online</p>
+                    <p class="text-sm text-slate-900 dark:text-slate-400">Models Online</p>
                     <p class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.modelsOnline }}
                     </p>
@@ -211,7 +217,7 @@ document.addEventListener('visibilitychange', () => {
                     <div class="flex items-center justify-between">
                         <div>
                             <h1 class="text-3xl font-semibold">Soft Sensors</h1>
-                            <p class="mt-1 text-sm text-gray-500">
+                            <p class="mt-1 text-sm text-slate-900 dark:text-slate-400">
                                 Manage and configure soft sensor models.
                             </p>
                         </div>
@@ -390,7 +396,7 @@ document.addEventListener('visibilitychange', () => {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>{{ sensor.name }}</CardTitle>
+                            <h1 class="font-semibold">{{ sensor.name }}</h1>
                         </CardHeader>
 
                         <CardContent class="grid grid-cols-2 gap-2">
@@ -449,7 +455,7 @@ document.addEventListener('visibilitychange', () => {
                             </div>
                             <button
                                 @click="confirmDelete(sensor.id)"
-                                class="rounded-lg border px-3 py-1 text-red-600 hover:bg-red-600 hover:text-white"
+                                class="rounded-lg border px-3 py-1 text-red-700 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:text-white"
                             >
                                 Delete
                             </button>

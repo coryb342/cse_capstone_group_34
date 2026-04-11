@@ -25,6 +25,13 @@ const currentPasswordInput = ref<HTMLInputElement | null>(null);
 </script>
 
 <template>
+    <Head>
+        <title>Password</title>
+        <meta
+            name="description"
+            content="Change your account password."
+        />
+    </Head>
     <AppLayout :breadcrumbs="breadcrumbItems">
         <Head title="Password settings" />
 
