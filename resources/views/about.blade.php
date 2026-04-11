@@ -63,7 +63,7 @@
                     <span class="tag-chip bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-400 px-3 py-1 rounded-md">Laravel</span>
                     <span class="tag-chip bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-400 px-3 py-1 rounded-md">Vue</span>
                     <span class="tag-chip bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-400 px-3 py-1 rounded-md">Python</span>
-                    <span class="tag-chip bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-400 px-3 py-1 rounded-md">ML · Soft Sensors</span>
+                    <span class="tag-chip bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-400 px-3 py-1 rounded-md">Docker</span>
                 </div>
                 <h1 class="text-4xl md:text-5xl font-bold text-blue-950 dark:text-white leading-tight mb-3">
                     Flow &amp; Sensor<br>Forecast
