@@ -18,6 +18,13 @@ const inputEmail = ref(props.email);
 </script>
 
 <template>
+    <Head>
+        <title>Reset Password</title>
+        <meta
+            name="description"
+            content="Reset your account password."
+        />
+    </Head>
     <AuthLayout
         title="Reset password"
         description="Please enter your new password below"

@@ -30,7 +30,10 @@ const page = usePage();
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head>
+        <title>Dashboard</title>
+        <meta name="description" content="Dashboard for predictive flow and sensor monitoring" />
+    </Head>
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <!-- Error Display -->

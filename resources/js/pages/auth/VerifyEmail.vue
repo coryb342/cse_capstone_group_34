@@ -13,6 +13,13 @@ defineProps<{
 </script>
 
 <template>
+    <Head>
+        <title>Verify Email</title>
+        <meta
+            name="description"
+            content="Please verify your email addess by clicking the link emailed to you."
+        />
+    </Head>
     <AuthLayout
         title="Verify email"
         description="Please verify your email address by clicking on the link we just emailed to you."

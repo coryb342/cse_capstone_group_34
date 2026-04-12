@@ -21,6 +21,16 @@ defineProps<{
 </script>
 
 <template>
+    <Head>
+        <title>Login</title>
+        <meta
+            name="description"
+            content="Log into your account with email and password for FSF."
+        />
+    </Head>
+    <main>
+
+    </main>
     <AuthBase
         title="Log in to your account"
         description="Enter your email and password below to log in"
@@ -53,7 +63,6 @@ defineProps<{
                         name="email"
                         required
                         autofocus
-                        :tabindex="1"
                         autocomplete="email"
                         placeholder="email@example.com"
                     />
@@ -67,7 +76,6 @@ defineProps<{
                             v-if="canResetPassword"
                             :href="request()"
                             class="text-sm"
-                            :tabindex="5"
                         >
                             Forgot password?
                         </TextLink>
@@ -77,7 +85,6 @@ defineProps<{
                         type="password"
                         name="password"
                         required
-                        :tabindex="2"
                         autocomplete="current-password"
                         placeholder="Password"
                     />
@@ -86,7 +93,7 @@ defineProps<{
 
                 <div class="flex items-center justify-between">
                     <Label for="remember" class="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" :tabindex="3" />
+                        <Checkbox id="remember" name="remember" />
                         <span>Remember me</span>
                     </Label>
                 </div>
@@ -94,7 +101,6 @@ defineProps<{
                 <Button
                     type="submit"
                     class="mt-4 w-full"
-                    :tabindex="4"
                     :disabled="processing"
                     data-test="login-button"
                 >
@@ -108,7 +114,7 @@ defineProps<{
 
             <div class="text-center text-sm text-muted-foreground">
                 Don't have an account?
-                <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+                <TextLink :href="register()">Sign up</TextLink>
             </div>
         </Form>
     </AuthBase>
