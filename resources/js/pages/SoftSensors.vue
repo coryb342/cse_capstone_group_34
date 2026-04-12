@@ -77,6 +77,7 @@ const getModelName = (id) => {
 const clients = new Map()
 const sensorActualValues = ref<number[]>([])
 let heartbeat: string | number | NodeJS.Timeout | null | undefined = null
+let sensor_monitor: string | number | NodeJS.Timeout | null | undefined = null
 
 function submit() {
     router.post(
@@ -96,6 +97,16 @@ function confirmDelete(id) {
         return;
     clients.get(id).end()
     router.delete(`/soft-sensors/${id}`);
+}
+
+function startSensorMonitor() {
+    sensor_monitor = setInterval(() => {
+        router.reload({ only: ['sensors'] })
+        let newest_sensor = props.sensors[props.sensors.length - 1]
+        if (newest_sensor && !clients.has(newest_sensor.id)) {
+            establishDatastreamConnection(newest_sensor);
+        }
+    }, 1000)
 }
 
 function startHeartbeat() {
@@ -131,21 +142,15 @@ onMounted(() => {
     establishDatastreamConnections()
     viewingSession.post(route('soft-sensors.initiate-viewing-session'))
     startHeartbeat()
+    startSensorMonitor()
 })
 
 onUnmounted(() => {
     clients.forEach(client => client.end())
     clearInterval(heartbeat)
+    clearInterval(sensor_monitor)
     viewingSession.post(route('soft-sensors.terminate-viewing-session'))
 })
-
-setInterval(() => {
-    router.reload({ only: ['sensors'] })
-    let newest_sensor = props.sensors[props.sensors.length - 1]
-    if (newest_sensor && !clients.has(newest_sensor.id)) {
-        establishDatastreamConnection(newest_sensor);
-    }
-}, 1000)
 
 window.addEventListener('beforeunload', () => {
     navigator.sendBeacon(route('soft-sensors.terminate-viewing-session'));
