@@ -11,7 +11,7 @@ import { Head, Link } from '@inertiajs/vue3'
         <img
             src="/img/FSF_Logo.png"
             alt="FSF logo"
-            class="h-28 md:h-36 w-auto mb-8"
+            class="h-28 md:h-36 lg:h-48 xl:h-56 w-auto mb-8 dark:brightness-200 dark:saturate-200 dark:drop-shadow-2xl"
         />
 
         <h1 class="text-3xl font-semibold text-center">
@@ -19,7 +19,7 @@ import { Head, Link } from '@inertiajs/vue3'
         </h1>
 
         <p class="mt-2  text-center">
-            Forecasts & soft-sensor estimates for wastewater plants
+            A Predictive Analytics Tool for Water Treatment Plants
         </p>
 
         <div class="mt-8 flex flex-col items-center gap-3">
@@ -61,7 +61,6 @@ import { Head, Link } from '@inertiajs/vue3'
                     About
                 </a>
             </template>
-
         </div>
     </main>
 </template>
