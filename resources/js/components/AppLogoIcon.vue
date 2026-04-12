@@ -16,7 +16,7 @@ defineProps<Props>();
     <img
         src="/img/FSF_Logo.png"
         alt="FSF logo"
-        class="w-full h-full"
+        class="w-full h-full dark:brightness-200 dark:saturate-200 dark:drop-shadow-2xl"
         v-bind="$attrs"
     />
 </template>
