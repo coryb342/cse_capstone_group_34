@@ -112,7 +112,7 @@ class SoftSensorController extends Controller
 
         $viewing_session = SensorViewingSession::query()->where('user_id', $user->id)->first();
 
-        if ($viewing_session) {
+        if (!$viewing_session) {
             $viewing_session = SensorViewingSession::create([
                 'organization_id' => $organization_id,
                 'user_id' => $user->id,
