@@ -124,13 +124,16 @@ const bestModel = computed(() => {
                                     type="text"
                                     placeholder="ZIP"
                                     class="w-20 rounded border px-2 py-1 text-xs"
+                                    aria-label="ZIP Code"
                                 />
                                 <!-- Gauge Box -->
+                                <label for="gauge" class="sr-only">Gauge ID (optional)</label>
                                 <input
                                     v-model="gauge"
                                     type="text"
                                     placeholder="Gauge ID (optional)"
                                     class="w-40 rounded border px-2 py-1 text-xs"
+                                    aria-label="Gauge ID (Optional)"
                                 />
                                 <button
                                     type="submit"
@@ -322,6 +325,7 @@ const bestModel = computed(() => {
                     <select
                         v-model="selectedModel"
                         class="rounded border px-2 py-1 text-xs dark:bg-slate-800 dark:text-slate-100"
+                        aria-label="Select Model"
                     >
                         <option disabled value="">Model</option>
                         <option
@@ -337,6 +341,7 @@ const bestModel = computed(() => {
                     <select
                         v-model="selectedGraph"
                         class="rounded border px-2 py-1 text-xs dark:bg-slate-800 dark:text-slate-100"
+                        aria-label="Select Graph Type"
                     >
                         <option disabled value="">Graph</option>
                         <option value="residual">Residual</option>

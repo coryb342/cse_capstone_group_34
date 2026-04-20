@@ -201,8 +201,9 @@ watch(
                                 >
                                 <TableCell>
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger>
+                                        <DropdownMenuTrigger as-child>
                                             <button
+                                                type="button"
                                                 class="cursor-pointer rounded p-1 text-black hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white dark:hover:bg-gray-800"
                                                 aria-label="Open menu"
                                                 :disabled="
@@ -213,12 +214,13 @@ watch(
                                                     isSuper(user)
                                                 "
                                             >
-                                                <EllipsisVerticalIcon />
+                                                <EllipsisVerticalIcon aria-hidden="true"/>
                                             </button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
                                             <DropdownMenuItem>
                                                 <Button
+                                                    type="button"
                                                     class="w-full"
                                                     @click="
                                                         toggleAdmin(user.id)
@@ -228,6 +230,7 @@ watch(
                                             </DropdownMenuItem>
                                             <DropdownMenuItem>
                                                 <Button
+                                                    type="button"
                                                     class="w-full"
                                                     @click="
                                                         toggleStatus(user.id)
@@ -237,6 +240,7 @@ watch(
                                             </DropdownMenuItem>
                                             <DropdownMenuItem>
                                                 <Button
+                                                    type="button"
                                                     class="w-full"
                                                     @click="
                                                         deleteUser(
@@ -296,9 +300,9 @@ watch(
                     <div
                         class="relative max-h-[35vh] w-full rounded-xl border border-sidebar-border/70 p-5 md:min-h-min dark:border-sidebar-border"
                     >
-                        <Label class="font-bold">
+                        <p class="font-bold">
                             Generate Organization Access Code
-                        </Label>
+                        </p>
                         <div class="p-10 lg:flex">
                             <Button
                                 class="mr-5"
@@ -319,7 +323,7 @@ watch(
                                     id="invite-code"
                                     disabled
                                     :value="page.props.flash.code ?? ''"
-                                    aria-describedby="invite-code-hint"
+                                    :aria-describedby="page.props.flash.code ? 'invite-code-hint' : undefined"
                                 />
                                 <p
                                     v-if="page.props.flash.code"
