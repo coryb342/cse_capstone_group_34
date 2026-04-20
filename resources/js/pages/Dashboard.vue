@@ -5,6 +5,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import { Icon } from '@iconify/vue';
+import { TriangleAlert } from 'lucide-vue-next';
 
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -107,6 +108,16 @@ const bestModel = computed(() => {
         <div
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
+            <div
+                role="banner"
+                class="w-full bg-yellow-50 border border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800 rounded-lg px-4 py-3 mb-4 flex items-start gap-3"
+            >
+                <TriangleAlert class="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" aria-hidden="true" />
+                <p class="text-sm text-yellow-900 dark:text-yellow-300 font-semibold">
+                    <span class="font-semibold"> </span>
+                    FSF is intended to assist plant operators and engineers in their decision-making process. It is not a tool to be used as a replacement for professional judgment or operational decisions.
+                </p>
+            </div>
             <div class="grid auto-rows-min gap-4 md:grid-cols-3">
                 <!-- Temperature Card -->
                 <div
