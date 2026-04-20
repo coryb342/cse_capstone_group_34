@@ -8,6 +8,7 @@ import { Icon } from '@iconify/vue';
 
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
+import SimpleXYGraph from '@/components/charts/SimpleXYGraph.vue';
 
 const zip = ref('');
 const gauge = ref('');
@@ -218,12 +219,13 @@ const actualPredPoints = computed(() => {
             <div
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 p-4 md:min-h-min dark:border-sidebar-border"
             >
-                <div class="absolute top-4 right-4 z-50">
+                <div class="mb-4 flex items-center justify-end gap-2">
+                    <!-- Model -->
                     <select
                         v-model="selectedModel"
-                        class="rounded border px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100"
+                        class="rounded border px-2 py-1 text-xs dark:bg-slate-800 dark:text-slate-100"
                     >
-                        <option disabled value="">Select a Model</option>
+                        <option disabled value="">Model</option>
                         <option
                             v-for="model in page.props.models"
                             :key="model.id"
@@ -232,17 +234,16 @@ const actualPredPoints = computed(() => {
                             {{ model.name }}
                         </option>
                     </select>
-                </div>
 
-                <div class="absolute top-16 right-4 z-50">
+                    <!-- Graph -->
                     <select
                         v-model="selectedGraph"
-                        class="rounded border px-2 py-1 text-sm dark:bg-slate-800 dark:text-slate-100"
+                        class="rounded border px-2 py-1 text-xs dark:bg-slate-800 dark:text-slate-100"
                     >
-                        <option disabled value="">Select a Graph</option>
-                        <option value="residual">Residual Scatter</option>
-                        <option value="actualPred">Actual vs Predicted</option>
-                        <option value="metric">Metric Chart</option>
+                        <option disabled value="">Graph</option>
+                        <option value="residual">Residual</option>
+                        <option value="actualPred">Actual vs Pred</option>
+                        <option value="metric">Metrics</option>
                     </select>
                 </div>
                 <!-- Show nothing until both dropdowns are selected -->
@@ -258,9 +259,17 @@ const actualPredPoints = computed(() => {
                         selectedGraph === 'residual' &&
                         residualScatter.points?.length
                     "
-                    class="w-full p-8"
+                    class="w-full p-4"
                 >
-                    <ResidualScatterPlot :points="residualScatter.points" />
+                    <SimpleXYGraph
+                        :points="residualScatter.points"
+                        xKey="x"
+                        yKey="y"
+                        :height="250"
+                        title="Residual Scatter Plot"
+                        xLabel="Predicted Value"
+                        yLabel="Residual"
+                    />
                 </div>
 
                 <div
@@ -270,7 +279,15 @@ const actualPredPoints = computed(() => {
                     "
                     class="w-full p-8"
                 >
-                    <ActualVsPredScatterPlot :points="actualPredPoints" />
+                    <SimpleXYGraph
+                        :points="actualPredPoints"
+                        xKey="predicted"
+                        yKey="actual"
+                        :height="250"
+                        title="Actual vs Predicted"
+                        xLabel="Predicted Value"
+                        yLabel="Actual Value"
+                    />
                 </div>
 
                 <div
