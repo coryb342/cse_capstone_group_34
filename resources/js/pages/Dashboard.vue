@@ -9,6 +9,7 @@ import { Icon } from '@iconify/vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SimpleXYGraph from '@/components/charts/SimpleXYGraph.vue';
+import SimpleBarGraph from '@/components/charts/SimpleBarGraph.vue';
 
 const zip = ref('');
 const gauge = ref('');
@@ -55,6 +56,38 @@ const actualPredPoints = computed(() => {
         predicted: p.x,
         actual: p.x - p.y,
     }));
+});
+const modelAccuracyPoints = computed(() => {
+    return (page.props.models ?? [])
+        .filter(
+            (model: any) =>
+                model.analytics?.accuracy !== null &&
+                model.analytics?.accuracy !== undefined,
+        )
+        .map((model: any) => ({
+            label: model.name,
+            value: Number(model.analytics.accuracy),
+        }));
+});
+const totalModels = computed(() => {
+    return (page.props.models ?? []).length;
+});
+
+const bestModel = computed(() => {
+    const modelsWithAccuracy = (page.props.models ?? []).filter(
+        (model: any) =>
+            model.analytics?.accuracy !== null &&
+            model.analytics?.accuracy !== undefined,
+    );
+
+    if (!modelsWithAccuracy.length) return null;
+
+    return modelsWithAccuracy.reduce((best: any, current: any) => {
+        return Number(current.analytics.accuracy) >
+            Number(best.analytics.accuracy)
+            ? current
+            : best;
+    });
 });
 </script>
 
@@ -203,16 +236,78 @@ const actualPredPoints = computed(() => {
 
                 <!-- Placeholder Card 2 -->
                 <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                    class="overflow-hidden rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
                 >
-                    <PlaceholderPattern />
+                    <div class="flex h-full flex-col justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Active Models
+                            </p>
+                            <h3
+                                class="mt-2 text-3xl font-bold text-slate-900 dark:text-white"
+                            >
+                                {{ totalModels }}
+                            </h3>
+                        </div>
+
+                        <p
+                            class="mt-4 text-xs text-gray-600 dark:text-gray-300"
+                        >
+                            Total active predictive models available
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Placeholder Card 3 -->
                 <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                    class="overflow-hidden rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border"
                 >
-                    <PlaceholderPattern />
+                    <div class="flex h-full flex-col justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Top Model
+                            </p>
+
+                            <template v-if="bestModel">
+                                <h3
+                                    class="mt-2 truncate text-xl font-bold text-slate-900 dark:text-white"
+                                >
+                                    {{ bestModel.name }}
+                                </h3>
+                                <p
+                                    class="mt-2 text-sm text-gray-700 dark:text-gray-300"
+                                >
+                                    Accuracy:
+                                    <span class="font-semibold">
+                                        {{
+                                            Number(
+                                                bestModel.analytics.accuracy,
+                                            ).toFixed(1)
+                                        }}%
+                                    </span>
+                                </p>
+                            </template>
+
+                            <template v-else>
+                                <h3
+                                    class="mt-2 text-xl font-bold text-slate-900 dark:text-white"
+                                >
+                                    No data
+                                </h3>
+                                <p
+                                    class="mt-2 text-sm text-gray-700 dark:text-gray-300"
+                                >
+                                    No model accuracy available yet
+                                </p>
+                            </template>
+                        </div>
+
+                        <p
+                            class="mt-4 text-xs text-gray-600 dark:text-gray-300"
+                        >
+                            Highest accuracy among active models
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -243,12 +338,17 @@ const actualPredPoints = computed(() => {
                         <option disabled value="">Graph</option>
                         <option value="residual">Residual</option>
                         <option value="actualPred">Actual vs Pred</option>
-                        <option value="metric">Metrics</option>
+                        <option value="modelAccuracy">
+                            Model Accuracy Comparison
+                        </option>
                     </select>
                 </div>
                 <!-- Show nothing until both dropdowns are selected -->
                 <div
-                    v-if="!selectedModel || !selectedGraph"
+                    v-if="
+                        !selectedGraph ||
+                        (selectedGraph !== 'modelAccuracy' && !selectedModel)
+                    "
                     class="py-20 text-center text-gray-500"
                 >
                     Select a model and a graph to view analytics
@@ -287,6 +387,23 @@ const actualPredPoints = computed(() => {
                         title="Actual vs Predicted"
                         xLabel="Predicted Value"
                         yLabel="Actual Value"
+                    />
+                </div>
+
+                <div
+                    v-else-if="
+                        selectedGraph === 'modelAccuracy' &&
+                        modelAccuracyPoints.length
+                    "
+                    class="w-full p-4"
+                >
+                    <SimpleBarGraph
+                        :points="modelAccuracyPoints"
+                        labelKey="label"
+                        valueKey="value"
+                        :height="260"
+                        title="Accuracy Comparison Across Models"
+                        yLabel="Accuracy (%)"
                     />
                 </div>
 
