@@ -496,16 +496,16 @@ watch(
                                         class="flex items-center justify-between"
                                     >
                                         <div>
-                                            <p
+                                            <h1
                                                 class="mb-1 text-sm text-slate-600 dark:text-white"
                                             >
                                                 Total Models
-                                            </p>
-                                            <p
+                                            </h1>
+                                            <h2
                                                 class="text-2xl font-bold text-slate-900 dark:text-slate-400"
                                             >
                                                 {{ models.length }}
-                                            </p>
+                                            </h2>
                                         </div>
                                         <Bot class="h-8 w-8 text-blue-500" />
                                     </div>
@@ -517,12 +517,12 @@ watch(
                                         class="flex items-center justify-between"
                                     >
                                         <div>
-                                            <p
+                                            <h1
                                                 class="mb-1 text-sm text-slate-600 dark:text-white"
                                             >
                                                 Active Models
-                                            </p>
-                                            <p
+                                            </h1>
+                                            <h2
                                                 class="text-2xl font-bold text-slate-900 dark:text-slate-400"
                                             >
                                                 {{
@@ -532,7 +532,7 @@ watch(
                                                             'active',
                                                     ).length
                                                 }}
-                                            </p>
+                                            </h2>
                                         </div>
                                         <MonitorCheck
                                             class="h-8 w-8 text-green-500"
@@ -546,12 +546,12 @@ watch(
                                         class="flex items-center justify-between"
                                     >
                                         <div>
-                                            <p
+                                            <h1
                                                 class="mb-1 text-sm text-slate-600 dark:text-white"
                                             >
                                                 Avg Accuracy
-                                            </p>
-                                            <p
+                                            </h1>
+                                            <h2
                                                 class="text-2xl font-bold text-slate-900 dark:text-slate-400"
                                             >
                                                 {{
@@ -561,7 +561,7 @@ watch(
                                                           ).toFixed(2) + '%'
                                                         : '--'
                                                 }}
-                                            </p>
+                                            </h2>
                                         </div>
                                         <Target
                                             class="h-8 w-8 text-purple-500"
@@ -575,12 +575,12 @@ watch(
                                         class="flex items-center justify-between"
                                     >
                                         <div>
-                                            <p
+                                            <h1
                                                 class="mb-1 text-sm text-slate-600 dark:text-white"
                                             >
                                                 Total Predictions
-                                            </p>
-                                            <p
+                                            </h1>
+                                            <h2
                                                 class="text-2xl font-bold text-slate-900 dark:text-slate-400"
                                             >
                                                 {{
@@ -588,7 +588,7 @@ watch(
                                                         ? total_predictions
                                                         : '--'
                                                 }}
-                                            </p>
+                                            </h2>
                                         </div>
                                         <Sparkle
                                             class="h-8 w-8 text-orange-500"
@@ -606,11 +606,25 @@ watch(
                             class="group cursor-pointer transition-shadow hover:shadow-lg"
                             v-for="model in props.models"
                             :key="model.id"
+                            role="link"
+                            tabindex="0"
+                            :aria-label="model.name"
                             @click="
                                 router.visit(
                                     route('predictive-models.show', model.id),
                                 )
                             "
+                            @keydown.enter="
+                                router.visit(
+                                    route('predictive-models.show', model.id),
+                                )
+                            "
+                            @keydown.space.prevent="
+                                router.visit(
+                                    route('predictive-models.show', model.id),
+                                )
+                            "
+
                         >
                             <CardHeader>
                                 <div
@@ -654,12 +668,12 @@ watch(
 
                                     <div class="grid grid-cols-2 gap-4 pt-2">
                                         <div>
-                                            <p
+                                            <h1
                                                 class="mb-1 text-xs text-slate-900 dark:text-slate-400"
                                             >
                                                 Accuracy
-                                            </p>
-                                            <p
+                                            </h1>
+                                            <h2
                                                 class="text-2xl font-semibold text-slate-900 dark:text-slate-400"
                                             >
                                                 {{
@@ -671,15 +685,15 @@ watch(
                                                           ).toFixed(2) + '%'
                                                         : '--'
                                                 }}
-                                            </p>
+                                            </h2>
                                         </div>
                                         <div>
-                                            <p
+                                            <h1
                                                 class="mb-1 text-xs text-slate-900 dark:text-slate-400"
                                             >
                                                 Latest Prediction
-                                            </p>
-                                            <p
+                                            </h1>
+                                            <h2
                                                 class="text-lg font-semibold text-slate-900 dark:text-slate-400"
                                                 v-if="model.latest_run_result"
                                             >
@@ -693,7 +707,7 @@ watch(
                                                     ).toFixed(2)
                                                 }}
                                                 <!--                                                    {{ parseFloat(JSON.parse(model.run_results.at(-1).result)).toFixed(2) }}-->
-                                            </p>
+                                            </h2>
                                             <p
                                                 class="text-lg font-semibold text-slate-900 dark:text-slate-400"
                                                 v-else

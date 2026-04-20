@@ -189,31 +189,31 @@ document.addEventListener('visibilitychange', () => {
             <!-- Stats Bar -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-slate-900 dark:text-slate-400">Active Sensors</p>
-                    <p class="mt-1 text-2xl font-semibold">
+                    <h1 class="text-sm text-slate-900 dark:text-slate-400">Active Sensors</h1>
+                    <h2 class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.activeSensors }}
-                    </p>
+                    </h2>
                 </div>
 
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-slate-900 dark:text-slate-400">Total Sensors</p>
-                    <p class="mt-1 text-2xl font-semibold">
+                    <h1 class="text-sm text-slate-900 dark:text-slate-400">Total Sensors</h1>
+                    <h2 class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.totalSensors }}
-                    </p>
+                    </h2>
                 </div>
 
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-slate-900 dark:text-slate-400">Avg Model Accuracy</p>
-                    <p class="mt-1 text-2xl font-semibold">
+                    <h1 class="text-sm text-slate-900 dark:text-slate-400">Avg Model Accuracy</h1>
+                    <h2 class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.avgAccuracy }}%
-                    </p>
+                    </h2>
                 </div>
 
                 <div class="rounded-xl border p-4">
-                    <p class="text-sm text-slate-900 dark:text-slate-400">Models Online</p>
-                    <p class="mt-1 text-2xl font-semibold">
+                    <h1 class="text-sm text-slate-900 dark:text-slate-400">Models Online</h1>
+                    <h2 class="mt-1 text-2xl font-semibold">
                         {{ props.stats?.modelsOnline }}
-                    </p>
+                    </h2>
                 </div>
             </div>
 
@@ -419,7 +419,7 @@ document.addEventListener('visibilitychange', () => {
                                     <span class="text-5xl">{{  sensorActualValues[sensor.id] ? Number(sensorActualValues[sensor.id]).toFixed(2) : "..." }}</span>
                                 </CardContent>
                                 <CardFooter class="justify-between py-2">
-                                    <Label>Deviation:</Label>
+                                    <p>Deviation:</p>
                                     <span>{{ Math.abs(Number(Number((sensor.run_results[0]?.result / sensorActualValues[sensor.id]) * 100 - 100).toFixed(0))) }}%</span>
                                 </CardFooter>
                             </div>
@@ -431,7 +431,7 @@ document.addEventListener('visibilitychange', () => {
                                     <span class="text-5xl">{{ sensor.run_results[0] ? Number(sensor.run_results[0].result).toFixed(2) : '...' }}</span>
                                 </CardContent>
                                 <CardFooter class="justify-between py-2">
-                                    <Label>Next:</Label>
+                                    <p>Next:</p>
                                     <span v-if="(Number((((new Date(sensor.last_prediction_time + 'Z').getTime()) + (sensor.time_interval * 1000)) - Date.now()) / 1000).toFixed(0)).includes('-')"
                                           class="inline-block w-4 h-4 border-2 rounded-full animate-spin border-black/30 border-t-black dark:border-white/30 dark:border-t-white">
                                     </span>

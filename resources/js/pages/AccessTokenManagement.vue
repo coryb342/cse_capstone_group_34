@@ -305,6 +305,7 @@ function deleteToken(tokenId: number) {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
+                                                aria-label="Delete token"
                                                 @click="deleteToken(token.id)"
                                             >
                                                 <Trash2Icon class="h-4 w-4" />
@@ -387,6 +388,7 @@ function deleteToken(tokenId: number) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    aria-label="Delete token"
                                                     @click="
                                                         deleteToken(token.id)
                                                     "
