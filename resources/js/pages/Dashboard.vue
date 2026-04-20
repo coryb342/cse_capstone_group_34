@@ -107,7 +107,7 @@ const bestModel = computed(() => {
             <div class="grid auto-rows-min gap-4 md:grid-cols-3">
                 <!-- Temperature Card -->
                 <div
-                    class="overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                    class="overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border p-4"
                 >
                     <div class="flex items-center gap-3">
                         <div>
