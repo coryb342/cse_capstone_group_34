@@ -606,11 +606,25 @@ watch(
                             class="group cursor-pointer transition-shadow hover:shadow-lg"
                             v-for="model in props.models"
                             :key="model.id"
+                            role="link"
+                            tabindex="0"
+                            :aria-label="model.name"
                             @click="
                                 router.visit(
                                     route('predictive-models.show', model.id),
                                 )
                             "
+                            @keydown.enter="
+                                router.visit(
+                                    route('predictive-models.show', model.id),
+                                )
+                            "
+                            @keydown.space.prevent="
+                                router.visit(
+                                    route('predictive-models.show', model.id),
+                                )
+                            "
+
                         >
                             <CardHeader>
                                 <div
